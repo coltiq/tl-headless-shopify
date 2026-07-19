@@ -51,3 +51,9 @@ Cart state lives in Shopify, identified by a `cartId` cookie. `components/cart/c
 - `/` — homepage; `/product/[handle]` — product detail; `/search` and `/search/[collection]` — listings with sort options defined in `lib/constants.ts` (`sorting`).
 - `/[page]` — catch-all rendering Shopify CMS pages by handle.
 - Dynamic OpenGraph images via `opengraph-image.tsx` files sharing `components/opengraph-image.tsx`.
+
+## Rules
+
+- Never run `npm run dev` to verify changes — it doesn't exit. Use `npx tsc --noEmit` and `npm run build` instead.
+- Never modify or consult `pnpm-lock.yaml`; npm is the package manager.
+- Before writing any new Storefront GraphQL query or mutation, validate field names against the schema via the shopify-dev-mcp server.
