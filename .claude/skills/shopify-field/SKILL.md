@@ -12,15 +12,17 @@ field missing from the query).
 
 ## Step 0 — Validate the field against the schema first
 
-Before writing any code, confirm the field exists and get its exact shape using the
-shopify-dev-mcp tools:
+Before writing or modifying any Storefront GraphQL, use the shopify-dev-mcp server:
 
-1. `learn_shopify_api(api: "storefront-graphql")` — save the `conversationId`.
-2. `search_docs_chunks` with the object/field name to find its type and arguments.
-3. After editing a fragment, run the full query/fragment through
-   `validate_graphql_codeblocks` and fix any reported errors before moving on.
-
-Never add a field to a fragment from memory alone.
+1. If not already done this session, call `learn_shopify_api(api:
+   "storefront-graphql")` and save the returned `conversationId` — every other
+   shopify-dev-mcp tool requires it.
+2. If a field name or its shape is uncertain, look up the object's reference page
+   with the docs search tool (`search_docs_chunks`; older server versions call it
+   `search_dev_docs`) rather than guessing from memory.
+3. Run the final query/mutation — the complete document, with fragments
+   interpolated — through `validate_graphql_codeblocks`, and fix any reported
+   errors before writing app code around it.
 
 ## Step 1 — Add the field to the right fragment
 
