@@ -40,6 +40,25 @@ export type Collection = ShopifyCollection & {
   path: string;
 };
 
+export type Announcement = {
+  text: string;
+  url?: string;
+  // Substring of `text` that carries the link (underlined); when absent,
+  // the whole text is the link.
+  labelText?: string;
+};
+
+export type AnnouncementBarLink = {
+  label: string;
+  url: string;
+  iconSvg?: string;
+};
+
+export type AnnouncementBar = {
+  announcements: Announcement[];
+  links: AnnouncementBarLink[];
+};
+
 export type Image = {
   url: string;
   altText: string;
@@ -133,6 +152,41 @@ export type ShopifyProduct = {
   seo: SEO;
   tags: string[];
   updatedAt: string;
+};
+
+// `field(key: ...)` is null when the field is absent; nodes that aren't
+// Metaobjects (other reference types) come back as empty objects.
+export type ShopifyMetaobjectFieldValue = Maybe<{ value: Maybe<string> }>;
+
+export type ShopifyAnnouncementMetaobject = {
+  text?: ShopifyMetaobjectFieldValue;
+  url?: ShopifyMetaobjectFieldValue;
+  labelText?: ShopifyMetaobjectFieldValue;
+};
+
+export type ShopifyAnnouncementLinkMetaobject = {
+  label?: ShopifyMetaobjectFieldValue;
+  url?: ShopifyMetaobjectFieldValue;
+  icon?: Maybe<{
+    reference: Maybe<{
+      url?: string;
+      mimeType?: Maybe<string>;
+      image?: Maybe<{ url: string }>;
+    }>;
+  }>;
+};
+
+export type ShopifyAnnouncementBarOperation = {
+  data: {
+    shop: {
+      announcements: Maybe<{
+        references: Maybe<Connection<ShopifyAnnouncementMetaobject>>;
+      }>;
+      links: Maybe<{
+        references: Maybe<Connection<ShopifyAnnouncementLinkMetaobject>>;
+      }>;
+    };
+  };
 };
 
 export type ShopifyCartOperation = {

@@ -3,6 +3,19 @@
 @plugin "@tailwindcss/container-queries";
 @plugin "@tailwindcss/typography";
 
+/* Standard content width for page sections: centered, capped at 1400px,
+   with 20px side padding on mobile and 50px from md up.
+   Apply as a class: <section class="page-width">. */
+@utility page-width {
+  margin-inline: auto;
+  max-width: 1400px;
+  padding-inline: 20px;
+
+  @variant md {
+    padding-inline: 50px;
+  }
+}
+
 @layer base {
   *,
   ::after,

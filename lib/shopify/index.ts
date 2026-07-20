@@ -1,57 +1,61 @@
 import {
-    HIDDEN_PRODUCT_TAG,
-    SHOPIFY_GRAPHQL_API_ENDPOINT,
-    TAGS,
+  HIDDEN_PRODUCT_TAG,
+  SHOPIFY_GRAPHQL_API_ENDPOINT,
+  TAGS,
 } from "lib/constants";
 import { isShopifyError } from "lib/type-guards";
 import { ensureStartsWith } from "lib/utils";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
-import { cookies, headers } from 'next/headers';
+import { cookies, headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import {
-    addToCartMutation,
-    createCartMutation,
-    editCartItemsMutation,
-    removeFromCartMutation,
+  addToCartMutation,
+  createCartMutation,
+  editCartItemsMutation,
+  removeFromCartMutation,
 } from "./mutations/cart";
+import { getAnnouncementBarQuery } from "./queries/announcement";
 import { getCartQuery } from "./queries/cart";
 import {
-    getCollectionProductsQuery,
-    getCollectionQuery,
-    getCollectionsQuery,
+  getCollectionProductsQuery,
+  getCollectionQuery,
+  getCollectionsQuery,
 } from "./queries/collection";
 import { getMenuQuery } from "./queries/menu";
 import { getPageQuery, getPagesQuery } from "./queries/page";
 import {
-    getProductQuery,
-    getProductRecommendationsQuery,
-    getProductsQuery,
+  getProductQuery,
+  getProductRecommendationsQuery,
+  getProductsQuery,
 } from "./queries/product";
 import {
-    Cart,
-    Collection,
-    Connection,
-    Image,
-    Menu,
-    Page,
-    Product,
-    ShopifyAddToCartOperation,
-    ShopifyCart,
-    ShopifyCartOperation,
-    ShopifyCollection,
-    ShopifyCollectionOperation,
-    ShopifyCollectionProductsOperation,
-    ShopifyCollectionsOperation,
-    ShopifyCreateCartOperation,
-    ShopifyMenuOperation,
-    ShopifyPageOperation,
-    ShopifyPagesOperation,
-    ShopifyProduct,
-    ShopifyProductOperation,
-    ShopifyProductRecommendationsOperation,
-    ShopifyProductsOperation,
-    ShopifyRemoveFromCartOperation,
-    ShopifyUpdateCartOperation,
+  Announcement,
+  AnnouncementBar,
+  Cart,
+  Collection,
+  Connection,
+  Image,
+  Menu,
+  Page,
+  Product,
+  ShopifyAddToCartOperation,
+  ShopifyAnnouncementBarOperation,
+  ShopifyCart,
+  ShopifyCartOperation,
+  ShopifyCollection,
+  ShopifyCollectionOperation,
+  ShopifyCollectionProductsOperation,
+  ShopifyCollectionsOperation,
+  ShopifyCreateCartOperation,
+  ShopifyMenuOperation,
+  ShopifyPageOperation,
+  ShopifyPagesOperation,
+  ShopifyProduct,
+  ShopifyProductOperation,
+  ShopifyProductRecommendationsOperation,
+  ShopifyProductsOperation,
+  ShopifyRemoveFromCartOperation,
+  ShopifyUpdateCartOperation,
 } from "./types";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
@@ -137,7 +141,7 @@ const reshapeCart = (cart: ShopifyCart): Cart => {
 };
 
 const reshapeCollection = (
-  collection: ShopifyCollection
+  collection: ShopifyCollection,
 ): Collection | undefined => {
   if (!collection) {
     return undefined;
@@ -179,7 +183,7 @@ const reshapeImages = (images: Connection<Image>, productTitle: string) => {
 
 const reshapeProduct = (
   product: ShopifyProduct,
-  filterHiddenProducts: boolean = true
+  filterHiddenProducts: boolean = true,
 ) => {
   if (
     !product ||
@@ -213,6 +217,135 @@ const reshapeProducts = (products: ShopifyProduct[]) => {
   return reshapedProducts;
 };
 
+export const reshapeAnnouncementBar = (
+  shop: ShopifyAnnouncementBarOperation["data"]["shop"],
+): {
+  announcements: Announcement[];
+  links: { label: string; url: string; iconUrl?: string }[];
+} => {
+  const announcements = (
+    shop.announcements?.references
+      ? removeEdgesAndNodes(shop.announcements.references)
+      : []
+  )
+    .filter((node) => node?.text?.value)
+    .map((node) => ({
+      text: node.text!.value!,
+      url: node.url?.value || undefined,
+      labelText: node.labelText?.value || undefined,
+    }));
+
+  const links = (
+    shop.links?.references ? removeEdgesAndNodes(shop.links.references) : []
+  )
+    .filter((node) => node?.label?.value && node?.url?.value)
+    .map((node) => {
+      const reference = node.icon?.reference;
+      const iconUrl = reference?.url ?? reference?.image?.url;
+      const isSvg =
+        reference?.mimeType === "image/svg+xml" ||
+        !!iconUrl?.split("?")[0]?.endsWith(".svg");
+
+      return {
+        label: node.label!.value!,
+        url: node.url!.value!,
+        iconUrl: iconUrl && isSvg ? iconUrl : undefined,
+      };
+    });
+
+  return { announcements, links };
+};
+
+// Strips sizing and hardcoded colors so inline icons size via CSS and
+// inherit `currentColor`. Stroke-based line icons need their stroke converted
+// (not removed — a missing stroke makes them invisible), and some icons carry
+// colors in inline style attributes rather than presentation attributes.
+// Returns undefined for anything that isn't an SVG.
+export const sanitizeSvgIcon = (raw: string): string | undefined => {
+  const start = raw.indexOf("<svg");
+  const end = raw.lastIndexOf("</svg>");
+  if (start === -1 || end === -1 || raw.length > 100_000) {
+    return undefined;
+  }
+
+  const svg = raw
+    .slice(start, end + "</svg>".length)
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*')/gi, "")
+    // Keep fill="none" — outline icons depend on it.
+    .replace(/\sfill\s*=\s*("(?!none")[^"]*"|'(?!none')[^']*')/gi, "")
+    .replace(
+      /\sstroke\s*=\s*("(?!none")[^"]*"|'(?!none')[^']*')/gi,
+      ' stroke="currentColor"',
+    )
+    .replace(/\sstyle\s*=\s*("[^"]*"|'[^']*')/gi, (attr) =>
+      attr.replace(
+        /(fill|stroke)\s*:\s*([^;"']+)/gi,
+        (match, property: string, value: string) =>
+          value.trim() === "none" ? match : `${property}: currentColor`,
+      ),
+    );
+
+  return svg.replace(/<svg([^>]*)>/i, (_, attrs: string) => {
+    const cleaned = attrs.replace(
+      /\s(width|height)\s*=\s*("[^"]*"|'[^']*')/gi,
+      "",
+    );
+    return `<svg${cleaned} fill="currentColor">`;
+  });
+};
+
+export const fetchSvgIcon = async (
+  url: string,
+): Promise<string | undefined> => {
+  try {
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      return undefined;
+    }
+
+    return sanitizeSvgIcon(await res.text());
+  } catch {
+    return undefined;
+  }
+};
+
+export async function getAnnouncementBar(): Promise<AnnouncementBar> {
+  "use cache";
+  cacheTag(TAGS.cms);
+  cacheLife("days");
+
+  const empty: AnnouncementBar = { announcements: [], links: [] };
+
+  if (!endpoint) {
+    console.log("Skipping getAnnouncementBar - Shopify not configured");
+    return empty;
+  }
+
+  try {
+    const res = await shopifyFetch<ShopifyAnnouncementBarOperation>({
+      query: getAnnouncementBarQuery,
+    });
+
+    const { announcements, links } = reshapeAnnouncementBar(res.body.data.shop);
+
+    return {
+      announcements,
+      links: await Promise.all(
+        links.map(async ({ iconUrl, ...link }) => ({
+          ...link,
+          iconSvg: iconUrl ? await fetchSvgIcon(iconUrl) : undefined,
+        })),
+      ),
+    };
+  } catch (e) {
+    // The announcement bar is optional chrome — never let it break a page.
+    console.error("Failed to load announcement bar", e);
+    return empty;
+  }
+}
+
 // The buyer's IP can only be read in request-scoped contexts (server actions,
 // route handlers) — not inside `use cache` functions, which are shared across visitors.
 async function getBuyerIp(): Promise<string | undefined> {
@@ -235,7 +368,7 @@ export async function createCart(): Promise<Cart> {
 }
 
 export async function addToCart(
-  lines: { merchandiseId: string; quantity: number }[]
+  lines: { merchandiseId: string; quantity: number }[],
 ): Promise<Cart> {
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyAddToCartOperation>({
@@ -264,7 +397,7 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart> {
 }
 
 export async function updateCart(
-  lines: { id: string; merchandiseId: string; quantity: number }[]
+  lines: { id: string; merchandiseId: string; quantity: number }[],
 ): Promise<Cart> {
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyUpdateCartOperation>({
@@ -302,7 +435,7 @@ export async function getCart(): Promise<Cart | undefined> {
 }
 
 export async function getCollection(
-  handle: string
+  handle: string,
 ): Promise<Collection | undefined> {
   "use cache";
   cacheTag(TAGS.collections);
@@ -333,7 +466,7 @@ export async function getCollectionProducts({
 
   if (!endpoint) {
     console.log(
-      `Skipping getCollectionProducts for '${collection}' - Shopify not configured`
+      `Skipping getCollectionProducts for '${collection}' - Shopify not configured`,
     );
     return [];
   }
@@ -353,7 +486,7 @@ export async function getCollectionProducts({
   }
 
   return reshapeProducts(
-    removeEdgesAndNodes(res.body.data.collection.products)
+    removeEdgesAndNodes(res.body.data.collection.products),
   );
 }
 
@@ -398,7 +531,7 @@ export async function getCollections(): Promise<Collection[]> {
     // Filter out the `hidden` collections.
     // Collections that start with `hidden-*` need to be hidden on the search page.
     ...reshapeCollections(shopifyCollections).filter(
-      (collection) => !collection.handle.startsWith("hidden")
+      (collection) => !collection.handle.startsWith("hidden"),
     ),
   ];
 
@@ -477,7 +610,7 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
 }
 
 export async function getProductRecommendations(
-  productId: string
+  productId: string,
 ): Promise<Product[]> {
   "use cache";
   cacheTag(TAGS.products);
@@ -532,17 +665,42 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
     "products/delete",
     "products/update",
   ];
+  // Metaobject edits fire metaobjects/*; shop metafield value edits only fire
+  // shop/update (metafield_definitions/* covers definitions, not values).
+  const cmsWebhooks = [
+    "metaobjects/create",
+    "metaobjects/delete",
+    "metaobjects/update",
+    "shop/update",
+  ];
   const topic = (await headers()).get("x-shopify-topic") || "unknown";
   const secret = req.nextUrl.searchParams.get("secret");
   const isCollectionUpdate = collectionWebhooks.includes(topic);
   const isProductUpdate = productWebhooks.includes(topic);
+  const isCmsUpdate = cmsWebhooks.includes(topic);
 
   if (!secret || secret !== process.env.SHOPIFY_REVALIDATION_SECRET) {
     console.error("Invalid revalidation secret.");
     return NextResponse.json({ status: 401 });
   }
 
-  if (!isCollectionUpdate && !isProductUpdate) {
+  // Manual trigger, e.g. /api/revalidate?secret=...&tag=cms — useful when the
+  // corresponding webhooks aren't configured.
+  const manualTag = req.nextUrl.searchParams.get("tag");
+  if (manualTag) {
+    if (!Object.values(TAGS).includes(manualTag)) {
+      return NextResponse.json({ status: 200 });
+    }
+
+    revalidateTag(manualTag, "seconds");
+    return NextResponse.json({
+      status: 200,
+      revalidated: true,
+      now: Date.now(),
+    });
+  }
+
+  if (!isCollectionUpdate && !isProductUpdate && !isCmsUpdate) {
     // We don't need to revalidate anything for any other topics.
     return NextResponse.json({ status: 200 });
   }
@@ -553,6 +711,10 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
 
   if (isProductUpdate) {
     revalidateTag(TAGS.products, "seconds");
+  }
+
+  if (isCmsUpdate) {
+    revalidateTag(TAGS.cms, "seconds");
   }
 
   return NextResponse.json({ status: 200, revalidated: true, now: Date.now() });
