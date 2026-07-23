@@ -6,10 +6,7 @@
       "Bash(npm run prettier:check)",
       "Bash(npm run build)"
     ],
-    "deny": [
-      "Read(.env.local)",
-      "Read(.env*)"
-    ]
+    "deny": ["Read(.env.local)", "Read(.env*)"]
   },
   "hooks": {
     "PostToolUse": [
