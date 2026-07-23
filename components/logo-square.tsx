@@ -1,23 +1,30 @@
 import clsx from "clsx";
-import LogoIcon from "./icons/logo";
 
-export default function LogoSquare({ size }: { size?: "sm" | undefined }) {
+// logo.svg is solid white (see public/logo.svg). On a background that
+// follows the site's light/dark theme, `adaptive` (default) flips it to
+// black in light mode via `invert` and cancels that back to white in dark
+// mode via `dark:invert-0`. On a background that's permanently dark (the
+// header), pass `adaptive={false}` to skip the invert and show the white
+// logo as-is.
+export default function LogoSquare({
+  alt,
+  size,
+  adaptive = true,
+}: {
+  alt: string;
+  size?: "sm" | undefined;
+  adaptive?: boolean;
+}) {
   return (
-    <div
-      className={clsx(
-        "flex flex-none items-center justify-center border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-black",
-        {
-          "h-[40px] w-[40px] rounded-xl": !size,
-          "h-[30px] w-[30px] rounded-lg": size === "sm",
-        },
-      )}
-    >
-      <LogoIcon
-        className={clsx({
-          "h-[16px] w-[16px]": !size,
-          "h-[10px] w-[10px]": size === "sm",
-        })}
-      />
-    </div>
+    <img
+      src="/logo.svg"
+      alt={alt}
+      width={625}
+      height={80}
+      className={clsx("w-auto", adaptive && "invert dark:invert-0", {
+        "h-4": !size,
+        "h-3": size === "sm",
+      })}
+    />
   );
 }

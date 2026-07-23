@@ -1,3 +1,5 @@
+import { ensureStartsWith } from "./utils";
+
 export type SortFilterItem = {
   title: string;
   slug: string | null;
@@ -50,3 +52,8 @@ export const TAGS = {
 export const HIDDEN_PRODUCT_TAG = "nextjs-frontend-hidden";
 export const DEFAULT_OPTION = "Default Title";
 export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2025-07/graphql.json";
+
+const accountDomain = process.env.SHOPIFY_STORE_DOMAIN
+  ? ensureStartsWith(process.env.SHOPIFY_STORE_DOMAIN, "https://")
+  : "";
+export const ACCOUNT_URL = accountDomain ? `${accountDomain}/account` : "";

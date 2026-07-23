@@ -555,13 +555,18 @@ export async function getMenu(handle: string): Promise<Menu[]> {
     },
   });
 
+  const reshapeMenuItem = (item: { title: string; url: string }): Menu => ({
+    title: item.title,
+    path: item.url
+      .replace(domain, "")
+      .replace("/collections", "/search")
+      .replace("/pages", ""),
+  });
+
   return (
-    res.body?.data?.menu?.items.map((item: { title: string; url: string }) => ({
-      title: item.title,
-      path: item.url
-        .replace(domain, "")
-        .replace("/collections", "/search")
-        .replace("/pages", ""),
+    res.body?.data?.menu?.items.map((item) => ({
+      ...reshapeMenuItem(item),
+      ...(item.items.length ? { items: item.items.map(reshapeMenuItem) } : {}),
     })) || []
   );
 }

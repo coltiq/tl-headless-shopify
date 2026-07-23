@@ -16,7 +16,7 @@ export async function AnnouncementBar() {
     <div
       className={clsx(
         inter.className,
-        "announcement-bar w-full bg-linear-135 from-[#1a2bc3] from-3% to-[#121d85] text-sm leading-[25px] text-white",
+        "announcement-bar h-(--header-announcement-height) w-full overflow-hidden bg-linear-135 from-[#1a2bc3] from-3% to-[#121d85] text-sm leading-[25px] text-white",
       )}
     >
       <div className="announcement-bar-content page-width flex items-center justify-between gap-6">

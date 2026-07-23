@@ -15,7 +15,7 @@ field missing from the query).
 Before writing or modifying any Storefront GraphQL, use the shopify-dev-mcp server:
 
 1. If not already done this session, call `learn_shopify_api(api:
-   "storefront-graphql")` and save the returned `conversationId` — every other
+"storefront-graphql")` and save the returned `conversationId` — every other
    shopify-dev-mcp tool requires it.
 2. If a field name or its shape is uncertain, look up the object's reference page
    with the docs search tool (`search_docs_chunks`; older server versions call it
@@ -36,6 +36,7 @@ Fragments live in `lib/shopify/fragments/`:
   `lib/shopify/queries/collection.ts` directly.
 
 Notes:
+
 - Connection fields must be requested as `edges { node { ... } }` with a `first:`
   argument (see `variants(first: 250)`, `images(first: 20)`).
 - Money fields need `{ amount currencyCode }`; images should spread `...image`.
@@ -51,7 +52,7 @@ Two layers, both required:
    field is `Connection<T>`; a nullable field is `T | null` (use `Maybe<T>`).
 2. **App-facing type** (`Product`, `Collection`, `Cart`): what components consume.
    Scalars are usually inherited automatically (`Product = Omit<ShopifyProduct,
-   "variants" | "images"> & {...}`), but a new connection field must be added to the
+"variants" | "images"> & {...}`), but a new connection field must be added to the
    `Omit<...>` list and re-declared as a flat array (`T[]`).
 
 If the field belongs to a different query root, also update the matching

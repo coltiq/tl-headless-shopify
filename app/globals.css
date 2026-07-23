@@ -16,6 +16,40 @@
   }
 }
 
+@theme {
+  /* Named z-index scale for the site header. `z-*` has no Tailwind v4 theme
+     namespace, so these are consumed via the arbitrary-value var shorthand,
+     e.g. `z-(--z-index-header)`, not a generated `z-header` utility. */
+  --z-index-header: 20;
+  --z-index-dropdown: 30;
+  --z-index-cart: 40;
+  --z-index-mobile-overlay: 50;
+
+  /* Static header row heights (kept in sync with each row's h-* utility) so
+     --header-height needs no runtime measurement. */
+  --header-announcement-height: 41px; /* announcement-bar: h-(--header-announcement-height) */
+  --header-utility-height: 80px; /* utility-row: h-20 */
+  --header-nav-height: 40px; /* nav-row: h-10 */
+  --header-mobile-height: 80px; /* mobile-nav collapsed row: h-20 */
+  --header-height: calc(
+    var(--header-announcement-height) + var(--header-utility-height) +
+      var(--header-nav-height)
+  );
+}
+
+/* Unlayered on purpose: Tailwind emits @theme variables inside `@layer
+   theme`, and per the CSS Cascade Layers spec, unlayered rules always beat
+   layered ones on a specificity tie regardless of source order. Writing this
+   as plain CSS (not inside any @layer) guarantees it wins over the @theme
+   block's default below md. */
+@media (width < 48rem) {
+  :root {
+    --header-height: calc(
+      var(--header-announcement-height) + var(--header-mobile-height)
+    );
+  }
+}
+
 @layer base {
   *,
   ::after,

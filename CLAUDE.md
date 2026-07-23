@@ -15,7 +15,7 @@ Use npm (`package-lock.json` is current; `pnpm-lock.yaml` is a leftover from the
 - `npm run prettier` — format all files (uses `prettier-plugin-tailwindcss`)
 - `npm run prettier:check` — check formatting; this is the only automated check (`test` script just runs it). There is no test suite, linter, or standalone typecheck script — use `npx tsc --noEmit` to typecheck.
 
-Requires env vars from `.env.example` in `.env.local`: `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN` (a *private* Storefront token, sent as `Shopify-Storefront-Private-Token`), `SHOPIFY_REVALIDATION_SECRET`, `COMPANY_NAME`, `SITE_NAME`.
+Requires env vars from `.env.example` in `.env.local`: `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN` (a _private_ Storefront token, sent as `Shopify-Storefront-Private-Token`), `SHOPIFY_REVALIDATION_SECRET`, `COMPANY_NAME`, `SITE_NAME`.
 
 ## Imports
 
