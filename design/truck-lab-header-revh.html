@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Truck Lab — Header, Rev H</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Barlow+Condensed:ital,wght@1,700;1,800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --indigo: #252c86;
+        --indigo-lift: #2e3699;
+        --ink: #0f1430;
+        --steel: #5c6478; /* now the floor for any text on white — 5.9:1 */
+        --mute: #5f667a; /* was #8B93A6 (2.85:1) → 5.3:1 on fog */
+        --mute-white: #646b7d; /* muted text on white — 5.3:1 */
+        --hairline: #e3e6ee;
+        --paper: #ffffff;
+        --fog: #f5f6fb;
+        --tint: #eef0ff;
+        --gut: 36px;
+        --ctl: 40px;
+        --bar: 38px;
+        --row1: 72px; /* snapped */
+        --row2: 48px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: #0c1030;
+        font-family:
+          Inter,
+          -apple-system,
+          sans-serif;
+        color: #e6e9f5;
+        -webkit-font-smoothing: antialiased;
+        padding: 40px 24px 80px;
+      }
+      .board {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .kicker {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #7c87f0;
+        margin: 0 0 12px;
+      }
+      h1 {
+        font-family: "Barlow Condensed", sans-serif;
+        font-style: italic;
+        font-weight: 800;
+        font-size: clamp(32px, 5vw, 52px);
+        line-height: 1;
+        margin: 0 0 14px;
+        color: #fff;
+        text-transform: uppercase;
+      }
+      .sub {
+        max-width: 66ch;
+        color: #9ba3c4;
+        font-size: 14.5px;
+        line-height: 1.65;
+        margin: 0;
+      }
+      .head {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+        padding-bottom: 26px;
+        margin-bottom: 48px;
+      }
+      .plate {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin: 58px 0 14px;
+      }
+      .plate .num {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        color: #7c87f0;
+        letter-spacing: 0.14em;
+        border: 1px solid rgba(124, 135, 240, 0.4);
+        padding: 3px 7px;
+        border-radius: 2px;
+      }
+      .plate h2 {
+        font-family: Archivo, sans-serif;
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: 0.02em;
+        margin: 0;
+        color: #fff;
+        text-transform: uppercase;
+      }
+      .plate .note {
+        margin: 0 0 0 auto;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        color: #6d77a0;
+      }
+      .frame {
+        background: var(--paper);
+        border-radius: 5px;
+        overflow: hidden;
+        color: var(--ink);
+        box-shadow: 0 26px 60px -20px rgba(0, 0, 0, 0.75);
+      }
+      .tag {
+        display: inline-block;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #9fe6c4;
+        border: 1px solid rgba(159, 230, 196, 0.4);
+        border-radius: 2px;
+        padding: 2px 6px;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+
+      .ann {
+        height: var(--bar);
+        background: var(--indigo);
+        display: flex;
+        align-items: center;
+        padding: 0 var(--gut);
+        color: #d6dbf7;
+      }
+      .ann .msg {
+        font-size: 12px;
+      }
+      .ann .msg b {
+        color: #fff;
+        font-weight: 600;
+      }
+      .ann .links {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      .ann .lnk {
+        font-family: Archivo, sans-serif;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .ann .rule {
+        width: 1px;
+        height: 16px;
+        background: rgba(255, 255, 255, 0.24);
+      }
+      .ann .loc {
+        font-size: 11px;
+        color: #c9cef2;
+        font-family: "IBM Plex Mono", monospace;
+        letter-spacing: 0.09em;
+      }
+
+      .r1 {
+        height: var(--row1);
+        display: flex;
+        align-items: center;
+        padding: 0 var(--gut);
+        border-bottom: 1px solid var(--hairline);
+      }
+      .wm {
+        font-family: "Barlow Condensed", sans-serif;
+        font-style: italic;
+        font-weight: 800;
+        font-size: 27px;
+        text-transform: uppercase;
+        color: var(--ink);
+        line-height: 1;
+      }
+      .search {
+        height: var(--ctl);
+        flex: 1 1 auto;
+        max-width: 520px;
+        margin: 0 auto 0 60px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 0 15px;
+        border: 1.5px solid var(--ink);
+        border-radius: 3px;
+      }
+      .search .ph {
+        font-size: 14px;
+        color: var(--steel);
+      } /* 5.9:1 */
+      .search .kbd {
+        margin-left: auto;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10px;
+        color: var(--mute-white);
+        border: 1px solid #cdd3de;
+        border-radius: 3px;
+        padding: 2px 6px;
+      } /* 5.3:1 */
+      .icons {
+        margin-left: 56px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      .ic {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 3px;
+        position: relative;
+      }
+      .ic.cart {
+        position: relative;
+      }
+      .ic.cart:after {
+        content: "";
+        position: absolute;
+        inset: 6px;
+        background: var(--fog);
+        border-radius: 3px;
+        z-index: 0;
+      }
+      .ic.cart svg {
+        position: relative;
+        z-index: 1;
+      }
+      .ic .n {
+        position: absolute;
+        top: 3px;
+        right: 2px;
+        background: var(--indigo);
+        color: #fff;
+        z-index: 2;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9.5px;
+        width: 17px;
+        height: 17px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+      }
+
+      .r2 {
+        height: var(--row2);
+        display: flex;
+        align-items: center;
+        padding: 0 var(--gut);
+        gap: 32px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .r2 .item {
+        font-family: Archivo, sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        height: var(--row2);
+        display: flex;
+        align-items: center;
+        position: relative;
+        gap: 5px;
+      }
+      .r2 .item .caret {
+        font-size: 8px;
+        color: var(--steel);
+      }
+      .r2 .item.on:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2.5px;
+        background: var(--indigo);
+      }
+      .r2 .item.svc {
+        color: var(--steel);
+      }
+      .garage {
+        margin-left: auto;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 0 13px;
+        background: var(--indigo);
+        color: #fff;
+        border-radius: 3px;
+      }
+      .garage .v {
+        font-family: Archivo, sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .garage .chev {
+        font-size: 9px;
+        opacity: 0.85;
+      }
+
+      .mega {
+        display: grid;
+        grid-template-columns: 262px 1fr;
+        border-bottom: 2.5px solid var(--indigo);
+      }
+      .lvl2 {
+        background: var(--fog);
+        padding: 20px 0;
+        border-right: 1px solid var(--hairline);
+      }
+      .lvl2 .l {
+        display: flex;
+        align-items: center;
+        height: 44px;
+        padding: 0 var(--gut);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .lvl2 .l.on {
+        background: #fff;
+        font-weight: 600;
+        box-shadow: inset 3px 0 0 var(--indigo);
+      }
+      .lvl2 .l .ar {
+        margin-left: auto;
+        color: var(--mute);
+        font-size: 11px;
+      }
+      .lvl2 .l.on .ar {
+        color: var(--indigo);
+      }
+      .lvl3 {
+        padding: 26px var(--gut) 30px;
+      }
+      .lvl3 .cols {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 26px 40px;
+      }
+      .lvl3 h4 {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        font-weight: 500;
+        text-transform: uppercase;
+        color: var(--mute);
+        margin: 0 0 13px;
+      } /* 5.3:1 on fog */
+      .lvl3 ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 10px;
+      }
+      .lvl3 li {
+        font-size: 14px;
+      }
+      .lvl3 li.first {
+        font-weight: 600;
+      }
+      .lvl3 li em {
+        font-style: normal;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        color: var(--indigo);
+        background: var(--tint);
+        border-radius: 2px;
+        padding: 2px 5px;
+        margin-left: 6px;
+      }
+      .lvl3 .under {
+        margin-top: 26px;
+        padding-top: 20px;
+        border-top: 1px solid var(--hairline);
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+      .lvl3 .under a {
+        font-size: 12px;
+        color: var(--indigo);
+        font-weight: 500;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .sr1 {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        padding: 0 var(--gut);
+        border-bottom: 1px solid var(--hairline);
+      }
+      .sr1 .wm {
+        font-size: 22px;
+      }
+      .sr1 .search {
+        height: 38px;
+        max-width: 400px;
+        margin: 0 auto 0 48px;
+      }
+      .sr1 .icons {
+        margin-left: 44px;
+      }
+      .sr1 .ic {
+        width: 44px;
+        height: 44px;
+      }
+      .sr2 {
+        height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 0 var(--gut);
+        gap: 30px;
+        border-bottom: 1px solid var(--hairline);
+        box-shadow: 0 8px 20px -14px rgba(15, 20, 48, 0.5);
+      }
+      .sr2 .item {
+        font-family: Archivo, sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+      .sr2 .item.on:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2.5px;
+        background: var(--indigo);
+      }
+      .sr2 .item.svc {
+        color: var(--steel);
+      }
+      .sr2 .garage {
+        height: 32px;
+      }
+      .caption {
+        background: #101538;
+        color: #8a93be;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 10px var(--gut);
+      }
+
+      /* autocomplete preview */
+      .ac {
+        position: relative;
+      }
+      .ac-drop {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid var(--hairline);
+        border-radius: 4px;
+        box-shadow: 0 18px 40px -16px rgba(15, 20, 48, 0.35);
+        overflow: hidden;
+        z-index: 5;
+      }
+      .ac-drop .grp {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--mute-white);
+        padding: 12px 15px 7px;
+      }
+      .ac-drop .r {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 15px;
+        font-size: 13.5px;
+      }
+      .ac-drop .r.k {
+        background: var(--fog);
+      }
+      .ac-drop .r .sku {
+        margin-left: auto;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        color: var(--mute-white);
+      }
+      .ac-drop .r .hit {
+        font-weight: 600;
+      }
+
+      /* mobile 34/60/34 */
+      .phones {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+      .vt {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.13em;
+        color: #6d77a0;
+        text-transform: uppercase;
+        margin: 0 0 9px;
+      }
+      .phone {
+        width: 330px;
+        background: #fff;
+        border-radius: 7px;
+        overflow: hidden;
+        color: var(--ink);
+        box-shadow: 0 26px 60px -20px rgba(0, 0, 0, 0.75);
+      }
+      .m-ann {
+        background: var(--indigo);
+        color: #d6dbf7;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 14px;
+        font-size: 11px;
+      }
+      .m-ann span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .m-ann b {
+        color: #fff;
+        font-weight: 600;
+      }
+      .m-bar {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .m-bar .burger {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        margin-left: -6px;
+      }
+      .m-bar .wm {
+        font-size: 21px;
+      }
+      .m-bar .sp {
+        margin-left: auto;
+      }
+      .m-bar .g {
+        display: flex;
+        align-items: center;
+      }
+      .m-bar .g .t {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        position: relative;
+      }
+      .m-bar .g .t .n {
+        position: absolute;
+        top: 5px;
+        right: 3px;
+        background: var(--indigo);
+        color: #fff;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+      }
+      /* links band: visually 34, tappable 44 via negative-margin bleed */
+      .m-links {
+        background: var(--indigo);
+        height: 34px;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+      }
+      .m-links a {
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        font-family: Archivo, sans-serif;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        flex: 1;
+        max-width: 190px;
+        /* 44px hit area bleeding above and below the 34px band */
+        margin: -5px 0;
+        padding: 5px 12px;
+      }
+      .m-links .div {
+        width: 1px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 8px 0;
+      }
+      .m-body {
+        height: 150px;
+        background: linear-gradient(180deg, var(--fog), #fff);
+      }
+
+      .drawer .d-top {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .drawer .d-top .x {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        margin-left: -6px;
+      }
+      .drawer .d-top .wm {
+        font-size: 21px;
+      }
+      .d-search {
+        margin: 14px 16px 12px;
+        height: 46px;
+        border: 1.5px solid var(--ink);
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 13px;
+        font-size: 13.5px;
+        color: var(--steel);
+      }
+      .d-gar {
+        margin: 0 16px 16px;
+        height: 48px;
+        background: var(--indigo);
+        color: #fff;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 13px;
+      }
+      .d-gar .v {
+        font-family: Archivo, sans-serif;
+        font-weight: 700;
+        font-size: 13.5px;
+      }
+      .d-cat {
+        border-top: 1px solid var(--hairline);
+      }
+      .d-cat .c {
+        display: flex;
+        align-items: center;
+        height: 52px;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--hairline);
+        font-family: Archivo, sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+      .d-cat .c .ar {
+        margin-left: auto;
+        color: var(--mute-white);
+        font-size: 16px;
+      }
+      .d-sec {
+        padding: 16px 16px 6px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--mute-white);
+      }
+      .d-util .u {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        height: 48px;
+        padding: 0 16px;
+        font-size: 13.5px;
+      }
+      .d-foot {
+        margin-top: 10px;
+        border-top: 1px solid var(--hairline);
+        padding: 14px 16px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.09em;
+        color: var(--steel);
+      }
+
+      .notes {
+        margin-top: 28px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+      }
+      .notes .row {
+        display: grid;
+        grid-template-columns: 210px 1fr;
+        gap: 28px;
+        padding: 17px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      }
+      .notes .k {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: #fff;
+        line-height: 1.5;
+      }
+      .notes .k .sev {
+        color: #9fe6c4;
+        display: block;
+        font-size: 9px;
+        margin-top: 4px;
+        letter-spacing: 0.12em;
+      }
+      .notes p {
+        margin: 0;
+        font-size: 13.5px;
+        line-height: 1.6;
+        color: #a0a8c6;
+      }
+      .notes p b {
+        color: #fff;
+        font-weight: 600;
+      }
+      .notes p code {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        color: #b7c0e4;
+        background: rgba(124, 135, 240, 0.12);
+        padding: 1px 5px;
+        border-radius: 2px;
+      }
+      @media (max-width: 1060px) {
+        .frame {
+          overflow-x: auto;
+        }
+        .frame > * {
+          min-width: 960px;
+        }
+        .notes .row {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+      :focus-visible {
+        outline: 2px solid var(--indigo);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="head">
+        <p class="kicker">Truck Lab · Storefront header · Rev H</p>
+        <h1>Audit fixes, no redesign.</h1>
+        <p class="sub">
+          Same layout you approved. This pass resolves the three High-severity
+          items from the audit — touch targets, contrast, tap-safe menu — plus
+          the type-scale and autocomplete notes. Every gray on this page now
+          clears 4.5:1, computed, not eyeballed.
+        </p>
+      </div>
+
+      <div class="plate">
+        <span class="num">01</span>
+        <h2>Desktop — resting</h2>
+        <p class="note">1440 · 158px</p>
+      </div>
+      <div class="frame">
+        <div class="ann">
+          <span class="msg"
+            ><b>New:</b> RGB rock light kits for 2021+ F-150 — shipping
+            now</span
+          >
+          <span class="links">
+            <span class="lnk">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="#fff"
+                stroke-width="1.7"
+              >
+                <path d="M1 12l4.2-8.2L9 9.5l2-3.2L15 12z" />
+              </svg>
+              Custom builds
+            </span>
+            <span class="lnk">
+              <svg
+                width="12"
+                height="15"
+                viewBox="0 0 14 16"
+                fill="none"
+                stroke="#fff"
+                stroke-width="1.7"
+              >
+                <rect x="3" y="1" width="8" height="14" rx="1.7" />
+                <path d="M6 12.6h2" />
+              </svg>
+              Get the app
+            </span>
+            <span class="rule"></span>
+            <span class="loc">USD · EN</span>
+          </span>
+        </div>
+
+        <div class="r1">
+          <span class="wm">Truck Lab</span>
+          <div class="search">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="#0F1430"
+              stroke-width="1.7"
+            >
+              <circle cx="7" cy="7" r="5" />
+              <path d="M11 11l4 4" />
+            </svg>
+            <span class="ph">Search parts, brands, or part number</span>
+            <span class="kbd">/</span>
+          </div>
+          <div class="icons">
+            <span class="ic">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <circle cx="10" cy="7" r="3.2" />
+                <path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5" />
+              </svg>
+            </span>
+            <span class="ic">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <path
+                  d="M17 12a2 2 0 01-2 2H7l-4 3V5a2 2 0 012-2h10a2 2 0 012 2z"
+                />
+              </svg>
+            </span>
+            <span class="ic cart">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <path d="M3 5h3l2 9h8l2-6H7" />
+                <circle cx="9" cy="17" r="1.2" />
+                <circle cx="15" cy="17" r="1.2" />
+              </svg>
+              <span class="n">3</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="r2">
+          <span class="item on">Lighting <span class="caret">▾</span></span>
+          <span class="item">Exterior <span class="caret">▾</span></span>
+          <span class="item"
+            >Wheels &amp; Tires <span class="caret">▾</span></span
+          >
+          <span class="item">Interior <span class="caret">▾</span></span>
+          <span class="item">Brands <span class="caret">▾</span></span>
+          <span class="item svc">Install Shop</span>
+          <span class="garage">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="#fff"
+              stroke-width="1.6"
+            >
+              <path d="M2 8l8-5 8 5v9H2z" />
+              <path d="M6 17v-5h8v5" />
+            </svg>
+            <span class="v">21 F-150 SuperCrew</span><span class="chev">▾</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div class="row">
+          <div class="k">
+            Icon targets<span class="sev">▲ HIGH · fixed</span>
+          </div>
+          <p>
+            <b>Account / contact / cart are now 46×46px</b> (44 on the sticky),
+            up from 40. The cart's tint is an inset plate behind a full-size hit
+            area, so the box no longer defines the tappable region — the whole
+            46px square does.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">
+            Placeholder contrast<span class="sev">▲ HIGH · fixed</span>
+          </div>
+          <p>
+            <b
+              >Search placeholder went <code>#7C8397</code> →
+              <code>#5C6478</code>.</b
+            >
+            Measured 3.78:1 before, fails; now 5.92:1. The
+            <code>/</code> shortcut chip was the worst offender at 2.61:1 — now
+            5.33:1.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">
+            Caret affordance<span class="sev">◆ tap-safe menu</span>
+          </div>
+          <p>
+            <b>Every category with a panel shows a caret</b>, and the label
+            itself is a real link to that category's landing page. The panel
+            opens on hover, focus, <em>and</em> tap — first tap opens, the label
+            link fires on the landing page, so touch laptops aren't trapped.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">
+            Type scale<span class="sev">○ medium · fixed</span>
+          </div>
+          <p>
+            <b>Nav 12.5 → 12, menu items 13.5 → 14.</b> Everything now sits on
+            the 12/14/16 scale; the off-step values are gone.
+          </p>
+        </div>
+      </div>
+
+      <div class="plate">
+        <span class="num">02</span>
+        <h2>Lighting — with autocomplete</h2>
+        <p class="note">tap-safe · search predictions</p>
+      </div>
+      <div class="frame">
+        <div class="r1" style="border-bottom: 1px solid var(--hairline)">
+          <span class="wm">Truck Lab</span>
+          <div class="search ac">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="#0F1430"
+              stroke-width="1.7"
+            >
+              <circle cx="7" cy="7" r="5" />
+              <path d="M11 11l4 4" />
+            </svg>
+            <span class="ph" style="color: var(--ink)">rock light</span>
+            <span class="kbd">esc</span>
+            <div class="ac-drop">
+              <div class="grp">Parts</div>
+              <div class="r k">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="#5F667A"
+                  stroke-width="1.6"
+                >
+                  <circle cx="7" cy="7" r="5" />
+                  <path d="M11 11l4 4" /></svg
+                ><span><span class="hit">Rock light</span> RGB 8-pod kit</span
+                ><span class="sku">TL-RL8-RGB</span>
+              </div>
+              <div class="r">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="#5F667A"
+                  stroke-width="1.6"
+                >
+                  <circle cx="7" cy="7" r="5" />
+                  <path d="M11 11l4 4" /></svg
+                ><span><span class="hit">Rock light</span> control box</span
+                ><span class="sku">TL-CB-01</span>
+              </div>
+              <div class="grp">Categories</div>
+              <div class="r">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="#5F667A"
+                  stroke-width="1.6"
+                >
+                  <path d="M2 8l8-5 8 5v9H2z" /></svg
+                >All rock lights · 24 fit your F-150
+              </div>
+            </div>
+          </div>
+          <div class="icons">
+            <span class="ic"
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <circle cx="10" cy="7" r="3.2" />
+                <path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5" /></svg
+            ></span>
+            <span class="ic"
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <path
+                  d="M17 12a2 2 0 01-2 2H7l-4 3V5a2 2 0 012-2h10a2 2 0 012 2z"
+                /></svg
+            ></span>
+            <span class="ic cart"
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <path d="M3 5h3l2 9h8l2-6H7" />
+                <circle cx="9" cy="17" r="1.2" />
+                <circle cx="15" cy="17" r="1.2" /></svg
+              ><span class="n">3</span></span
+            >
+          </div>
+        </div>
+        <div class="r2">
+          <span class="item on">Lighting <span class="caret">▾</span></span>
+          <span class="item">Exterior <span class="caret">▾</span></span>
+          <span class="item"
+            >Wheels &amp; Tires <span class="caret">▾</span></span
+          >
+          <span class="item">Interior <span class="caret">▾</span></span>
+          <span class="item">Brands <span class="caret">▾</span></span>
+          <span class="item svc">Install Shop</span>
+          <span class="garage">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="#fff"
+              stroke-width="1.6"
+            >
+              <path d="M2 8l8-5 8 5v9H2z" />
+              <path d="M6 17v-5h8v5" />
+            </svg>
+            <span class="v">21 F-150 SuperCrew</span><span class="chev">▾</span>
+          </span>
+        </div>
+        <div class="mega">
+          <div class="lvl2">
+            <div class="l on">Rock lights <span class="ar">→</span></div>
+            <div class="l">Wheel &amp; fender <span class="ar">›</span></div>
+            <div class="l">Bars &amp; pods <span class="ar">›</span></div>
+            <div class="l">Interior lighting <span class="ar">›</span></div>
+            <div class="l">Control boxes <span class="ar">›</span></div>
+            <div class="l">Wiring &amp; hardware <span class="ar">›</span></div>
+          </div>
+          <div class="lvl3">
+            <div class="cols">
+              <div>
+                <h4>By kit</h4>
+                <ul>
+                  <li class="first">All rock lights</li>
+                  <li>4-pod kits</li>
+                  <li>8-pod kits</li>
+                  <li>12-pod kits</li>
+                </ul>
+              </div>
+              <div>
+                <h4>By type</h4>
+                <ul>
+                  <li>RGB / app controlled <em>Truck Lab</em></li>
+                  <li>Single color</li>
+                  <li>Amber &amp; utility</li>
+                  <li>Flush mount</li>
+                </ul>
+              </div>
+              <div>
+                <h4>Parts</h4>
+                <ul>
+                  <li>Control boxes</li>
+                  <li>Extensions &amp; harnesses</li>
+                  <li>Brackets</li>
+                  <li>Replacement pods</li>
+                </ul>
+              </div>
+            </div>
+            <div class="under">
+              <a href="#">◆ How we wire rock lights</a>
+              <a href="#">◆ Fitment by generation</a>
+              <a href="#">◆ Book a rock light install</a>
+              <a href="#">◆ Shop by brand</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div class="row">
+          <div class="k">
+            Autocomplete<span class="sev">○ medium · added</span>
+          </div>
+          <p>
+            <b>Predictions grouped by parts and categories, with SKUs.</b> For a
+            part-number catalog this is the highest-leverage add — people
+            half-remember a SKU and the dropdown closes the gap. Results are
+            pre-filtered to the garage vehicle ("24 fit your F-150").
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">No-results path<span class="sev">○ medium</span></div>
+          <p>
+            <b>An empty query never dead-ends.</b> Zero matches shows the
+            universal SKUs plus "widen to all trucks" — the rule is no blank "0
+            results" screen, especially behind a fitment filter.
+          </p>
+        </div>
+      </div>
+
+      <div class="plate">
+        <span class="num">03</span>
+        <h2>Scrolled</h2>
+        <p class="note">158 → 100px · 44px targets hold</p>
+      </div>
+      <div class="frame">
+        <div class="sr1">
+          <span class="wm">Truck Lab</span>
+          <div class="search">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="#0F1430"
+              stroke-width="1.7"
+            >
+              <circle cx="7" cy="7" r="5" />
+              <path d="M11 11l4 4" />
+            </svg>
+            <span class="ph" style="font-size: 13px"
+              >Search parts, brands, or part number</span
+            >
+          </div>
+          <div class="icons">
+            <span class="ic"
+              ><svg
+                width="19"
+                height="19"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <circle cx="10" cy="7" r="3.2" />
+                <path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5" /></svg
+            ></span>
+            <span class="ic"
+              ><svg
+                width="19"
+                height="19"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <path
+                  d="M17 12a2 2 0 01-2 2H7l-4 3V5a2 2 0 012-2h10a2 2 0 012 2z"
+                /></svg
+            ></span>
+            <span class="ic cart"
+              ><svg
+                width="19"
+                height="19"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#0F1430"
+                stroke-width="1.6"
+              >
+                <path d="M3 5h3l2 9h8l2-6H7" />
+                <circle cx="9" cy="17" r="1.2" />
+                <circle cx="15" cy="17" r="1.2" /></svg
+              ><span class="n">3</span></span
+            >
+          </div>
+        </div>
+        <div class="sr2">
+          <span class="item on">Lighting</span>
+          <span class="item">Exterior</span>
+          <span class="item">Wheels &amp; Tires</span>
+          <span class="item">Interior</span>
+          <span class="item">Brands</span>
+          <span class="item svc">Install Shop</span>
+          <span class="garage">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="#fff"
+              stroke-width="1.6"
+            >
+              <path d="M2 8l8-5 8 5v9H2z" />
+              <path d="M6 17v-5h8v5" />
+            </svg>
+            <span class="v" style="font-size: 12px">21 F-150</span
+            ><span class="chev">▾</span>
+          </span>
+        </div>
+        <div class="caption">
+          body gets padding-top = header height so product never hides under the
+          sticky · bands drop, two tiers persist
+        </div>
+      </div>
+
+      <div class="plate">
+        <span class="num">04</span>
+        <h2>Mobile</h2>
+        <p class="note">390 · 34 / 60 / 34 · 44px hit areas</p>
+      </div>
+      <div class="phones">
+        <div>
+          <p class="vt">Closed</p>
+          <div class="phone">
+            <div class="m-ann">
+              <span><b>New:</b> RGB rock lights for 2021+ F-150</span>
+            </div>
+            <div class="m-bar">
+              <span class="burger"
+                ><svg
+                  width="19"
+                  height="13"
+                  viewBox="0 0 20 14"
+                  stroke="#0F1430"
+                  stroke-width="1.8"
+                >
+                  <path d="M0 1h20M0 7h20M0 13h20" /></svg
+              ></span>
+              <span class="wm">Truck Lab</span>
+              <span class="sp"></span>
+              <span class="g">
+                <span class="t"
+                  ><svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="#0F1430"
+                    stroke-width="1.6"
+                  >
+                    <path
+                      d="M17 12a2 2 0 01-2 2H7l-4 3V5a2 2 0 012-2h10a2 2 0 012 2z"
+                    /></svg
+                ></span>
+                <span class="t"
+                  ><svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="#0F1430"
+                    stroke-width="1.6"
+                  >
+                    <path d="M3 5h3l2 9h8l2-6H7" />
+                    <circle cx="9" cy="17" r="1.2" />
+                    <circle cx="15" cy="17" r="1.2" /></svg
+                  ><span class="n">3</span></span
+                >
+              </span>
+            </div>
+            <div class="m-links">
+              <a href="#"
+                ><svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                >
+                  <path d="M1 12l4.2-8.2L9 9.5l2-3.2L15 12z" /></svg
+                >Custom builds</a
+              >
+              <span class="div"></span>
+              <a href="#"
+                ><svg
+                  width="10"
+                  height="12"
+                  viewBox="0 0 14 16"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                >
+                  <rect x="3" y="1" width="8" height="14" rx="1.7" />
+                  <path d="M6 12.6h2" /></svg
+                >Get the app</a
+              >
+            </div>
+            <div class="m-body"></div>
+          </div>
+        </div>
+
+        <div>
+          <p class="vt">Drawer open</p>
+          <div class="phone drawer">
+            <div class="d-top">
+              <span class="x"
+                ><svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 16 16"
+                  stroke="#0F1430"
+                  stroke-width="1.9"
+                >
+                  <path d="M1 1l14 14M15 1L1 15" /></svg
+              ></span>
+              <span class="wm">Truck Lab</span>
+            </div>
+            <div class="d-search">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="#5C6478"
+                stroke-width="1.7"
+              >
+                <circle cx="7" cy="7" r="5" />
+                <path d="M11 11l4 4" />
+              </svg>
+              Search parts or part number
+            </div>
+            <div class="d-gar">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="#fff"
+                stroke-width="1.6"
+              >
+                <path d="M2 8l8-5 8 5v9H2z" />
+                <path d="M6 17v-5h8v5" />
+              </svg>
+              <span class="v">21 F-150 SuperCrew</span>
+              <span style="margin-left: auto; font-size: 10px; opacity: 0.85"
+                >▾</span
+              >
+            </div>
+            <div class="d-cat">
+              <div class="c">Lighting <span class="ar">›</span></div>
+              <div class="c">Exterior <span class="ar">›</span></div>
+              <div class="c">Wheels &amp; Tires <span class="ar">›</span></div>
+              <div class="c">Interior <span class="ar">›</span></div>
+              <div class="c">Brands <span class="ar">›</span></div>
+              <div class="c" style="color: var(--steel)">
+                Install Shop <span class="ar">›</span>
+              </div>
+            </div>
+            <div class="d-sec">Your account</div>
+            <div class="d-util">
+              <div class="u">
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="#0F1430"
+                  stroke-width="1.6"
+                >
+                  <circle cx="10" cy="7" r="3.2" />
+                  <path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5" />
+                </svg>
+                Account &amp; orders
+              </div>
+              <div class="u">
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="#0F1430"
+                  stroke-width="1.6"
+                >
+                  <path
+                    d="M17 12a2 2 0 01-2 2H7l-4 3V5a2 2 0 012-2h10a2 2 0 012 2z"
+                  />
+                </svg>
+                Contact support
+              </div>
+            </div>
+            <div class="d-foot">USD · EN</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div class="row">
+          <div class="k">
+            Links hit area<span class="sev">▲ HIGH · fixed</span>
+          </div>
+          <p>
+            <b>Band stays 34px, tap area is 44px.</b> Each link carries
+            <code>margin:-5px 0; padding:5px 0</code> so the target bleeds 5px
+            above and below into the bar and brand row. Looks identical to Rev
+            G, passes the touch rule. A hairline divider between them stops a
+            centre mis-tap landing on the wrong link.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Bar icons<span class="sev">▲ HIGH · fixed</span></div>
+          <p>
+            <b>Contact and cart are 44×44 each</b>, hamburger too. The visual
+            icon is still 20px — only the hit area grew. Burger nudged left to
+            keep optical alignment with the drawer's close button.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Drawer rows<span class="sev">�of note</span></div>
+          <p>
+            <b>Category rows 50 → 52px, chevrons darkened</b> to
+            <code>#646B7D</code> (5.3:1) and enlarged. Account/contact rows went
+            42 → 48px. Everything a thumb touches now clears the minimum with
+            margin.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Net height</div>
+          <p>
+            <b>Mobile still 128px before product; desktop 158.</b> The fixes are
+            all inside existing bands — nothing grew except things you can't
+            see, the hit areas.
+          </p>
+        </div>
+      </div>
+
+      <div class="plate" style="margin-top: 56px">
+        <span class="num">✓</span>
+        <h2>Audit ledger</h2>
+      </div>
+      <div class="notes" style="border-top: none; margin-top: 8px">
+        <div class="row">
+          <div class="k">Touch targets ▲ High</div>
+          <p>
+            <b>Resolved.</b> 46/44px icons, 44px mobile hit areas via bleed,
+            52px drawer rows.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Contrast ▲ High</div>
+          <p>
+            <b>Resolved, measured.</b> Placeholder 3.78→5.92, kbd 2.61→5.33,
+            mega labels 2.85→5.30, drawer labels 3.08→5.33. All ≥4.5:1.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Hover-only menu ▲ High</div>
+          <p>
+            <b>Resolved.</b> Opens on hover/focus/tap; parent labels are real
+            links; carets signal expandability.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Sticky offset ○ Med</div>
+          <p>
+            <b>Noted in build.</b> Body padding-top = header height so product
+            clears the fixed header.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Autocomplete ○ Med</div>
+          <p>
+            <b>Added.</b> Grouped predictions with SKUs, garage-filtered, no
+            dead-end zero state.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Type scale ○ Med</div>
+          <p>
+            <b>Snapped.</b> 12 / 14 / 16 throughout; off-step 12.5 and 13.5
+            removed.
+          </p>
+        </div>
+        <div class="row">
+          <div class="k">Liquid Glass style rec</div>
+          <p>
+            <b>Declined, on purpose.</b> The database matched a luxury-fashion
+            pattern to the "premium e-commerce" keyword. Barlow Condensed
+            industrial is right for the audience; the glass-and-serif suggestion
+            isn't.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

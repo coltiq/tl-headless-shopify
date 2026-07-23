@@ -21,7 +21,9 @@ type MerchandiseSearchParams = {
   [key: string]: string;
 };
 
-export default function CartModal() {
+// The header mounts one modal per breakpoint; only the primary instance runs
+// the cart-create and auto-open-on-add effects so they don't fire twice.
+export default function CartModal({ primary = true }: { primary?: boolean }) {
   const { cart, updateCartItem } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
@@ -29,13 +31,14 @@ export default function CartModal() {
   const closeCart = () => setIsOpen(false);
 
   useEffect(() => {
-    if (!cart) {
+    if (primary && !cart) {
       createCartAndSetCookie();
     }
-  }, [cart]);
+  }, [primary, cart]);
 
   useEffect(() => {
     if (
+      primary &&
       cart?.totalQuantity &&
       cart?.totalQuantity !== quantityRef.current &&
       cart?.totalQuantity > 0
@@ -45,7 +48,7 @@ export default function CartModal() {
       }
       quantityRef.current = cart?.totalQuantity;
     }
-  }, [isOpen, cart?.totalQuantity, quantityRef]);
+  }, [primary, isOpen, cart?.totalQuantity, quantityRef]);
 
   return (
     <>

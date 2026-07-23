@@ -1,4 +1,3 @@
-import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 
 export default function OpenCart({
@@ -9,18 +8,30 @@ export default function OpenCart({
   quantity?: number;
 }) {
   return (
-    <div className="relative flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors dark:border-neutral-700 dark:text-white">
-      <ShoppingCartIcon
-        className={clsx(
-          "h-4 transition-all ease-in-out hover:scale-110",
-          className,
-        )}
-      />
-
+    <div className="relative grid h-[46px] w-[46px] place-items-center rounded-[3px] text-tl-ink group-data-[condensed]:h-11 group-data-[condensed]:w-11 max-md:h-11 max-md:w-11">
+      <svg
+        className={clsx("h-5 w-5", className)}
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        aria-hidden="true"
+      >
+        <path d="M3 5h3l2 9h8l2-6H7" />
+        <circle cx="9" cy="17" r="1.2" />
+        <circle cx="15" cy="17" r="1.2" />
+      </svg>
+      {/* Screen readers announce count changes; the visual bubble is decorative. */}
+      <span aria-live="polite" className="sr-only">
+        {quantity ? `Cart, ${quantity} items` : "Cart, empty"}
+      </span>
       {quantity ? (
-        <div className="absolute right-0 top-0 -mr-2 -mt-2 h-4 w-4 rounded-sm bg-blue-600 text-[11px] font-medium text-white">
+        <span
+          aria-hidden
+          className="absolute right-0.5 top-[3px] grid h-[17px] w-[17px] place-items-center rounded-full bg-tl-indigo font-tl-mono text-[9.5px] text-white"
+        >
           {quantity}
-        </div>
+        </span>
       ) : null}
     </div>
   );

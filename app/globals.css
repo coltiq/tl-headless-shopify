@@ -3,6 +3,40 @@
 @plugin "@tailwindcss/container-queries";
 @plugin "@tailwindcss/typography";
 
+/* Truck Lab header tokens — values are the approved Rev H spec; the grays are
+   tuned for ≥4.5:1 contrast, do not adjust. */
+@theme {
+  --color-tl-indigo: #252c86;
+  --color-tl-indigo-lift: #2e3699;
+  --color-tl-ink: #0f1430;
+  --color-tl-steel: #5c6478;
+  --color-tl-mute: #5f667a;
+  --color-tl-mute-white: #646b7d;
+  --color-tl-hairline: #e3e6ee;
+  --color-tl-fog: #f5f6fb;
+  --color-tl-tint: #eef0ff;
+  --color-tl-ann-text: #d6dbf7;
+  --color-tl-ann-dim: #c9cef2;
+  --color-tl-kbd-border: #cdd3de;
+
+  --font-tl-sans: var(--font-archivo);
+  --font-tl-condensed: var(--font-barlow-condensed);
+  --font-tl-mono: var(--font-ibm-plex-mono);
+  --font-tl-text: var(--font-inter);
+
+  /* Page width for constrained sections. */
+  --container-page: 1400px;
+  --spacing-gutter: 50px;
+}
+
+/* Constrains a section to the page width with the standard side gutters.
+   Full-bleed wrappers (band backgrounds) stay outside; content goes inside. */
+@utility page-width {
+  margin-inline: auto;
+  max-width: var(--container-page);
+  padding-inline: var(--spacing-gutter);
+}
+
 @layer base {
   *,
   ::after,
@@ -25,8 +59,25 @@
   }
 }
 
-a,
-input,
-button {
-  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
+/* In @layer base so per-element utilities (e.g. the search input's
+   focus-visible:ring-0) can override the default focus ring. */
+@layer base {
+  a,
+  input,
+  button {
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
+  }
+}
+
+/* Header focus rings use the accent indigo per the Rev H spec. */
+[data-site-header] :is(a, input, button):focus-visible {
+  --tw-ring-color: var(--color-tl-indigo);
+  --tw-ring-offset-color: #fff;
+}
+
+/* Search input: the caret is the focus indicator — no ring, ever. Unlayered so
+   it outranks the base focus rule regardless of ring-variable composition. */
+[data-search-input]:focus-visible {
+  box-shadow: none;
+  outline: none;
 }

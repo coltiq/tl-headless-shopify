@@ -52,6 +52,36 @@ export type Menu = {
   path: string;
 };
 
+export type MenuItem = {
+  title: string;
+  path: string;
+  items: MenuItem[];
+};
+
+export type Announcement = {
+  desktop: string | null;
+  mobile: string | null;
+};
+
+export type PredictiveProduct = {
+  id: string;
+  title: string;
+  path: string;
+  sku: string | null;
+  tags: string[];
+};
+
+export type PredictiveCollection = {
+  id: string;
+  title: string;
+  path: string;
+};
+
+export type PredictiveSearchResult = {
+  products: PredictiveProduct[];
+  collections: PredictiveCollection[];
+};
+
 export type Money = {
   amount: string;
   currencyCode: string;
@@ -230,6 +260,54 @@ export type ShopifyMenuOperation = {
   };
   variables: {
     handle: string;
+  };
+};
+
+export type ShopifyHeaderMenuItem = {
+  title: string;
+  url: Maybe<string>;
+  items?: ShopifyHeaderMenuItem[];
+};
+
+export type ShopifyHeaderMenuOperation = {
+  data: {
+    menu?: Maybe<{
+      items: ShopifyHeaderMenuItem[];
+    }>;
+  };
+  variables: {
+    handle: string;
+  };
+};
+
+export type ShopifyShopAnnouncementOperation = {
+  data: {
+    shop: {
+      announcement: Maybe<{ value: string }>;
+      announcementMobile: Maybe<{ value: string }>;
+    };
+  };
+};
+
+export type ShopifyPredictiveSearchOperation = {
+  data: {
+    predictiveSearch: Maybe<{
+      products: {
+        id: string;
+        title: string;
+        handle: string;
+        tags: string[];
+        variants: Connection<{ sku: Maybe<string> }>;
+      }[];
+      collections: {
+        id: string;
+        title: string;
+        handle: string;
+      }[];
+    }>;
+  };
+  variables: {
+    query: string;
   };
 };
 

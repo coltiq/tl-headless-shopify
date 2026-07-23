@@ -1,57 +1,66 @@
 import {
-    HIDDEN_PRODUCT_TAG,
-    SHOPIFY_GRAPHQL_API_ENDPOINT,
-    TAGS,
+  HIDDEN_PRODUCT_TAG,
+  SHOPIFY_GRAPHQL_API_ENDPOINT,
+  TAGS,
 } from "lib/constants";
 import { isShopifyError } from "lib/type-guards";
 import { ensureStartsWith } from "lib/utils";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
-import { cookies, headers } from 'next/headers';
+import { cookies, headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import {
-    addToCartMutation,
-    createCartMutation,
-    editCartItemsMutation,
-    removeFromCartMutation,
+  addToCartMutation,
+  createCartMutation,
+  editCartItemsMutation,
+  removeFromCartMutation,
 } from "./mutations/cart";
 import { getCartQuery } from "./queries/cart";
 import {
-    getCollectionProductsQuery,
-    getCollectionQuery,
-    getCollectionsQuery,
+  getCollectionProductsQuery,
+  getCollectionQuery,
+  getCollectionsQuery,
 } from "./queries/collection";
-import { getMenuQuery } from "./queries/menu";
+import { getHeaderMenuQuery, getMenuQuery } from "./queries/menu";
 import { getPageQuery, getPagesQuery } from "./queries/page";
+import { getPredictiveSearchQuery } from "./queries/predictive-search";
+import { getShopAnnouncementQuery } from "./queries/shop";
 import {
-    getProductQuery,
-    getProductRecommendationsQuery,
-    getProductsQuery,
+  getProductQuery,
+  getProductRecommendationsQuery,
+  getProductsQuery,
 } from "./queries/product";
 import {
-    Cart,
-    Collection,
-    Connection,
-    Image,
-    Menu,
-    Page,
-    Product,
-    ShopifyAddToCartOperation,
-    ShopifyCart,
-    ShopifyCartOperation,
-    ShopifyCollection,
-    ShopifyCollectionOperation,
-    ShopifyCollectionProductsOperation,
-    ShopifyCollectionsOperation,
-    ShopifyCreateCartOperation,
-    ShopifyMenuOperation,
-    ShopifyPageOperation,
-    ShopifyPagesOperation,
-    ShopifyProduct,
-    ShopifyProductOperation,
-    ShopifyProductRecommendationsOperation,
-    ShopifyProductsOperation,
-    ShopifyRemoveFromCartOperation,
-    ShopifyUpdateCartOperation,
+  Announcement,
+  Cart,
+  Collection,
+  Connection,
+  Image,
+  Menu,
+  MenuItem,
+  Page,
+  PredictiveSearchResult,
+  Product,
+  ShopifyAddToCartOperation,
+  ShopifyCart,
+  ShopifyCartOperation,
+  ShopifyCollection,
+  ShopifyCollectionOperation,
+  ShopifyCollectionProductsOperation,
+  ShopifyCollectionsOperation,
+  ShopifyCreateCartOperation,
+  ShopifyHeaderMenuItem,
+  ShopifyHeaderMenuOperation,
+  ShopifyMenuOperation,
+  ShopifyPageOperation,
+  ShopifyPredictiveSearchOperation,
+  ShopifyPagesOperation,
+  ShopifyProduct,
+  ShopifyProductOperation,
+  ShopifyProductRecommendationsOperation,
+  ShopifyProductsOperation,
+  ShopifyRemoveFromCartOperation,
+  ShopifyShopAnnouncementOperation,
+  ShopifyUpdateCartOperation,
 } from "./types";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
@@ -137,7 +146,7 @@ const reshapeCart = (cart: ShopifyCart): Cart => {
 };
 
 const reshapeCollection = (
-  collection: ShopifyCollection
+  collection: ShopifyCollection,
 ): Collection | undefined => {
   if (!collection) {
     return undefined;
@@ -179,7 +188,7 @@ const reshapeImages = (images: Connection<Image>, productTitle: string) => {
 
 const reshapeProduct = (
   product: ShopifyProduct,
-  filterHiddenProducts: boolean = true
+  filterHiddenProducts: boolean = true,
 ) => {
   if (
     !product ||
@@ -235,7 +244,7 @@ export async function createCart(): Promise<Cart> {
 }
 
 export async function addToCart(
-  lines: { merchandiseId: string; quantity: number }[]
+  lines: { merchandiseId: string; quantity: number }[],
 ): Promise<Cart> {
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyAddToCartOperation>({
@@ -264,7 +273,7 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart> {
 }
 
 export async function updateCart(
-  lines: { id: string; merchandiseId: string; quantity: number }[]
+  lines: { id: string; merchandiseId: string; quantity: number }[],
 ): Promise<Cart> {
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyUpdateCartOperation>({
@@ -302,7 +311,7 @@ export async function getCart(): Promise<Cart | undefined> {
 }
 
 export async function getCollection(
-  handle: string
+  handle: string,
 ): Promise<Collection | undefined> {
   "use cache";
   cacheTag(TAGS.collections);
@@ -333,7 +342,7 @@ export async function getCollectionProducts({
 
   if (!endpoint) {
     console.log(
-      `Skipping getCollectionProducts for '${collection}' - Shopify not configured`
+      `Skipping getCollectionProducts for '${collection}' - Shopify not configured`,
     );
     return [];
   }
@@ -353,7 +362,7 @@ export async function getCollectionProducts({
   }
 
   return reshapeProducts(
-    removeEdgesAndNodes(res.body.data.collection.products)
+    removeEdgesAndNodes(res.body.data.collection.products),
   );
 }
 
@@ -398,7 +407,7 @@ export async function getCollections(): Promise<Collection[]> {
     // Filter out the `hidden` collections.
     // Collections that start with `hidden-*` need to be hidden on the search page.
     ...reshapeCollections(shopifyCollections).filter(
-      (collection) => !collection.handle.startsWith("hidden")
+      (collection) => !collection.handle.startsWith("hidden"),
     ),
   ];
 
@@ -425,12 +434,108 @@ export async function getMenu(handle: string): Promise<Menu[]> {
   return (
     res.body?.data?.menu?.items.map((item: { title: string; url: string }) => ({
       title: item.title,
-      path: item.url
-        .replace(domain, "")
-        .replace("/collections", "/search")
-        .replace("/pages", ""),
+      path: menuUrlToPath(item.url),
     })) || []
   );
+}
+
+const menuUrlToPath = (url: string): string =>
+  url
+    .replace(domain, "")
+    .replace("/collections", "/search")
+    .replace("/pages", "");
+
+const reshapeMenuItems = (items: ShopifyHeaderMenuItem[] = []): MenuItem[] =>
+  items.map((item) => ({
+    title: item.title,
+    path: item.url ? menuUrlToPath(item.url) : "#",
+    items: reshapeMenuItems(item.items),
+  }));
+
+export async function getHeaderMenu(handle: string): Promise<MenuItem[]> {
+  "use cache";
+  cacheTag(TAGS.collections);
+  cacheLife("days");
+
+  if (!endpoint) {
+    console.log(
+      `Skipping getHeaderMenu for '${handle}' - Shopify not configured`,
+    );
+    return [];
+  }
+
+  const res = await shopifyFetch<ShopifyHeaderMenuOperation>({
+    query: getHeaderMenuQuery,
+    variables: {
+      handle,
+    },
+  });
+
+  return reshapeMenuItems(res.body?.data?.menu?.items);
+}
+
+export async function getAnnouncement(): Promise<Announcement> {
+  "use cache";
+  cacheLife("hours");
+
+  if (!endpoint) {
+    return { desktop: null, mobile: null };
+  }
+
+  const res = await shopifyFetch<ShopifyShopAnnouncementOperation>({
+    query: getShopAnnouncementQuery,
+  });
+
+  // Shop metafields resolve to null until set in admin — callers must collapse
+  // the band rather than render an empty bar.
+  return {
+    desktop: res.body.data.shop.announcement?.value || null,
+    mobile: res.body.data.shop.announcementMobile?.value || null,
+  };
+}
+
+export async function getPredictiveSearch(
+  query: string,
+): Promise<PredictiveSearchResult> {
+  "use cache";
+  cacheTag(TAGS.products, TAGS.collections);
+  cacheLife("hours");
+
+  if (!endpoint) {
+    return { products: [], collections: [] };
+  }
+
+  const res = await shopifyFetch<ShopifyPredictiveSearchOperation>({
+    query: getPredictiveSearchQuery,
+    variables: {
+      query,
+    },
+  });
+
+  const result = res.body.data.predictiveSearch;
+
+  if (!result) {
+    return { products: [], collections: [] };
+  }
+
+  return {
+    products: result.products
+      .filter((product) => !product.tags.includes(HIDDEN_PRODUCT_TAG))
+      .map((product) => ({
+        id: product.id,
+        title: product.title,
+        path: `/product/${product.handle}`,
+        sku: removeEdgesAndNodes(product.variants)[0]?.sku || null,
+        tags: product.tags,
+      })),
+    collections: result.collections
+      .filter((collection) => !collection.handle.startsWith("hidden"))
+      .map((collection) => ({
+        id: collection.id,
+        title: collection.title,
+        path: `/search/${collection.handle}`,
+      })),
+  };
 }
 
 export async function getPage(handle: string): Promise<Page> {
@@ -477,7 +582,7 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
 }
 
 export async function getProductRecommendations(
-  productId: string
+  productId: string,
 ): Promise<Product[]> {
   "use cache";
   cacheTag(TAGS.products);
