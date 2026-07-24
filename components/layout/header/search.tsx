@@ -2,9 +2,8 @@
 
 import clsx from "clsx";
 import {
-  findGeneration,
-  GARAGE_COOKIE,
   productFitsGeneration,
+  readGarageGeneration,
   UNIVERSAL_FIT_TAG,
   VehicleGeneration,
 } from "lib/fitment";
@@ -53,14 +52,6 @@ export function SearchFieldSkeleton({
       </div>
     </div>
   );
-}
-
-function readGarageGeneration(): VehicleGeneration | undefined {
-  if (typeof document === "undefined") return undefined;
-  const match = document.cookie.match(
-    new RegExp(`(?:^|; )${GARAGE_COOKIE}=([^;]+)`),
-  );
-  return findGeneration(match ? decodeURIComponent(match[1]!) : undefined);
 }
 
 export function SearchField({
