@@ -9,6 +9,9 @@ import { Fragment, ReactNode, useEffect, useState } from "react";
 import { IconAccount, IconBurger, IconChat, IconClose } from "./icons";
 import { SearchField } from "./search";
 
+const drawerRowClass =
+  "flex h-[52px] w-full items-center border-b border-tl-hairline px-4 font-tl-sans text-[13px] font-semibold uppercase tracking-[0.09em]";
+
 export function MobileDrawer({
   menu,
   garage,
@@ -23,7 +26,13 @@ export function MobileDrawer({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
-  const openDrawer = () => setIsOpen(true);
+  // Path of drilled-in menu items; empty = root panel. The drawer always
+  // opens at root.
+  const [stack, setStack] = useState<MenuItem[]>([]);
+  const openDrawer = () => {
+    setStack([]);
+    setIsOpen(true);
+  };
   const closeDrawer = () => setIsOpen(false);
 
   useEffect(() => {
@@ -38,7 +47,10 @@ export function MobileDrawer({
 
   useEffect(() => {
     setIsOpen(false);
+    setStack([]);
   }, [pathname, searchParams]);
+
+  const panelItem = stack.length > 0 ? stack[stack.length - 1] : undefined;
 
   return (
     <>
@@ -83,62 +95,164 @@ export function MobileDrawer({
                 {wordmark}
               </div>
 
-              {/* Search and garage live only in the drawer, above the category list. */}
-              <SearchField variant="drawer" />
-              {garage}
+              {panelItem ? (
+                <DrawerPanel
+                  item={panelItem}
+                  parentTitle={
+                    stack.length > 1
+                      ? stack[stack.length - 2]!.title
+                      : "Main menu"
+                  }
+                  onBack={() => setStack((prev) => prev.slice(0, -1))}
+                  onDrill={(child) => setStack((prev) => [...prev, child])}
+                  onNavigate={closeDrawer}
+                />
+              ) : (
+                <>
+                  {/* Search, garage, and account sections live only on the
+                      root panel; drilled-in panels show just the submenu. */}
+                  <SearchField variant="drawer" />
+                  {garage}
 
-              {menu.length ? (
-                <ul className="border-t border-tl-hairline">
-                  {menu.map((item) => (
-                    <li key={item.title}>
-                      <Link
-                        href={item.path}
-                        prefetch={true}
-                        onClick={closeDrawer}
-                        className={clsx(
-                          "flex h-[52px] items-center border-b border-tl-hairline px-4 font-tl-sans text-[13px] font-semibold uppercase tracking-[0.09em]",
-                          item.items.length ? "text-tl-ink" : "text-tl-steel",
-                        )}
-                      >
-                        {item.title}
-                        <span
-                          aria-hidden
-                          className="ml-auto text-base text-tl-mute-white"
-                        >
-                          ›
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
+                  {menu.length ? (
+                    <ul className="border-t border-tl-hairline">
+                      {menu.map((item, index) => (
+                        <li key={`${item.title}-${index}`}>
+                          {item.items.length ? (
+                            <button
+                              onClick={() => setStack([item])}
+                              className={clsx(drawerRowClass, "text-tl-ink")}
+                            >
+                              {item.title}
+                              <span
+                                aria-hidden
+                                className="ml-auto text-base text-tl-mute-white"
+                              >
+                                ›
+                              </span>
+                            </button>
+                          ) : (
+                            <Link
+                              href={item.path}
+                              prefetch={true}
+                              onClick={closeDrawer}
+                              className={clsx(drawerRowClass, "text-tl-steel")}
+                            >
+                              {item.title}
+                              <span
+                                aria-hidden
+                                className="ml-auto text-base text-tl-mute-white"
+                              >
+                                ›
+                              </span>
+                            </Link>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
 
-              <p className="px-4 pb-1.5 pt-4 font-tl-mono text-[9.5px] uppercase tracking-[0.14em] text-tl-mute-white">
-                Your account
-              </p>
-              <a
-                href={accountHref}
-                className="flex h-12 items-center gap-[11px] px-4 font-tl-text text-[13.5px]"
-              >
-                <IconAccount className="h-[17px] w-[17px]" />
-                Account &amp; orders
-              </a>
-              <Link
-                href="/contact"
-                onClick={closeDrawer}
-                className="flex h-12 items-center gap-[11px] px-4 font-tl-text text-[13.5px]"
-              >
-                <IconChat className="h-[17px] w-[17px]" />
-                Contact support
-              </Link>
+                  <p className="px-4 pb-1.5 pt-4 font-tl-mono text-[9.5px] uppercase tracking-[0.14em] text-tl-mute-white">
+                    Your account
+                  </p>
+                  <a
+                    href={accountHref}
+                    className="flex h-12 items-center gap-[11px] px-4 font-tl-text text-[13.5px]"
+                  >
+                    <IconAccount className="h-[17px] w-[17px]" />
+                    Account &amp; orders
+                  </a>
+                  <Link
+                    href="/contact"
+                    onClick={closeDrawer}
+                    className="flex h-12 items-center gap-[11px] px-4 font-tl-text text-[13.5px]"
+                  >
+                    <IconChat className="h-[17px] w-[17px]" />
+                    Contact support
+                  </Link>
 
-              <div className="mt-2.5 border-t border-tl-hairline px-4 py-3.5 font-tl-mono text-[10.5px] tracking-[0.09em] text-tl-steel">
-                USD · EN
-              </div>
+                  <div className="mt-2.5 border-t border-tl-hairline px-4 py-3.5 font-tl-mono text-[10.5px] tracking-[0.09em] text-tl-steel">
+                    USD · EN
+                  </div>
+                </>
+              )}
             </Dialog.Panel>
           </Transition.Child>
         </Dialog>
       </Transition>
     </>
+  );
+}
+
+// A drilled-in submenu: back row, a "View all" link to the item's own page
+// (tapping a row drills in, so this is how the item's destination stays
+// reachable), then its children — branches drill deeper, leaves navigate.
+function DrawerPanel({
+  item,
+  parentTitle,
+  onBack,
+  onDrill,
+  onNavigate,
+}: {
+  item: MenuItem;
+  parentTitle: string;
+  onBack: () => void;
+  onDrill: (item: MenuItem) => void;
+  onNavigate: () => void;
+}) {
+  return (
+    <div className="border-t border-tl-hairline">
+      <button onClick={onBack} className={clsx(drawerRowClass, "text-tl-ink")}>
+        <span aria-hidden className="mr-2.5 text-base text-tl-mute-white">
+          ‹
+        </span>
+        {parentTitle}
+      </button>
+      {item.path !== "#" ? (
+        <Link
+          href={item.path}
+          prefetch={true}
+          onClick={onNavigate}
+          className={clsx(drawerRowClass, "text-tl-indigo")}
+        >
+          View all {item.title}
+        </Link>
+      ) : null}
+      <ul>
+        {item.items.map((child, index) => (
+          <li key={`${child.title}-${index}`}>
+            {child.items.length ? (
+              <button
+                onClick={() => onDrill(child)}
+                className={clsx(drawerRowClass, "text-tl-ink")}
+              >
+                {child.title}
+                <span
+                  aria-hidden
+                  className="ml-auto text-base text-tl-mute-white"
+                >
+                  ›
+                </span>
+              </button>
+            ) : (
+              <Link
+                href={child.path}
+                prefetch={true}
+                onClick={onNavigate}
+                className={clsx(drawerRowClass, "text-tl-steel")}
+              >
+                {child.title}
+                <span
+                  aria-hidden
+                  className="ml-auto text-base text-tl-mute-white"
+                >
+                  ›
+                </span>
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

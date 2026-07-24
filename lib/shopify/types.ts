@@ -55,6 +55,10 @@ export type Menu = {
 export type MenuItem = {
   title: string;
   path: string;
+  // "links-row" pulls a level-2 item out of the mega panel rail and renders
+  // its children as the links row beneath the rule (set via the nav_item
+  // metaobject's `style` field).
+  style?: "links-row";
   items: MenuItem[];
 };
 
@@ -273,6 +277,33 @@ export type ShopifyHeaderMenuOperation = {
   data: {
     menu?: Maybe<{
       items: ShopifyHeaderMenuItem[];
+    }>;
+  };
+  variables: {
+    handle: string;
+  };
+};
+
+// Raw shape of a nav_item metaobject at every level of the nav query — the
+// `children` alias is identical per level, so one recursive type covers the
+// whole tree. Fields are Maybe because unset metaobject fields resolve to
+// null, and a non-Metaobject reference wired into a children list
+// deserializes as {} under the `... on Metaobject` fragment.
+export type ShopifyNavItem = {
+  label: Maybe<{ value: string }>;
+  link: Maybe<{ value: string }>;
+  style: Maybe<{ value: string }>;
+  children?: Maybe<{
+    references: Maybe<{ nodes: ShopifyNavItem[] }>;
+  }>;
+};
+
+export type ShopifyNavMenuOperation = {
+  data: {
+    metaobject: Maybe<{
+      children: Maybe<{
+        references: Maybe<{ nodes: ShopifyNavItem[] }>;
+      }>;
     }>;
   };
   variables: {

@@ -5,17 +5,36 @@ import { MenuItem } from "lib/shopify/types";
 import Link from "next/link";
 import { ReactNode, useRef, useState } from "react";
 
-// A level-2 item titled "Resources" is pulled out of the rail: its children
-// render as the links row beneath the rule (the menu has no fourth level).
-const isResources = (item: MenuItem) =>
-  item.title.toLowerCase() === "resources";
-
-function chunkColumns<T>(items: T[], count: number): T[][] {
-  const size = Math.ceil(items.length / count) || 1;
-  const columns: T[][] = [];
-  for (let i = 0; i < items.length; i += size) {
-    columns.push(items.slice(i, i + size));
+// Distributes level-3 groups across the panel columns without reordering:
+// authored order is preserved by cutting to the next column once a group's
+// midpoint overshoots the column's even share of the weight still to place,
+// so wildly uneven groups don't shuffle. Weight ≈ rendered rows (heading +
+// links + inter-group gap); a childless group renders as one plain link.
+function distributeGroups(groups: MenuItem[], count: number): MenuItem[][] {
+  if (groups.length === 0) return [];
+  const weightOf = (group: MenuItem) =>
+    group.items.length > 0 ? group.items.length + 2 : 1;
+  let unplaced = groups.reduce((sum, group) => sum + weightOf(group), 0);
+  const columns: MenuItem[][] = [];
+  let column: MenuItem[] = [];
+  let columnWeight = 0;
+  for (const group of groups) {
+    const columnsLeft = count - columns.length;
+    if (
+      column.length > 0 &&
+      columns.length < count - 1 &&
+      columnWeight + weightOf(group) / 2 >
+        (columnWeight + unplaced) / columnsLeft
+    ) {
+      columns.push(column);
+      column = [];
+      columnWeight = 0;
+    }
+    column.push(group);
+    columnWeight += weightOf(group);
+    unplaced -= weightOf(group);
   }
+  columns.push(column);
   return columns;
 }
 
@@ -110,10 +129,14 @@ function MegaPanel({
   rail: number;
   onRailChange: (index: number) => void;
 }) {
-  const resources = item.items.find(isResources);
-  const railItems = item.items.filter((i) => !isResources(i));
+  // Level-2 items styled "links-row" are pulled out of the rail: their
+  // children render as the links row beneath the rule.
+  const linksRow = item.items
+    .filter((child) => child.style === "links-row")
+    .flatMap((child) => child.items);
+  const railItems = item.items.filter((child) => child.style !== "links-row");
   const active = railItems[Math.min(rail, Math.max(railItems.length - 1, 0))];
-  const columns = active ? chunkColumns(active.items, 3) : [];
+  const columns = active ? distributeGroups(active.items, 3) : [];
 
   return (
     <div className="absolute inset-x-0 top-full z-50 border-b-[2.5px] border-tl-indigo bg-white shadow-[0_26px_60px_-20px_rgba(15,20,48,0.45)]">
@@ -154,26 +177,59 @@ function MegaPanel({
 
         <div className="px-(--spacing-gutter) pb-[30px] pt-[26px]">
           {columns.length > 0 ? (
-            <div className="grid grid-cols-3 gap-x-10 gap-y-[26px]">
+            <div className="grid grid-cols-3 gap-x-10">
               {columns.map((column, columnIndex) => (
-                <ul key={columnIndex} className="grid list-none gap-2.5 p-0">
-                  {column.map((link, linkIndex) => (
-                    <li key={link.title}>
-                      <Link
-                        href={link.path}
-                        prefetch={true}
-                        className={clsx(
-                          "font-tl-text text-sm text-tl-ink",
-                          columnIndex === 0 &&
-                            linkIndex === 0 &&
-                            "font-semibold",
-                        )}
-                      >
-                        {link.title}
-                      </Link>
-                    </li>
+                <div
+                  key={columnIndex}
+                  className="grid content-start gap-y-[26px]"
+                >
+                  {column.map((group, groupIndex) => (
+                    <div key={`${group.title}-${groupIndex}`}>
+                      {/* Level-3 group: heading with its level-4 links below.
+                          A childless group reads as a plain link, so a menu
+                          that is only three levels deep (e.g. the native-menu
+                          fallback) renders as the familiar flat column. */}
+                      {group.items.length > 0 ? (
+                        group.path === "#" ? (
+                          <span className="font-tl-text text-sm font-semibold text-tl-ink">
+                            {group.title}
+                          </span>
+                        ) : (
+                          <Link
+                            href={group.path}
+                            prefetch={true}
+                            className="font-tl-text text-sm font-semibold text-tl-ink"
+                          >
+                            {group.title}
+                          </Link>
+                        )
+                      ) : (
+                        <Link
+                          href={group.path}
+                          prefetch={true}
+                          className="font-tl-text text-sm text-tl-ink"
+                        >
+                          {group.title}
+                        </Link>
+                      )}
+                      {group.items.length > 0 ? (
+                        <ul className="mt-2.5 grid list-none gap-2.5 p-0">
+                          {group.items.map((link, linkIndex) => (
+                            <li key={`${link.title}-${linkIndex}`}>
+                              <Link
+                                href={link.path}
+                                prefetch={true}
+                                className="font-tl-text text-sm text-tl-ink"
+                              >
+                                {link.title}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
                   ))}
-                </ul>
+                </div>
               ))}
             </div>
           ) : (
@@ -182,11 +238,11 @@ function MegaPanel({
             </p>
           )}
 
-          {resources && resources.items.length > 0 ? (
+          {linksRow.length > 0 ? (
             <div className="mt-[26px] flex flex-wrap gap-[30px] border-t border-tl-hairline pt-5">
-              {resources.items.map((link) => (
+              {linksRow.map((link, linkIndex) => (
                 <Link
-                  key={link.title}
+                  key={`${link.title}-${linkIndex}`}
                   href={link.path}
                   prefetch={true}
                   className="flex items-center gap-[7px] font-tl-text text-xs font-medium text-tl-indigo"

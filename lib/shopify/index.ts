@@ -21,6 +21,7 @@ import {
   getCollectionsQuery,
 } from "./queries/collection";
 import { getHeaderMenuQuery, getMenuQuery } from "./queries/menu";
+import { getNavMenuQuery } from "./queries/nav";
 import { getPageQuery, getPagesQuery } from "./queries/page";
 import { getPredictiveSearchQuery } from "./queries/predictive-search";
 import { getShopAnnouncementQuery } from "./queries/shop";
@@ -51,6 +52,8 @@ import {
   ShopifyHeaderMenuItem,
   ShopifyHeaderMenuOperation,
   ShopifyMenuOperation,
+  ShopifyNavItem,
+  ShopifyNavMenuOperation,
   ShopifyPageOperation,
   ShopifyPredictiveSearchOperation,
   ShopifyPagesOperation,
@@ -474,6 +477,57 @@ export async function getHeaderMenu(handle: string): Promise<MenuItem[]> {
   return reshapeMenuItems(res.body?.data?.menu?.items);
 }
 
+const reshapeNavItems = (nodes: ShopifyNavItem[] = []): MenuItem[] =>
+  nodes
+    // A missing label means the node is either a non-Metaobject reference
+    // (deserialized as {}) or a misconfigured entry — drop it.
+    .filter((node) => node?.label?.value)
+    .map((node) => ({
+      title: node.label!.value,
+      path: node.link?.value ? menuUrlToPath(node.link.value) : "#",
+      style:
+        node.style?.value === "links-row" ? ("links-row" as const) : undefined,
+      items: reshapeNavItems(node.children?.references?.nodes ?? []),
+    }));
+
+export async function getNavMenu(
+  handle: string,
+  fallbackMenuHandle: string,
+): Promise<MenuItem[]> {
+  "use cache";
+  // Dual-tagged on purpose: while the nav_item metaobject is missing this
+  // serves the native-menu fallback, whose cache tags don't propagate to this
+  // outer entry — the collections tag keeps it fresh via collection webhooks.
+  // Drop TAGS.collections once the metaobject migration is complete.
+  cacheTag(TAGS.menu, TAGS.collections);
+  cacheLife("days");
+
+  if (!endpoint) {
+    console.log(`Skipping getNavMenu for '${handle}' - Shopify not configured`);
+    return [];
+  }
+
+  try {
+    const res = await shopifyFetch<ShopifyNavMenuOperation>({
+      query: getNavMenuQuery,
+      variables: {
+        handle,
+      },
+    });
+    const root = res.body?.data?.metaobject;
+    if (root) {
+      return reshapeNavItems(root.children?.references?.nodes ?? []);
+    }
+  } catch (e) {
+    // A missing unauthenticated_read_metaobjects scope or disabled storefront
+    // access on the definition throws rather than resolving null — the header
+    // must fall back, not crash.
+    console.error(`getNavMenu for '${handle}' failed, using fallback menu`, e);
+  }
+
+  return getHeaderMenu(fallbackMenuHandle);
+}
+
 export async function getAnnouncement(): Promise<Announcement> {
   "use cache";
   cacheLife("hours");
@@ -637,17 +691,25 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
     "products/delete",
     "products/update",
   ];
+  // nav_item metaobject edits; subscriptions must be created via the Admin
+  // API — see docs/shopify-nav-setup.md.
+  const menuWebhooks = [
+    "metaobjects/create",
+    "metaobjects/delete",
+    "metaobjects/update",
+  ];
   const topic = (await headers()).get("x-shopify-topic") || "unknown";
   const secret = req.nextUrl.searchParams.get("secret");
   const isCollectionUpdate = collectionWebhooks.includes(topic);
   const isProductUpdate = productWebhooks.includes(topic);
+  const isMenuUpdate = menuWebhooks.includes(topic);
 
   if (!secret || secret !== process.env.SHOPIFY_REVALIDATION_SECRET) {
     console.error("Invalid revalidation secret.");
     return NextResponse.json({ status: 401 });
   }
 
-  if (!isCollectionUpdate && !isProductUpdate) {
+  if (!isCollectionUpdate && !isProductUpdate && !isMenuUpdate) {
     // We don't need to revalidate anything for any other topics.
     return NextResponse.json({ status: 200 });
   }
@@ -658,6 +720,10 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
 
   if (isProductUpdate) {
     revalidateTag(TAGS.products, "seconds");
+  }
+
+  if (isMenuUpdate) {
+    revalidateTag(TAGS.menu, "seconds");
   }
 
   return NextResponse.json({ status: 200, revalidated: true, now: Date.now() });
