@@ -12,7 +12,7 @@ export function GarageMenu({
   variant,
 }: {
   current: VehicleGeneration | null;
-  variant: "row" | "drawer";
+  variant: "row" | "drawer" | "inline";
 }) {
   const [open, setOpen] = useState(false);
   const [, startTransition] = useTransition();
@@ -43,7 +43,11 @@ export function GarageMenu({
   return (
     <div
       ref={rootRef}
-      className={clsx("relative", variant === "drawer" && "mx-4 mb-4")}
+      className={clsx(
+        "relative",
+        variant === "drawer" && "mx-4 mb-4",
+        variant === "inline" && "w-fit",
+      )}
       onKeyDown={(e) => {
         if (e.key === "Escape") setOpen(false);
       }}
@@ -54,11 +58,13 @@ export function GarageMenu({
         onClick={() => setOpen((v) => !v)}
         className={clsx(
           "flex items-center gap-[9px] rounded-[3px] bg-tl-indigo px-[13px] text-white transition-colors hover:bg-tl-indigo-lift",
-          variant === "row" ? "h-9 group-data-[condensed]:h-8" : "h-12 w-full",
+          variant === "row" && "h-9 group-data-[condensed]:h-8",
+          variant === "drawer" && "h-12 w-full",
+          variant === "inline" && "h-9",
         )}
       >
         <IconGarage
-          className={variant === "row" ? "h-4 w-4" : "h-[17px] w-[17px]"}
+          className={variant === "drawer" ? "h-[17px] w-[17px]" : "h-4 w-4"}
         />
         {current ? (
           variant === "row" ? (
@@ -79,7 +85,7 @@ export function GarageMenu({
           <span
             className={clsx(
               "font-tl-sans font-bold",
-              variant === "row" ? "text-xs" : "text-[13.5px]",
+              variant === "drawer" ? "text-[13.5px]" : "text-xs",
             )}
           >
             Add Your Truck
@@ -102,7 +108,9 @@ export function GarageMenu({
         <div
           className={clsx(
             "absolute top-full z-50 mt-1.5 min-w-56 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
-            variant === "row" ? "right-0" : "inset-x-0",
+            variant === "row" && "right-0",
+            variant === "drawer" && "inset-x-0",
+            variant === "inline" && "left-0",
           )}
         >
           <p className="px-4 pb-1.5 pt-3 font-tl-mono text-[9px] uppercase tracking-[0.14em] text-tl-mute-white">
