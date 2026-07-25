@@ -398,17 +398,23 @@ Every other collection in the store is a **public category page at
 **would you put this in the nav?**
 
 - **Yes** → leave it alone.
-- **No** → **rename the handle** to `hidden-<handle>`. It keeps working as a
-  merchandising source; it just stops being a page.
-- **Nothing uses it at all** → delete it.
+- **No, but I may want it as a source later** (a "Best Sellers" rail, a future
+  landing page) → **rename the handle** to `hidden-<handle>`. It keeps working
+  as a merchandising source; it just stops being a page.
+- **No, and I don't want it** → **delete it.** Hidden clutter is still clutter.
 
-Rename rather than delete by default: a hidden collection is still usable as a
-source for homepage sections and future landing pages, and deleting throws away
-whatever curation is in it.
+Sort devices like `best-selling-products`, `newest-products`, and `all` are
+never browsable categories — prefix or delete, but don't leave them public. If
+one reappears after deletion, a theme or app is regenerating it; prefix that one
+instead of deleting it again.
 
-Shopify auto-creates `best-selling-products` and `newest-products` in every
-store, and neither is a browsable category — they're sort devices. `all` is the
-same. Prefix them.
+> **Before deleting, check nothing nests it.** A collection listed in another
+> collection's **Collection card** (3.2) is contributing its products to that
+> parent. Deleting it silently removes them from every parent that pulled it in,
+> with no warning and no error — the parent page just quietly shrinks. Also
+> confirm no `nav_item` `collection` field points at it (that would leave a
+> category rendering child links instead of a grid) and that the footer menu
+> doesn't link to it.
 
 **Renaming a handle is safe while nothing is indexed.** Nav `collection` fields
 store a reference, not a handle, so category pages survive a rename untouched.
