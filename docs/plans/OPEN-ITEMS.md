@@ -52,7 +52,20 @@ in-memory safety net over the first 100 products in the collection.
 Selecting a truck currently empties every category page and every search.
 `docs/shopify-setup.md` Part 6.
 
-### 1.4 Homepage collections don't exist
+### 1.4 Almost the whole catalog is unlisted (deliberate, mid-build)
+
+As of 2026-07-25 the Storefront API returns **2 products** for the entire store,
+while admin shows 43 in `lighting` alone. That's the catalog being unlisted on
+purpose while it's built out — not a publishing bug, and not something to
+investigate.
+
+**It does make most storefront-side checks meaningless until it changes.** An
+empty or one-item category grid is currently expected, so Part 8.3's cascade
+check ("a parent category's grid contains everything its children's grids do")
+proves nothing yet. Compare collection item counts in admin instead, and re-run
+the storefront checks once products go live.
+
+### 1.5 Homepage collections don't exist
 
 `hidden-homepage-carousel` and `hidden-homepage-featured-items` are missing —
 the build logs `No collection found` for both and the homepage renders zero
@@ -128,9 +141,14 @@ sorting. If a product is added to a leaf but not its parents, the parent page
 silently under-reports: no error, no empty grid, just a quietly incomplete page
 nobody notices for months.
 
-**Recommendation: make the parent tiers smart collections** (rules on tag or
-product type) so membership is computed and cannot drift. Leaves can stay
-manual.
+**Recommendation: automate every tier**, each on its own tag, so membership is
+computed and cannot drift — `docs/shopify-setup.md` 3.2 has the scheme.
+Shopify's rules can only test product attributes, so there is no "is in
+collection X" condition; the cascade has to be carried by product tags.
+
+Note this is currently **unverifiable from the storefront** for a second
+reason — see §1.4. Admin item counts are the only signal until the catalog is
+published.
 
 ### 2.6 Moving a category in admin changes its URL
 
