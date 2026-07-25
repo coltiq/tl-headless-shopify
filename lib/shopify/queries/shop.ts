@@ -42,6 +42,13 @@ export const getShopAnnouncementsQuery = /* GraphQL */ `
     references(first: 10) {
       nodes {
         ... on Metaobject {
+          # Only read on the error path: a field key that doesn't exist
+          # resolves to null, which is indistinguishable from "left blank"
+          # unless you can see what keys the entry actually has.
+          type
+          fields {
+            key
+          }
           label: field(key: "label") {
             value
           }
@@ -63,6 +70,10 @@ export const getShopAnnouncementsQuery = /* GraphQL */ `
     references(first: 6) {
       nodes {
         ... on Metaobject {
+          type
+          fields {
+            key
+          }
           label: field(key: "label") {
             value
           }

@@ -385,12 +385,17 @@ export type ShopifyVehiclesOperation = {
 // because unset metaobject fields resolve to null, and a reference pointing at
 // something that isn't the expected type deserializes as {}.
 export type ShopifyAnnouncementNode = {
+  // Present so a key mismatch can name the keys that *do* exist.
+  type?: string;
+  fields?: { key: string }[];
   label: Maybe<{ value: string }>;
   url: Maybe<{ value: string }>;
   linkText: Maybe<{ value: string }>;
 };
 
 export type ShopifyAnnouncementBarLinkNode = {
+  type?: string;
+  fields?: { key: string }[];
   label: Maybe<{ value: string }>;
   url: Maybe<{ value: string }>;
   icon: Maybe<{

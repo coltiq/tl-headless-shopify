@@ -702,6 +702,18 @@ export async function getVehicles(): Promise<VehicleGeneration[]> {
   return FALLBACK_VEHICLE_GENERATIONS;
 }
 
+// A field key that doesn't exist resolves to null, exactly like a field left
+// blank — so "no label" is far more often a mis-keyed field than an empty one.
+// Naming the keys the entry actually has turns a puzzling null into the answer.
+const keyMismatchHint = (node: {
+  type?: string;
+  fields?: { key: string }[];
+}): string => {
+  const keys = node?.fields?.map((field) => field.key) ?? [];
+  if (keys.length === 0) return "";
+  return ` (metaobject type "${node.type ?? "unknown"}" has keys: ${keys.join(", ")} — field keys must match exactly)`;
+};
+
 const reshapeAnnouncements = (
   nodes: ShopifyAnnouncementNode[],
 ): Announcement[] => {
@@ -710,7 +722,9 @@ const reshapeAnnouncements = (
   for (const node of nodes) {
     const label = node?.label?.value?.trim();
     if (!label) {
-      console.error("Dropping announcement with no label", node);
+      console.error(
+        `Dropping announcement with no label${keyMismatchHint(node)}`,
+      );
       continue;
     }
 
@@ -755,8 +769,7 @@ const reshapeAnnouncementBarLinks = (
     // sitting in the header.
     if (!label || !url) {
       console.error(
-        "Dropping announcement bar link missing a label or URL",
-        node,
+        `Dropping announcement bar link missing a label or URL${keyMismatchHint(node)}`,
       );
       continue;
     }
