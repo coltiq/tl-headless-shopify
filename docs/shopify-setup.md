@@ -31,18 +31,18 @@ Two hard ordering rules, both enforced by Shopify rather than by convention:
   have already cached the fallback for up to a day with nothing firing to
   refresh it. The manual flush in Part 8 covers this either way.
 
-## Status legend
+## What to build, and what to leave alone
 
-Some of what follows is read by the app today; some is the target state for
-work that is planned but not built. Every table below is marked:
+Almost everything here is needed now. The exceptions are called out in place —
+field tables carry a **Create it?** column, and anything marked _skip for now_
+or **Phase 3B** is deferred until after the UI pass. Skipping is safe by design:
+a metaobject field that doesn't exist resolves to `null`, and the app defaults
+it correctly. Creating deferred fields early just puts controls in the admin
+that visibly do nothing.
 
-- **Live** — the app reads it now.
-- **Phase 3B** — deferred until after the UI pass. Don't build it yet.
-
-> **Phase 3 shipped 2026-07-25.** The multi-level category URL space is built
-> and every field it needs is now
-> **Live**. Until the `slug` and `collection` fields are actually filled in on
-> the `nav_item` entries, the category tree is empty and only single-segment
+> **Phase 3 shipped 2026-07-25.** The multi-level category URL space is built.
+> Until the `slug` and `collection` fields are actually filled in on the
+> `nav_item` entries, the category tree is empty and only single-segment
 > collection URLs resolve — which is why the deep nav links
 > (`/lighting/rock-lights`, `/lighting/rock-lights/diy-kits`, …) still 404.
 > **Part 4.3 is the work that turns them on.**
@@ -87,17 +87,25 @@ Until this exists the storefront falls back to the native `main-menu-v2` menu.
 **Field keys must match exactly** — a mismatched key resolves to `null`, and
 the item is dropped or the whole nav falls back.
 
-| Field key    | Type                                              | Status   | Notes                                                                                                                   |
-| ------------ | ------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `label`      | Single line text                                  | Live     | Display name; set as the definition's display name field. **Display only** — never used to build a URL                  |
-| `link`       | Single line text                                  | Live     | Plain text on purpose: the URL field type only accepts absolute URLs, but the nav needs relative paths. Empty = heading |
-| `children`   | Metaobject reference → Nav item, **list**         | Live     | Self-reference. List order is display order                                                                             |
-| `style`      | Single line text, preset `default` / `links-row`  | Live     | `links-row` on an L2 item moves it out of the mega panel rail; its children render as the links row at the panel's foot |
-| `slug`       | Single line text                                  | Live     | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                         |
-| `collection` | Collection reference                              | Live     | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                   |
-| `layout`     | Single line text, preset `grid` / `landing`       | Live     | Read and stored; defaults to `grid`. `landing` still renders the grid until Phase 3B ships                              |
-| `show_grid`  | True/false                                        | Live     | Read and stored; unset = true. Only starts mattering when `landing` renders differently (Phase 3B)                      |
-| `sections`   | Metaobject reference → Category section, **list** | Phase 3B | **Not in the query yet.** A reference _list_ multiplies query cost at all four levels, so it is added with Phase 3B     |
+| Field key    | Type                                              | Create it?   | Notes                                                                                                                         |
+| ------------ | ------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `label`      | Single line text                                  | **Yes**      | Display name; set as the definition's display name field. **Display only** — never used to build a URL                        |
+| `link`       | Single line text                                  | **Yes**      | Plain text on purpose: the URL field type only accepts absolute URLs, but the nav needs relative paths. Empty = heading       |
+| `children`   | Metaobject reference → Nav item, **list**         | **Yes**      | Self-reference. List order is display order                                                                                   |
+| `style`      | Single line text, preset `default` / `links-row`  | **Yes**      | `links-row` on an L2 item moves it out of the mega panel rail; its children render as the links row at the panel's foot       |
+| `slug`       | Single line text                                  | **Yes**      | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                               |
+| `collection` | Collection reference                              | **Yes**      | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                         |
+| `layout`     | Single line text, preset `grid` / `landing`       | Skip for now | Read if present, but only `grid` renders — a node set to `landing` still shows the grid. Absent → `grid`                      |
+| `show_grid`  | True/false                                        | Skip for now | Read if present, but unread until `landing` renders differently. Absent → true                                                |
+| `sections`   | Metaobject reference → Category section, **list** | Skip for now | Not in the query at all, and it can't be created before the `category_section` definition that Part 1.5 says not to build yet |
+
+**"Skip for now" means skip.** A missing field key resolves to `null`, and the
+walk defaults it correctly — the three Phase 3B fields cost nothing to leave
+out, and creating them early just puts controls in the admin that visibly do
+nothing. Add them with Phase 3B (`docs/plans/OPEN-ITEMS.md` §4.1).
+
+`slug` and `collection` are the two that matter for the migration in Part 4.3 —
+they're what turns the dead deep nav links on.
 
 Then, under the definition's options, enable **Storefront API access**
 (Storefronts: Read).
