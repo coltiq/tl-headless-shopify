@@ -67,6 +67,19 @@ export const VEHICLE_GENERATIONS: VehicleGeneration[] = [
   },
 ];
 
+// The canonical generation handle, derived from fields — never read from the
+// vehicle metaobject's own Shopify handle. Cookie values and fits-* product
+// tags embed this string, so it must be deterministic and immune to admin
+// handle typos/auto-generation. All stub handles above already match.
+export function vehicleHandle(
+  make: string,
+  model: string,
+  yearStart: number,
+  yearEnd: number,
+): string {
+  return `${make}-${model}-${yearStart}-${yearEnd}`;
+}
+
 export function findGeneration(
   handle: string | undefined | null,
 ): VehicleGeneration | undefined {

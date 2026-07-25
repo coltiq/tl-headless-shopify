@@ -318,6 +318,28 @@ export type ShopifyNavMenuOperation = {
   };
 };
 
+// Raw shape of a `vehicle` metaobject entry. Fields are Maybe because unset
+// metaobject fields resolve to null; reshapeVehicles validates and drops bad
+// entries. Handles are derived from fields (vehicleHandle), never read from
+// the metaobject — cookies and fits-* tags embed them.
+export type ShopifyVehicleNode = {
+  make: Maybe<{ value: string }>;
+  model: Maybe<{ value: string }>;
+  yearStart: Maybe<{ value: string }>;
+  yearEnd: Maybe<{ value: string }>;
+  label: Maybe<{ value: string }>;
+  shortLabel: Maybe<{ value: string }>;
+};
+
+export type ShopifyVehiclesOperation = {
+  data: {
+    metaobjects: {
+      nodes: ShopifyVehicleNode[];
+      pageInfo: { hasNextPage: boolean };
+    };
+  };
+};
+
 export type ShopifyShopAnnouncementOperation = {
   data: {
     shop: {

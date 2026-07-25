@@ -177,6 +177,11 @@ No changes to `/search`'s data fetching, `?all=1` grammar, or `getProducts` usag
 
 ## Phase 2 (follow-up build, not in scope here): metaobject-sourced YMM fitment
 
+> **Detailed build plan: `PLAN-GARAGE-PHASE2.md`** (2026-07-24). The outline
+> below is the original direction; the detailed plan supersedes it where they
+> differ (notably: `short_label` field added, handles derived from fields,
+> tags-only fitment confirmed, sitemap still deferred).
+
 Decided direction, recorded for continuity:
 
 1. **`vehicle` metaobject** — `make`, `model`, `year_start`, `year_end`, `label` (one entry per generation / year-range — decided over per-exact-year entries; the picker's Year dropdown still offers individual years, resolved to the containing range). Storefront access enabled; same webhook/revalidation pattern as `nav_item`.

@@ -3,6 +3,11 @@ import {
   SHOPIFY_GRAPHQL_API_ENDPOINT,
   TAGS,
 } from "lib/constants";
+import {
+  VEHICLE_GENERATIONS,
+  vehicleHandle,
+  type VehicleGeneration,
+} from "lib/fitment";
 import { isShopifyError } from "lib/type-guards";
 import { ensureStartsWith } from "lib/utils";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
@@ -30,6 +35,7 @@ import {
   getProductRecommendationsQuery,
   getProductsQuery,
 } from "./queries/product";
+import { getVehiclesQuery } from "./queries/vehicles";
 import {
   Announcement,
   Cart,
@@ -64,6 +70,8 @@ import {
   ShopifyRemoveFromCartOperation,
   ShopifyShopAnnouncementOperation,
   ShopifyUpdateCartOperation,
+  ShopifyVehicleNode,
+  ShopifyVehiclesOperation,
 } from "./types";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
@@ -543,6 +551,126 @@ export async function getNavMenu(
   return getHeaderMenu(fallbackMenuHandle);
 }
 
+const reshapeVehicles = (nodes: ShopifyVehicleNode[]): VehicleGeneration[] => {
+  const slug = /^[a-z0-9]+$/;
+  const year = /^\d{4}$/;
+  const valid: VehicleGeneration[] = [];
+
+  // Per-entry validation — one bad admin entry must not blank the picker.
+  for (const node of nodes) {
+    const make = node.make?.value;
+    const model = node.model?.value;
+    const yearStartRaw = node.yearStart?.value;
+    const yearEndRaw = node.yearEnd?.value;
+    const label = node.label?.value;
+
+    if (
+      !make ||
+      !slug.test(make) ||
+      !model ||
+      !slug.test(model) ||
+      !yearStartRaw ||
+      !year.test(yearStartRaw) ||
+      !yearEndRaw ||
+      !year.test(yearEndRaw) ||
+      !label
+    ) {
+      console.error("Dropping invalid vehicle metaobject entry", node);
+      continue;
+    }
+
+    const yearStart = Number(yearStartRaw);
+    const yearEnd = Number(yearEndRaw);
+
+    if (yearStart > yearEnd) {
+      console.error(
+        `Dropping vehicle entry with year_start > year_end: ${make} ${model} ${yearStart}-${yearEnd}`,
+      );
+      continue;
+    }
+
+    valid.push({
+      handle: vehicleHandle(make, model, yearStart, yearEnd),
+      label,
+      shortLabel: node.shortLabel?.value || label,
+      make,
+      model,
+      yearStart,
+      yearEnd,
+    });
+  }
+
+  // Drives picker ordering and makes overlap-dropping deterministic.
+  valid.sort(
+    (a, b) =>
+      a.make.localeCompare(b.make) ||
+      a.model.localeCompare(b.model) ||
+      b.yearStart - a.yearStart,
+  );
+
+  // Overlap guard: two entries sharing make+model with intersecting year
+  // ranges would make year → generation resolution ambiguous. Keep the first
+  // (post-sort), drop the rest — admin fixes the data; the app never guesses.
+  const vehicles: VehicleGeneration[] = [];
+  for (const gen of valid) {
+    const overlap = vehicles.find(
+      (kept) =>
+        kept.make === gen.make &&
+        kept.model === gen.model &&
+        kept.yearStart <= gen.yearEnd &&
+        gen.yearStart <= kept.yearEnd,
+    );
+    if (overlap) {
+      console.error(
+        `Dropping vehicle entry ${gen.handle}: year range overlaps ${overlap.handle}`,
+      );
+      continue;
+    }
+    vehicles.push(gen);
+  }
+
+  return vehicles;
+};
+
+export async function getVehicles(): Promise<VehicleGeneration[]> {
+  "use cache";
+  cacheTag(TAGS.vehicles);
+  cacheLife("days");
+
+  if (!endpoint) {
+    console.log("Skipping getVehicles - Shopify not configured");
+    return VEHICLE_GENERATIONS;
+  }
+
+  try {
+    const res = await shopifyFetch<ShopifyVehiclesOperation>({
+      query: getVehiclesQuery,
+    });
+    const metaobjects = res.body.data.metaobjects;
+
+    // Silent truncation would read as "vehicle missing from picker".
+    if (metaobjects.pageInfo.hasNextPage) {
+      console.error(
+        "getVehicles: over 250 vehicle metaobjects — entries beyond the page cap are missing",
+      );
+    }
+
+    const vehicles = reshapeVehicles(metaobjects.nodes);
+
+    // Definition exists but has no (valid) entries yet → fallback stubs.
+    if (vehicles.length > 0) {
+      return vehicles;
+    }
+  } catch (e) {
+    // A missing unauthenticated_read_metaobjects scope, no `vehicle`
+    // definition, or disabled storefront access throws rather than resolving
+    // null — serve the fallback stubs, same pattern as getNavMenu.
+    console.error("getVehicles failed, using fallback generations", e);
+  }
+
+  return VEHICLE_GENERATIONS;
+}
+
 export async function getAnnouncement(): Promise<Announcement> {
   "use cache";
   cacheLife("hours");
@@ -706,9 +834,9 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
     "products/delete",
     "products/update",
   ];
-  // nav_item metaobject edits; subscriptions must be created via the Admin
-  // API — see docs/shopify-nav-setup.md.
-  const menuWebhooks = [
+  // nav_item + vehicle metaobject edits; subscriptions must be created via the
+  // Admin API — see docs/shopify-nav-setup.md and docs/shopify-vehicle-setup.md.
+  const metaobjectWebhooks = [
     "metaobjects/create",
     "metaobjects/delete",
     "metaobjects/update",
@@ -717,14 +845,14 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
   const secret = req.nextUrl.searchParams.get("secret");
   const isCollectionUpdate = collectionWebhooks.includes(topic);
   const isProductUpdate = productWebhooks.includes(topic);
-  const isMenuUpdate = menuWebhooks.includes(topic);
+  const isMetaobjectUpdate = metaobjectWebhooks.includes(topic);
 
   if (!secret || secret !== process.env.SHOPIFY_REVALIDATION_SECRET) {
     console.error("Invalid revalidation secret.");
     return NextResponse.json({ status: 401 });
   }
 
-  if (!isCollectionUpdate && !isProductUpdate && !isMenuUpdate) {
+  if (!isCollectionUpdate && !isProductUpdate && !isMetaobjectUpdate) {
     // We don't need to revalidate anything for any other topics.
     return NextResponse.json({ status: 200 });
   }
@@ -737,8 +865,13 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
     revalidateTag(TAGS.products, "seconds");
   }
 
-  if (isMenuUpdate) {
+  if (isMetaobjectUpdate) {
+    // The x-shopify-topic header is identical for nav_item and vehicle
+    // subscriptions — telling them apart would mean parsing the webhook body's
+    // `type` field. Both caches are tiny and metaobject edits are rare admin
+    // actions, so revalidate both; parse the body if that trade ever changes.
     revalidateTag(TAGS.menu, "seconds");
+    revalidateTag(TAGS.vehicles, "seconds");
   }
 
   return NextResponse.json({ status: 200, revalidated: true, now: Date.now() });
