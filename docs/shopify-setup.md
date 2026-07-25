@@ -338,27 +338,47 @@ Nothing in the app can verify it. If a product is added to a leaf but not to its
 parents, the parent page silently under-reports — no error, no empty grid, just
 a quietly incomplete page nobody notices for months.
 
-**Strongly recommended: make the parent tiers automated collections** so
-membership is computed and cannot drift. Leaves can stay manual.
-
 **Automated collections cannot reference other collections.** Shopify's
 conditions cover product title, type, vendor, tag, price, weight, inventory,
-variant, and metafields — there is no "product is in collection X". So a parent
-tier has to be built on **tags** or **product type**:
+variant, and metafields — there is no "product is in collection X". Product
+_type_ is a single value per product, so it can't express three levels either.
+That leaves **tags**, and the cascade has to be carried by the products.
+
+### The scheme: one tag per level, one condition per collection
+
+Tag a product with **every level of its path**, and give each collection a
+single rule matching its own tag:
 
 ```
-Collection: lighting        (automated, match ANY condition)
-  Product tag is equal to  rock-lights
-  Product tag is equal to  wheel-lights
+Product: Beacon Rock Light Kit
+  tags: lighting, rock-lights, rock-light-kits, fits-ford-f150-2021-2026
+
+Collection  lighting          →  Product tag is equal to  lighting
+Collection  rock-lights       →  Product tag is equal to  rock-lights
+Collection  rock-light-kits   →  Product tag is equal to  rock-light-kits
 ```
 
-which means every product needs the tag its leaf collection is built on. Tag
-edits fire `products/update`, so this revalidates normally.
+Every collection is automated, every one has exactly one condition, and the
+cascade is true **by construction** rather than by discipline — which matters,
+because nothing in the app can check it.
 
-**A manual parent is a snapshot, not a rule.** Adding every child product to the
-parent by hand works today and silently rots: each new leaf product has to be
-added to every ancestor forever, and the only symptom is a parent page that
-quietly shows less than it should.
+Keep each tag equal to its collection handle. Nothing enforces that; it just
+makes a product's tag list readable as its path. Category tags can't collide
+with fitment tags, which are all `fits-*`.
+
+**Don't** tag only the leaf and have each parent OR together its descendants
+(`lighting` = tag is `rock-light-kits` OR `wheel-lights` OR …). It looks tidier
+on the product, but every new leaf means editing every ancestor's rule, and
+those lists grow toward Shopify's per-collection condition cap. One tag per
+level never needs a second condition.
+
+**Don't leave parents manual.** Adding every child product to the parent by hand
+works today and silently rots: each new leaf product has to be added to every
+ancestor forever, and the only symptom is a parent page that quietly shows less
+than it should.
+
+Tag edits are core product fields and fire `products/update`, so collection
+membership revalidates normally.
 
 ## 3.3 Hidden collections
 
