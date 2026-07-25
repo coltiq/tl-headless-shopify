@@ -157,7 +157,7 @@ const reshapeCollection = (
 
   return {
     ...collection,
-    path: `/search/${collection.handle}`,
+    path: `/${collection.handle}`,
     // Missing metafield → fitment on: Parts collections need no admin setup;
     // only Lifestyle collections set custom.fitment_disabled = true.
     fitmentDisabled: collection.fitmentDisabled?.value === "true",
@@ -454,9 +454,12 @@ export async function getMenu(handle: string): Promise<Menu[]> {
   );
 }
 
+// Order matters: strip "/collections/<handle>" to "/<handle>" before mapping
+// the bare "/collections" link to "/search".
 const menuUrlToPath = (url: string): string =>
   url
     .replace(domain, "")
+    .replace("/collections/", "/")
     .replace("/collections", "/search")
     .replace("/pages", "");
 
@@ -599,7 +602,7 @@ export async function getPredictiveSearch(
       .map((collection) => ({
         id: collection.id,
         title: collection.title,
-        path: `/search/${collection.handle}`,
+        path: `/${collection.handle}`,
       })),
   };
 }
