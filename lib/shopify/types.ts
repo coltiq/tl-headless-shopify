@@ -36,8 +36,11 @@ export type CartItem = {
   };
 };
 
-export type Collection = ShopifyCollection & {
+export type Collection = Omit<ShopifyCollection, "fitmentDisabled"> & {
   path: string;
+  // true only on Lifestyle collections (opt-out flag) — fitment UI and
+  // vehicle URLs are disabled there. Missing metafield → false.
+  fitmentDisabled: boolean;
 };
 
 export type Image = {
@@ -145,6 +148,8 @@ export type ShopifyCollection = {
   handle: string;
   title: string;
   description: string;
+  // Aliased `custom.fitment_disabled` boolean metafield; null when unset.
+  fitmentDisabled: Maybe<{ value: string }>;
   seo: SEO;
   updatedAt: string;
 };
@@ -244,6 +249,8 @@ export type ShopifyCollectionProductsOperation = {
     handle: string;
     reverse?: boolean;
     sortKey?: string;
+    // Same-type filters OR together: [{tag: fits-<gen>}, {tag: fits-universal}].
+    filters?: { tag: string }[];
   };
 };
 

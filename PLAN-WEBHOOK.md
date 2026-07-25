@@ -13,11 +13,11 @@ Shopify POSTs to `https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDAT
 The handler (`revalidate()` in `lib/shopify/index.ts`) checks the secret, reads the
 topic from the `x-shopify-topic` header, and maps it to a cache tag:
 
-| Topic group | Topics | Tag revalidated | Refreshes |
-| --- | --- | --- | --- |
-| Products | `products/create`, `products/update`, `products/delete` | `TAGS.products` | product pages, grids, search, predictive search |
-| Collections | `collections/create`, `collections/update`, `collections/delete` | `TAGS.collections` | category pages, collection metadata, sidebar, sitemap, nav fallback |
-| Nav metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (filter `type:nav_item`) | `TAGS.menu` | header nav |
+| Topic group     | Topics                                                                                    | Tag revalidated    | Refreshes                                                           |
+| --------------- | ----------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------- |
+| Products        | `products/create`, `products/update`, `products/delete`                                   | `TAGS.products`    | product pages, grids, search, predictive search                     |
+| Collections     | `collections/create`, `collections/update`, `collections/delete`                          | `TAGS.collections` | category pages, collection metadata, sidebar, sitemap, nav fallback |
+| Nav metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (filter `type:nav_item`) | `TAGS.menu`        | header nav                                                          |
 
 Any other topic is acknowledged and ignored.
 
@@ -33,28 +33,100 @@ aliased request, substitute domain + secret in every `uri`:
 mutation CreateCatalogWebhooks {
   productsCreate: webhookSubscriptionCreate(
     topic: PRODUCTS_CREATE
-    webhookSubscription: { uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>", format: JSON }
-  ) { webhookSubscription { id topic } userErrors { field message } }
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
   productsUpdate: webhookSubscriptionCreate(
     topic: PRODUCTS_UPDATE
-    webhookSubscription: { uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>", format: JSON }
-  ) { webhookSubscription { id topic } userErrors { field message } }
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
   productsDelete: webhookSubscriptionCreate(
     topic: PRODUCTS_DELETE
-    webhookSubscription: { uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>", format: JSON }
-  ) { webhookSubscription { id topic } userErrors { field message } }
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
   collectionsCreate: webhookSubscriptionCreate(
     topic: COLLECTIONS_CREATE
-    webhookSubscription: { uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>", format: JSON }
-  ) { webhookSubscription { id topic } userErrors { field message } }
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
   collectionsUpdate: webhookSubscriptionCreate(
     topic: COLLECTIONS_UPDATE
-    webhookSubscription: { uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>", format: JSON }
-  ) { webhookSubscription { id topic } userErrors { field message } }
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
   collectionsDelete: webhookSubscriptionCreate(
     topic: COLLECTIONS_DELETE
-    webhookSubscription: { uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>", format: JSON }
-  ) { webhookSubscription { id topic } userErrors { field message } }
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
 }
 ```
 
@@ -85,7 +157,7 @@ When the vehicle metaobject ships (PLAN-GARAGE.md Phase 2), repeat §2's mutatio
   `custom.fitment_disabled` on a collection won't auto-revalidate — it takes effect
   when the day-long cache expires, or immediately if you also make a trivial
   collection edit (touch the description) to force the webhook. There is no webhook
-  topic for metafield *values* (only `metafield_definitions/*` for definitions).
+  topic for metafield _values_ (only `metafield_definitions/*` for definitions).
 - **Product metafield/tag edits are fine:** tags are core product fields and metafield
   edits on products do fire `products/update` — so `fits-*` tagging revalidates
   normally.
@@ -102,5 +174,19 @@ When the vehicle metaobject ships (PLAN-GARAGE.md Phase 2), repeat §2's mutatio
 4. List live subscriptions to confirm all 9 (12 after Phase 2) exist:
 
 ```graphql
-query { webhookSubscriptions(first: 20) { nodes { id topic filter endpoint { __typename ... on WebhookHttpEndpoint { callbackUrl } } } } }
+query {
+  webhookSubscriptions(first: 20) {
+    nodes {
+      id
+      topic
+      filter
+      endpoint {
+        __typename
+        ... on WebhookHttpEndpoint {
+          callbackUrl
+        }
+      }
+    }
+  }
+}
 ```

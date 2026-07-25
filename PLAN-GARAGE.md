@@ -19,24 +19,24 @@ This design keeps every page cacheable: vehicle identity lives in the URL (share
 
 ## Files
 
-| Action | File |
-|---|---|
-| Modify | `lib/fitment.ts` — structured vehicle fields + URL helpers |
-| Delete | `app/[page]/` entirely (layout, page, loading, opengraph-image) — no CMS branch replaces it |
-| Create | `app/[category]/[[...vehicle]]/page.tsx` — category + vehicle views |
-| Create | `app/[category]/layout.tsx`, `app/[category]/opengraph-image.tsx`, `app/[category]/garage-redirect.tsx` |
-| Create | `app/contact/page.tsx` — minimal placeholder (header/drawer link to `/contact`, currently a CMS page; stub until custom-built) |
-| Modify | `app/sitemap.ts` — drop the CMS `pagesPromise` (those URLs would 404 now) |
-| Modify | `lib/shopify/index.ts` — collection paths, predictive search path, menuUrlToPath, `fitmentDisabled` in reshapeCollection, `filters` param on `getCollectionProducts` |
+| Action | File                                                                                                                                                                            |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Modify | `lib/fitment.ts` — structured vehicle fields + URL helpers                                                                                                                      |
+| Delete | `app/[page]/` entirely (layout, page, loading, opengraph-image) — no CMS branch replaces it                                                                                     |
+| Create | `app/[category]/[[...vehicle]]/page.tsx` — category + vehicle views                                                                                                             |
+| Create | `app/[category]/layout.tsx`, `app/[category]/opengraph-image.tsx`, `app/[category]/garage-redirect.tsx`                                                                         |
+| Create | `app/contact/page.tsx` — minimal placeholder (header/drawer link to `/contact`, currently a CMS page; stub until custom-built)                                                  |
+| Modify | `app/sitemap.ts` — drop the CMS `pagesPromise` (those URLs would 404 now)                                                                                                       |
+| Modify | `lib/shopify/index.ts` — collection paths, predictive search path, menuUrlToPath, `fitmentDisabled` in reshapeCollection, `filters` param on `getCollectionProducts`            |
 | Modify | `lib/shopify/queries/collection.ts` — add `custom.fitment_disabled` metafield to the collection fragment; optional `$filters: [ProductFilter!]` on `getCollectionProductsQuery` |
-| Modify | `lib/shopify/types.ts` — metafield on `ShopifyCollection`, `fitmentDisabled: boolean` on `Collection`, `filters` in `ShopifyCollectionProductsOperation` variables |
-| Create | `PLAN-WEBHOOK.md` — full webhook inventory: topics, how to create each (admin UI vs Admin GraphQL), known gaps |
-| Modify | `components/layout/header/search.tsx` — import shared `readGarageGeneration` |
-| Modify | `app/search/page.tsx` — fitment toggle replaces the inline banner |
-| Create | `components/layout/search/fitment-toggle.tsx` — client toggle / add-truck control |
-| Modify | `docs/shopify-nav-setup.md` — link-format table |
-| Modify | `app/search/[collection]/page.tsx` — canonical alternate to `/<handle>` |
-| Modify | `components/layout/search/filter/item.tsx` — `SortFilterItem` also preserves `all` (fixes filter re-applying on sorted `/search?all=1` too) |
+| Modify | `lib/shopify/types.ts` — metafield on `ShopifyCollection`, `fitmentDisabled: boolean` on `Collection`, `filters` in `ShopifyCollectionProductsOperation` variables              |
+| Create | `PLAN-WEBHOOK.md` — full webhook inventory: topics, how to create each (admin UI vs Admin GraphQL), known gaps                                                                  |
+| Modify | `components/layout/header/search.tsx` — import shared `readGarageGeneration`                                                                                                    |
+| Modify | `app/search/page.tsx` — fitment toggle replaces the inline banner                                                                                                               |
+| Create | `components/layout/search/fitment-toggle.tsx` — client toggle / add-truck control                                                                                               |
+| Modify | `docs/shopify-nav-setup.md` — link-format table                                                                                                                                 |
+| Modify | `app/search/[collection]/page.tsx` — canonical alternate to `/<handle>`                                                                                                         |
+| Modify | `components/layout/search/filter/item.tsx` — `SortFilterItem` also preserves `all` (fixes filter re-applying on sorted `/search?all=1` too)                                     |
 
 Untouched: homepage carousels, nav components (nav data stays shared/cached — personalization happens on arrival via the redirect), `getPage`/`getPages` in lib/shopify (unused by routes after this; harmless to keep). `/search` keeps its server-side cookie+`?all=1` filtering logic — only its UI changes (Step 6).
 
@@ -45,6 +45,7 @@ Untouched: homepage carousels, nav components (nav data stays shared/cached — 
 Extend `VehicleGeneration` with `make`, `model` (slug-safe lowercase), `yearStart`, `yearEnd`; fill the 5 stub entries (`ford-f150-2021-2026` → ford/f150/2021–2026; `ford-f150-2015-2020`; `chevy-silverado-2019-2025` → chevy/silverado; `ram-1500-2019-2025` → ram/1500; `toyota-tacoma-2016-2023` → toyota/tacoma). Keep the metaobject-sourcing TODO.
 
 New pure helpers:
+
 - `vehiclePathSegments(gen): string[]` → `[make, model, String(yearStart)]`. Emits `yearStart` — the cookie stores only a generation handle, so first year is the deterministic canonical link. Resolver accepts any in-range year, so all year URLs work.
 - `resolveVehiclePath(segments: string[]): VehicleGeneration | undefined` — require exactly 3 segments (future drivetrain/trim = loosen here only); guard destructured values (`noUncheckedIndexedAccess`); reject non-integer years; match make+model and `yearStart <= year <= yearEnd`.
 - Move `readGarageGeneration()` here from `components/layout/header/search.tsx:58-64` (document-guarded cookie regex read, dependency-free); export it; update search.tsx to import it.
@@ -70,7 +71,7 @@ if (!gen) notFound();
 
 The `hidden` guard is required — `getCollection` doesn't filter `hidden-*` handles, and without it `/hidden-homepage-featured-items` becomes a public page. The `fitmentDisabled` guard must also appear in `generateMetadata`'s vehicle branch (it runs independently of the page render).
 
-`generateMetadata`: bare category → `collection.seo?.title || collection.title` + description (mirror `app/search/[collection]/page.tsx:9-24`) plus a self-canonical `alternates: { canonical: \`/${category}\` }` so `?sort=`/`?all=` variants don't index separately; vehicle → `` `${gen.label} ${collection.title}` `` + `` `${collection.title} that fits your ${gen.label}.` `` **plus `alternates: { canonical: \`/${category}/${gen.make}/${gen.model}/${gen.yearStart}\` }`** — every in-range year serves identical content, so all year variants canonicalize to the generation's first-year URL (concentrates ranking signals on one indexed vehicle page per generation; users still see their own year in the address bar). Comment it: switch to self-referencing canonicals if/when fitment becomes year-specific within a generation. Invalid vehicle → notFound.
+`generateMetadata`: bare category → `collection.seo?.title || collection.title` + description (mirror `app/search/[collection]/page.tsx:9-24`) plus a self-canonical `alternates: { canonical: \`/${category}\` }` so `?sort=`/`?all=` variants don't index separately; vehicle → `` `${gen.label} ${collection.title}` `` + `` `${collection.title} that fits your ${gen.label}.` `` **plus `alternates: { canonical: \`/${category}/${gen.make}/${gen.model}/${gen.yearStart}\` }`\*\* — every in-range year serves identical content, so all year variants canonicalize to the generation's first-year URL (concentrates ranking signals on one indexed vehicle page per generation; users still see their own year in the address bar). Comment it: switch to self-referencing canonicals if/when fitment becomes year-specific within a generation. Invalid vehicle → notFound.
 
 **`app/[category]/opengraph-image.tsx`** — collection-only: `getCollection(category)` → `collection.seo?.title || collection.title` into `components/opengraph-image`; awaited params shape.
 
@@ -78,7 +79,7 @@ The `hidden` guard is required — `getCollection` doesn't filter `hidden-*` han
 
 **Sort ships in Phase 1 (decided 2026-07-24):** same `?sort=` grammar and `sorting` list (`lib/constants.ts`) as `/search/[collection]`. The sort read lives in a server child component (e.g. `<SortedGrid category vehicle={gen} searchParams={props.searchParams}>` wrapped in `<Suspense fallback={<Grid className="…">skeleton</Grid>}>`): it awaits `searchParams`, resolves `sorting.find((i) => i.slug === sort) || defaultSort`, and calls `getCollectionProducts({ collection, sortKey, reverse, filters? })` — cached per (collection, sort, filters) variant. Reading `searchParams` only inside the Suspense boundary keeps the page shell static under `cacheComponents`; the grid streams but its data is cached. Sort applies identically on bare and vehicle views (`sortKey`/`filters` compose in one query; the `CREATED_AT → CREATED` mapping in `getCollectionProducts` already handles the collection sort-key enum).
 
-**Fitment filtering is server-side (decided 2026-07-24):** the vehicle view calls `getCollectionProducts({ collection: category, filters: [{ tag: fitmentTag(gen.handle) }, { tag: UNIVERSAL_FIT_TAG }] })`. Multiples of the same filter type combine with **OR** (per Shopify's storefront filtering docs) — exactly the `fits-<gen>` OR `fits-universal` semantics — so the `first: 100` cap applies to *matching* products, not the whole collection. Changes: optional `filters: [ProductFilter!]` variable on `getCollectionProductsQuery` + threaded through `getCollectionProducts` and `ShopifyCollectionProductsOperation` (validate the exact shape via shopify-dev-mcp at build time per repo rule — the MCP was offline during planning). Distinct filter values produce distinct cache entries per (collection, generation); still fully cacheable.
+**Fitment filtering is server-side (decided 2026-07-24):** the vehicle view calls `getCollectionProducts({ collection: category, filters: [{ tag: fitmentTag(gen.handle) }, { tag: UNIVERSAL_FIT_TAG }] })`. Multiples of the same filter type combine with **OR** (per Shopify's storefront filtering docs) — exactly the `fits-<gen>` OR `fits-universal` semantics — so the `first: 100` cap applies to _matching_ products, not the whole collection. Changes: optional `filters: [ProductFilter!]` variable on `getCollectionProductsQuery` + threaded through `getCollectionProducts` and `ShopifyCollectionProductsOperation` (validate the exact shape via shopify-dev-mcp at build time per repo rule — the MCP was offline during planning). Distinct filter values produce distinct cache entries per (collection, generation); still fully cacheable.
 
 **Keep the in-memory `productFitsGeneration(p.tags, gen.handle)` post-filter as a safety net** (every `Product` already carries `tags`, `lib/shopify/fragments/product.ts:57`): tag filtering only takes effect once the tag filter is enabled in the Search & Discovery app (admin checklist, Step 6); until then Shopify ignores the filter and returns the unfiltered list, and the post-filter degrades gracefully to today's in-memory-over-first-100 behavior instead of showing wrong products.
 
@@ -92,25 +93,27 @@ Reuse `Grid` + `ProductGridItems` with `grid-cols-1 sm:grid-cols-2 lg:grid-cols-
 
 **Vehicle view** (`/lighting/ford/f150/2021`): banner patterned on `app/search/page.tsx:52-59` — "Showing {collection.title} that fits your {gen.label}. [View all {collection.title}]" linking `` `/${category}?all=1` ``; filtered grid; empty state "No {collection.title} fit your {gen.label} yet." with the same view-all link. No GarageRedirect here (can't loop).
 
-**`app/[category]/garage-redirect.tsx`** (client, renders null): in `useEffect`, once per mount (useRef guard): if `useSearchParams().get("all") === "1"` → no-op; else `readGarageGeneration()` → if found, `router.replace(\`/${category}/${vehiclePathSegments(gen).join("/")}\`)` — appending the current `sort` param if set, so a sorted bare page lands on the sorted vehicle page.
+**`app/[category]/garage-redirect.tsx`** (client, renders null): in `useEffect`, once per mount (useRef guard): if `useSearchParams().get("all") === "1"` → no-op; else `readGarageGeneration()` → if found, `router.replace(\`/${category}/${vehiclePathSegments(gen).join("/")}\`)`— appending the current`sort` param if set, so a sorted bare page lands on the sorted vehicle page.
 
 ### URL grammar
-| URL | Behavior |
-|---|---|
-| `/<cat>` | full grid; redirect fires iff garage cookie set and no `?all=1` |
-| `/<cat>?all=1` | full grid, redirect suppressed (matches `/search?all=1` convention) |
-| `/<cat>/<make>/<model>/<year>` | filtered, cacheable, cookie-free; any in-range year resolves |
-| `/<cat>[/<vehicle>]?sort=<slug>` | same view reordered; shell static, grid streams from cached data; sort links preserve `all` |
-| fitment-disabled `/<cat>` | plain grid, no redirect/banner regardless of garage cookie |
-| fitment-disabled `/<cat>/<...vehicle>` | `notFound()` |
-| anything else | `notFound()` |
+
+| URL                                    | Behavior                                                                                    |
+| -------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `/<cat>`                               | full grid; redirect fires iff garage cookie set and no `?all=1`                             |
+| `/<cat>?all=1`                         | full grid, redirect suppressed (matches `/search?all=1` convention)                         |
+| `/<cat>/<make>/<model>/<year>`         | filtered, cacheable, cookie-free; any in-range year resolves                                |
+| `/<cat>[/<vehicle>]?sort=<slug>`       | same view reordered; shell static, grid streams from cached data; sort links preserve `all` |
+| fitment-disabled `/<cat>`              | plain grid, no redirect/banner regardless of garage cookie                                  |
+| fitment-disabled `/<cat>/<...vehicle>` | `notFound()`                                                                                |
+| anything else                          | `notFound()`                                                                                |
 
 Accepted tradeoff: one-frame flash of the unfiltered grid before `replace` (unavoidable without server cookie reads).
 
 ## Step 4 — Path rewrites + sitemap
 
 In `lib/shopify/index.ts`:
-1. `reshapeCollection` (line 160): `path: \`/${collection.handle}\`` — flows to sitemap and the `/search` sidebar automatically. Synthetic "All" entries keep `path: "/search"`. Also map the metafield: `fitmentDisabled: collection.fitmentDisabled?.value === "true"` (query aliases `metafield(namespace: "custom", key: "fitment_disabled") { value }` as `fitmentDisabled`; validate the field shape via shopify-dev-mcp per repo rule). Missing metafield → `false` → fitment on, so Parts collections need no admin setup.
+
+1. `reshapeCollection` (line 160): `path: \`/${collection.handle}\``— flows to sitemap and the`/search`sidebar automatically. Synthetic "All" entries keep`path: "/search"`. Also map the metafield: `fitmentDisabled: collection.fitmentDisabled?.value === "true"`(query aliases`metafield(namespace: "custom", key: "fitment_disabled") { value }`as`fitmentDisabled`; validate the field shape via shopify-dev-mcp per repo rule). Missing metafield → `false` → fitment on, so Parts collections need no admin setup.
 2. `getPredictiveSearch` (line 590): `/search/${handle}` → `/${handle}`.
 3. `menuUrlToPath` (line 445): map `/collections/<h>` → `/<h>` (replace `"/collections/"` with `"/"` **first**, then bare `"/collections"` → `"/search"` — order matters). `/pages` strip becomes moot but is harmless; leave it.
 
@@ -131,6 +134,7 @@ const query = applyFitment ? [searchValue, fitmentSearchClause(cookieGen!.handle
 Replace the inline banner (lines 52-59) with `<FitmentToggle garage={cookieGen ?? null} />`:
 
 **`components/layout/search/fitment-toggle.tsx`** (client):
+
 - `garage` set → a toggle labeled "Fits my {garage.shortLabel}", checked when `useSearchParams().get("all") !== "1"` (auto-on by default). Toggling off: `router.replace` current URL with `all=1` added; toggling on: remove `all` — always preserving `q` and `sort`. Style as a compact pill/switch consistent with the header's indigo accent (`bg-tl-indigo` when on).
 - `garage` null → render the existing `<GarageMenu current={null} variant="drawer" />` (`components/layout/header/garage-menu.tsx` — already renders an "Add Your Truck" trigger + picker when `current` is null; choosing a truck runs the server action and `router.refresh()`, which re-renders the page with the filter auto-applied). If the drawer variant's full-width styling looks wrong inline, add a third `variant: "inline"` to GarageMenu rather than forking the component.
 
@@ -142,6 +146,7 @@ No changes to `/search`'s data fetching, `?all=1` grammar, or `getProducts` usag
 - `docs/shopify-nav-setup.md` admin checklist additions: (1) create a **collection metafield definition** `custom.fitment_disabled` (boolean, **Storefront access enabled** — without it the Storefront API returns null); (2) set it true on every Lifestyle collection (t-shirts, hats, accessories…); (3) tag every Lifestyle **product** `fits-universal` so it appears in fitment-filtered search; (4) **pre-deploy link sweep:** audit the footer menu (`next-js-frontend-footer-menu`) and every nav metaobject `link` field — any CMS-page link (`/pages/<handle>` or bare `/<handle>` pointing at a Shopify page) 404s once `app/[page]` is deleted, so each must either have its custom code route built or be removed from the menu before deploy (end state decided: no CMS-page links anywhere; every page is a custom-designed code route); (5) in the **Search & Discovery app**: Filters → Edit filters → enable the **Tag** filter — without it the Storefront API silently ignores the `filters` argument on `collection.products` and vehicle pages fall back to the in-memory safety net.
 
 **Webhook caveat (verified 2026-07-24):** collection metafield edits do **not** fire `collections/update` (the topic fires on product add/remove and rule changes only — unlike products, where metafield edits do fire `products/update`). So flipping `fitment_disabled` won't auto-revalidate; it takes effect when the `cacheLife("days")` window expires, or immediately if you also make any trivial collection edit (e.g. touch the description) to force the webhook. Full webhook inventory and creation steps: `PLAN-WEBHOOK.md`. Fitment **tags** on products are core fields — tag edits fire `products/update` normally.
+
 - `app/search/[collection]/page.tsx`: add `alternates: { canonical: \`/${params.collection}\` }` — the route keeps working but SEO concentrates on the new URLs.
 
 ## Verification
@@ -161,10 +166,10 @@ No changes to `/search`'s data fetching, `?all=1` grammar, or `getProducts` usag
 
 ## Known limits (accepted)
 
-- `first: 100` cap in `getCollectionProductsQuery`: with server-side tag filtering enabled the cap applies to *matching* products, so it only bites when >100 products fit one vehicle in one category (acceptable). Until the Search & Discovery tag filter is enabled in admin, the in-memory safety net sees only the first 100 collection products — the original limitation, now temporary. Comment the cap; pagination out of scope.
+- `first: 100` cap in `getCollectionProductsQuery`: with server-side tag filtering enabled the cap applies to _matching_ products, so it only bites when >100 products fit one vehicle in one category (acceptable). Until the Search & Discovery tag filter is enabled in admin, the in-memory safety net sees only the first 100 collection products — the original limitation, now temporary. Comment the cap; pagination out of scope.
 - Products missing `fits-*` tags vanish from vehicle pages and fitment-filtered search (deliberate — better hidden than shown with unconfirmed fitment). Admin prerequisites: parts get `fits-<generation>` tags, lifestyle products get `fits-universal`.
 - A new Lifestyle collection created without `fitment_disabled` set behaves like a parts category (redirect fires, vehicle URLs resolve) until the flag is set — visible symptom, one-toggle fix in admin.
-- **Cross-vehicle near-duplicates while the catalog is thin:** with few products (or mostly `fits-universal`), vehicle pages for *different* trucks (`/lighting/ford/f150/2021` vs `/lighting/chevy/silverado/2019`) can render the same grid under different titles. Google's response is soft deduplication (picks one to rank), not a penalty. Accepted: vehicle URLs are already excluded from the sitemap (low crawl exposure), and pages diverge naturally as real `fits-*` data lands. Adding vehicle URLs to the sitemap is a deliberate Phase 2+ step once fitment coverage makes them distinct. Escalation lever if Search Console flags duplicates anyway: noindex a vehicle page when its filtered grid equals the full collection — don't build until needed.
+- **Cross-vehicle near-duplicates while the catalog is thin:** with few products (or mostly `fits-universal`), vehicle pages for _different_ trucks (`/lighting/ford/f150/2021` vs `/lighting/chevy/silverado/2019`) can render the same grid under different titles. Google's response is soft deduplication (picks one to rank), not a penalty. Accepted: vehicle URLs are already excluded from the sitemap (low crawl exposure), and pages diverge naturally as real `fits-*` data lands. Adding vehicle URLs to the sitemap is a deliberate Phase 2+ step once fitment coverage makes them distinct. Escalation lever if Search Console flags duplicates anyway: noindex a vehicle page when its filtered grid equals the full collection — don't build until needed.
 - 5 hardcoded stub generations until Phase 2 ships; `resolveVehiclePath` is the single extension point for drivetrain/trim segments.
 - Any single-segment URL that isn't a collection handle or a real route now 404s (no CMS fallback) — intentional; custom pages are added as code routes.
 

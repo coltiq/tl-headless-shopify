@@ -158,6 +158,9 @@ const reshapeCollection = (
   return {
     ...collection,
     path: `/search/${collection.handle}`,
+    // Missing metafield → fitment on: Parts collections need no admin setup;
+    // only Lifestyle collections set custom.fitment_disabled = true.
+    fitmentDisabled: collection.fitmentDisabled?.value === "true",
   };
 };
 
@@ -334,10 +337,16 @@ export async function getCollectionProducts({
   collection,
   reverse,
   sortKey,
+  filters,
 }: {
   collection: string;
   reverse?: boolean;
   sortKey?: string;
+  // Shopify honors `filters` only once the matching filter (e.g. Tag) is
+  // enabled in the Search & Discovery app — otherwise it's silently ignored
+  // and the unfiltered list comes back, so callers must keep an in-memory
+  // safety net.
+  filters?: { tag: string }[];
 }): Promise<Product[]> {
   "use cache";
   cacheTag(TAGS.collections, TAGS.products);
@@ -356,6 +365,7 @@ export async function getCollectionProducts({
       handle: collection,
       reverse,
       sortKey: sortKey === "CREATED_AT" ? "CREATED" : sortKey,
+      filters,
     },
   });
 
@@ -387,6 +397,7 @@ export async function getCollections(): Promise<Collection[]> {
         },
         path: "/search",
         updatedAt: new Date().toISOString(),
+        fitmentDisabled: false,
       },
     ];
   }
@@ -406,6 +417,7 @@ export async function getCollections(): Promise<Collection[]> {
       },
       path: "/search",
       updatedAt: new Date().toISOString(),
+      fitmentDisabled: false,
     },
     // Filter out the `hidden` collections.
     // Collections that start with `hidden-*` need to be hidden on the search page.

@@ -6,6 +6,9 @@ const collectionFragment = /* GraphQL */ `
     handle
     title
     description
+    fitmentDisabled: metafield(namespace: "custom", key: "fitment_disabled") {
+      value
+    }
     seo {
       ...seo
     }
@@ -41,9 +44,17 @@ export const getCollectionProductsQuery = /* GraphQL */ `
     $handle: String!
     $sortKey: ProductCollectionSortKeys
     $reverse: Boolean
+    $filters: [ProductFilter!]
   ) {
     collection(handle: $handle) {
-      products(sortKey: $sortKey, reverse: $reverse, first: 100) {
+      # first: 100 caps *matching* products once filters apply server-side;
+      # pagination is out of scope until a single vehicle+category exceeds it.
+      products(
+        sortKey: $sortKey
+        reverse: $reverse
+        filters: $filters
+        first: 100
+      ) {
         edges {
           node {
             ...product
