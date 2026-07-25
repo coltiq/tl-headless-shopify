@@ -133,22 +133,23 @@ themselves are unaffected, since they read the cached tree directly.
 middleware's internal request to `/api/category-index` isn't blocked. It
 degrades safely (falls through to `next()`), but the 308s quietly stop.
 
-### 2.5 Cascading collection membership can't be verified
+### 2.5 Cascading collection membership — largely solved by native nesting
 
-The app assumes a parent collection contains everything in its descendants —
-that assumption is what lets every category page be one query with native
-sorting. If a product is added to a leaf but not its parents, the parent page
-silently under-reports: no error, no empty grid, just a quietly incomplete page
-nobody notices for months.
+The app assumes a parent collection contains everything in its descendants; that
+assumption is what lets every category page be one query with native sorting.
 
-**Recommendation: automate every tier**, each on its own tag, so membership is
-computed and cannot drift — `docs/shopify-setup.md` 3.2 has the scheme.
-Shopify's rules can only test product attributes, so there is no "is in
-collection X" condition; the cascade has to be carried by product tags.
+**Shopify's collection editor nests collections natively** (the Collection card
+in the right rail), and that membership reaches the Storefront API — verified
+2026-07-25 with `lighting`, which owns no products directly and still returned
+its nested rock-light product. So the cascade is computed, not curated, and the
+old drift risk (a product added to a leaf but not its parents) is gone.
 
-Note this is currently **unverifiable from the storefront** for a second
-reason — see §1.4. Admin item counts are the only signal until the catalog is
-published.
+**What remains** is one level up: nesting is per-parent, so a child collection
+that is never added to its parent's Collection card is silently absent from it.
+Visible in the editor, but nothing warns. Worth eyeballing once the tree is
+authored, and again whenever a category is added.
+
+`docs/shopify-setup.md` 3.2 has the mechanism.
 
 ### 2.6 Moving a category in admin changes its URL
 

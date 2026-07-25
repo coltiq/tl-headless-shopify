@@ -327,58 +327,53 @@ at.
 **Handles are global and must be unique**, so two different parents can't both
 have a child called "kits" — use `rock-light-kits` and `lightbar-kits`.
 
-## 3.2 Membership must cascade
+## 3.2 Membership must cascade — nest the collections
 
 The app assumes **a parent collection contains everything in its descendants**:
 a product in `rock-light-kits` is also in `rock-lights` and in `lighting`. That
 assumption is what lets every category page be a single query with native
-Shopify sorting.
+Shopify sorting, and never merge its descendants.
 
-Nothing in the app can verify it. If a product is added to a leaf but not to its
-parents, the parent page silently under-reports — no error, no empty grid, just
-a quietly incomplete page nobody notices for months.
-
-**Automated collections cannot reference other collections.** Shopify's
-conditions cover product title, type, vendor, tag, price, weight, inventory,
-variant, and metafields — there is no "product is in collection X". Product
-_type_ is a single value per product, so it can't express three levels either.
-That leaves **tags**, and the cascade has to be carried by the products.
-
-### The scheme: one tag per level, one condition per collection
-
-Tag a product with **every level of its path**, and give each collection a
-single rule matching its own tag:
+**Shopify does this natively.** In the collection editor's right rail, the
+**Collection** card pulls another collection's products into this one:
 
 ```
-Product: Beacon Rock Light Kit
-  tags: lighting, rock-lights, rock-light-kits, fits-ford-f150-2021-2026
-
-Collection  lighting          →  Product tag is equal to  lighting
-Collection  rock-lights       →  Product tag is equal to  rock-lights
-Collection  rock-light-kits   →  Product tag is equal to  rock-light-kits
+Collection: Lighting
+  Collection card →  Rock Lights, Wheel Lights, Wiring
+  Products card   →  (empty — Lighting owns no products directly)
+  Collection items: everything in those three
 ```
 
-Every collection is automated, every one has exactly one condition, and the
-cascade is true **by construction** rather than by discipline — which matters,
-because nothing in the app can check it.
+Nest each child under its parent and the whole tree cascades with no
+per-product bookkeeping at all.
 
-Keep each tag equal to its collection handle. Nothing enforces that; it just
-makes a product's tag list readable as its path. Category tags can't collide
-with fitment tags, which are all `fits-*`.
+**Verified 2026-07-25 against the Storefront API.** `lighting` owned no products
+directly, listed `rock-lights` in its Collection card, and `collection.products`
+returned the rock-light product — so nested membership reaches the storefront,
+which is the only thing the app cares about.
 
-**Don't** tag only the leaf and have each parent OR together its descendants
-(`lighting` = tag is `rock-light-kits` OR `wheel-lights` OR …). It looks tidier
-on the product, but every new leaf means editing every ancestor's rule, and
-those lists grow toward Shopify's per-collection condition cap. One tag per
-level never needs a second condition.
+Why this beats the alternatives:
 
-**Don't leave parents manual.** Adding every child product to the parent by hand
-works today and silently rots: each new leaf product has to be added to every
-ancestor forever, and the only symptom is a parent page that quietly shows less
-than it should.
+- **Computed, not a snapshot.** Add a product to `rock-lights` and it appears in
+  `lighting` immediately, with nothing else to touch.
+- **The hierarchy lives in one place** — the parent — instead of being copied
+  into every product's tags.
+- **Adding a leaf touches only its parent.** Nothing above needs editing.
 
-Tag edits are core product fields and fire `products/update`, so collection
-membership revalidates normally.
+What still needs care:
+
+- **Nesting is per-parent, one level at a time.** Each collection lists its
+  direct children; the tree is what makes it transitive. A child created and
+  never nested is simply invisible to its parent — visible in the editor, but
+  nothing warns you.
+- Products added to a parent directly are fine; they sit alongside the nested
+  ones.
+
+The legacy **automated-collection conditions** (Products card → _Add
+condition_ — tag, type, vendor, price…) still exist and still cannot reference
+a collection: `CollectionRuleColumn` has no "product is in collection X". You
+don't need them for the hierarchy. They remain useful for cross-cutting
+collections like "Sale" or "New arrivals".
 
 ## 3.3 Hidden collections
 
