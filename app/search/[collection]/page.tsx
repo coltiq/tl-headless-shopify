@@ -20,6 +20,8 @@ export async function generateMetadata(props: {
       collection.seo?.description ||
       collection.description ||
       `${collection.title} products`,
+    // Route kept for compatibility; SEO concentrates on the /<handle> URLs.
+    alternates: { canonical: `/${params.collection}` },
   };
 }
 

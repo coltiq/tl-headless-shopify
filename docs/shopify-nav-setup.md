@@ -162,13 +162,14 @@ Content → Metaobjects → Nav item:
 Link formats for the `link` field (handles must match Shopify exactly — a
 typo renders a working-looking link that 404s, nothing validates it):
 
-| Destination            | Enter                                                       |
-| ---------------------- | ----------------------------------------------------------- |
-| Collection             | `/search/<handle>` (or `/collections/<handle>` — rewritten) |
-| Product                | `/product/<handle>`                                         |
-| CMS page               | `/<handle>` (or `/pages/<handle>`)                          |
-| All products / search  | `/search`                                                   |
-| Heading only (no link) | leave empty                                                 |
+| Destination                      | Enter                                                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Category (collection)            | `/<handle>` (e.g. `/lighting`; `/collections/<handle>` also works — rewritten)                                            |
+| Product                          | `/product/<handle>`                                                                                                       |
+| Custom page                      | the route's path, e.g. `/contact` (pages are custom-built code routes; Shopify CMS pages are **not** rendered — they 404) |
+| All products / search            | `/search`                                                                                                                 |
+| Pre-filtered vehicle link (rare) | `/<handle>/<make>/<model>/<year>` (usually unnecessary — the garage redirect lands visitors there)                        |
+| Heading only (no link)           | leave empty                                                                                                               |
 
 Full store URLs pasted from the admin also work — the domain is stripped
 automatically.
@@ -200,3 +201,44 @@ edit any `nav_item` entry in the admin and confirm a `POST /api/revalidate`
 arrives in the app logs, and the change appears on the storefront shortly
 after. If delivery turns out to be flaky, nav edits will only surface at
 cache expiry (up to a day) — re-run the curl above as a stopgap.
+
+## 5. Fitment / category-page admin checklist
+
+Category pages (`/<handle>`) apply vehicle fitment by default; only
+Lifestyle (merch) collections opt out. One-time setup:
+
+1. **Collection metafield definition** — Settings → Custom data →
+   Collections → Add definition: **Name** "Fitment disabled", **Namespace
+   and key** `custom.fitment_disabled`, **Type** True/false. Enable
+   **Storefront API access** — without it the Storefront API returns `null`
+   and the flag silently reads as "fitment on".
+2. **Set it `true` on every Lifestyle collection** (t-shirts, hats,
+   accessories…). Unset/false is the default and means fitment on, so Parts
+   collections need no setup. A Lifestyle collection missing the flag
+   behaves like a parts category (garage redirect fires, vehicle URLs
+   resolve) until it's set — visible symptom, one-toggle fix.
+3. **Tag every Lifestyle _product_ `fits-universal`** so merch still
+   appears in fitment-filtered search (parts get `fits-<generation>` tags).
+   An untagged product vanishes from filtered views — deliberate, but worth
+   knowing when a product "disappears".
+4. **Pre-deploy link sweep** — audit the footer menu
+   (`next-js-frontend-footer-menu`) and every nav metaobject `link` field:
+   any CMS-page link (`/pages/<handle>`, or a bare `/<handle>` pointing at a
+   Shopify page) now 404s. Each such link must either get its custom code
+   route built or be removed from the menu before deploy. End state: no
+   CMS-page links anywhere — every page is a custom-designed code route.
+5. **Search & Discovery app** — Filters → Edit filters → enable the **Tag**
+   filter. Without it the Storefront API silently ignores the `filters`
+   argument on `collection.products`, and vehicle pages fall back to the
+   in-memory safety net (first 100 collection products only).
+
+**Webhook caveat (verified 2026-07-24):** collection metafield edits do
+**not** fire `collections/update` (that topic fires on product add/remove
+and rule changes only — unlike products, where metafield edits do fire
+`products/update`). Flipping `fitment_disabled` therefore won't
+auto-revalidate: it takes effect when the day-long cache expires, or
+immediately if you also make a trivial collection edit (touch the
+description) to force the webhook — or run the manual revalidation curl
+from step 4 with `-H "x-shopify-topic: collections/update"`. Fitment
+**tags** on products are core fields — tag edits fire `products/update`
+normally. Full webhook inventory and creation steps: `PLAN-WEBHOOK.md`.
