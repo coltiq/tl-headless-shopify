@@ -7,7 +7,7 @@ import {
   fitmentSearchClause,
   GARAGE_COOKIE,
 } from "lib/fitment";
-import { getProducts } from "lib/shopify";
+import { getProducts, getVehicles } from "lib/shopify";
 import { cookies } from "next/headers";
 
 export const metadata = {
@@ -30,7 +30,10 @@ export default async function SearchPage(props: {
   // What's in the garage and whether the filter is applied are separate:
   // ?all=1 turns the filter off, but the toggle must stay visible (in its off
   // state) so the visitor can turn it back on.
-  const cookieGen = findGeneration((await cookies()).get(GARAGE_COOKIE)?.value);
+  const cookieGen = findGeneration(
+    await getVehicles(),
+    (await cookies()).get(GARAGE_COOKIE)?.value,
+  );
   const applyFitment = Boolean(cookieGen) && all !== "1";
   const query = applyFitment
     ? [searchValue, fitmentSearchClause(cookieGen!.handle)]

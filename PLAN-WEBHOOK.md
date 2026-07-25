@@ -13,13 +13,20 @@ Shopify POSTs to `https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDAT
 The handler (`revalidate()` in `lib/shopify/index.ts`) checks the secret, reads the
 topic from the `x-shopify-topic` header, and maps it to a cache tag:
 
-| Topic group     | Topics                                                                                    | Tag revalidated    | Refreshes                                                           |
-| --------------- | ----------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------- |
-| Products        | `products/create`, `products/update`, `products/delete`                                   | `TAGS.products`    | product pages, grids, search, predictive search                     |
-| Collections     | `collections/create`, `collections/update`, `collections/delete`                          | `TAGS.collections` | category pages, collection metadata, sidebar, sitemap, nav fallback |
-| Nav metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (filter `type:nav_item`) | `TAGS.menu`        | header nav                                                          |
+| Topic group | Topics                                                                                              | Tag revalidated               | Refreshes                                                           |
+| ----------- | --------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------- |
+| Products    | `products/create`, `products/update`, `products/delete`                                             | `TAGS.products`               | product pages, grids, search, predictive search                     |
+| Collections | `collections/create`, `collections/update`, `collections/delete`                                    | `TAGS.collections`            | category pages, collection metadata, sidebar, sitemap, nav fallback |
+| Metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (filter `type:nav_item`/`vehicle`) | `TAGS.menu` + `TAGS.vehicles` | header nav **and** the vehicle list / garage picker                 |
 
 Any other topic is acknowledged and ignored.
+
+**Metaobject topics revalidate both tags.** The handler only reads
+`x-shopify-topic`, which is identical for `nav_item` and `vehicle`
+subscriptions — distinguishing them would mean parsing the webhook body's
+`type` field. Both caches are tiny and metaobject edits are rare admin
+actions, so a nav edit also refreshes vehicles and vice versa. Body parsing is
+the escalation if that ever stops being a good trade.
 
 ## Subscriptions to create
 
@@ -142,13 +149,17 @@ validates the `filter` against existing definitions). The exact aliased mutation
 (`METAOBJECTS_CREATE`/`UPDATE`/`DELETE` with `filter: "type:nav_item"`) is already
 written out in **`docs/shopify-nav-setup.md` §2** — use that.
 
-### 3. Phase 2 addition: `vehicle` metaobjects
+### 3. Vehicle metaobjects (3 topics, API-only)
 
-When the vehicle metaobject ships (PLAN-GARAGE.md Phase 2), repeat §2's mutation with
-`filter: "type:vehicle"` (three more subscriptions). The revalidate handler's
-`menuWebhooks` topic list already matches all metaobject topics — but it revalidates
-`TAGS.menu`; Phase 2 must decide which tag vehicle data caches under and extend
-`revalidate()` accordingly.
+Same shape as §2 with `filter: "type:vehicle"` — the exact mutation is written out
+in **`docs/shopify-vehicle-setup.md` §2**, alongside the rest of the vehicle admin
+setup (definition, entries, product tagging). Three more subscriptions, 9 → 12 total.
+The `vehicle` definition must exist first, same validation rule as `nav_item`.
+
+Handler side is already done (Phase 2 Step 1): vehicle data caches under
+`TAGS.vehicles`, and `metaobjects/*` topics revalidate it together with `TAGS.menu`
+per the note above. Until these subscriptions exist the site still works — vehicle
+edits just take up to a day (`cacheLife("days")`) to appear.
 
 ## Known gaps (verified 2026-07-24 against Shopify docs + community)
 
@@ -171,7 +182,8 @@ When the vehicle metaobject ships (PLAN-GARAGE.md Phase 2), repeat §2's mutatio
 1. `curl -X POST "https://<site-domain>/api/revalidate?secret=<secret>" -H "x-shopify-topic: collections/update"` → `{"status":200,"revalidated":true,...}`; wrong secret → `{"status":401}`.
 2. Rename a product in admin → product page reflects it within seconds.
 3. Edit a nav_item label → header nav updates within seconds.
-4. List live subscriptions to confirm all 9 (12 after Phase 2) exist:
+4. Edit a vehicle entry's label → the garage chip updates within seconds.
+5. List live subscriptions to confirm all 12 exist:
 
 ```graphql
 query {

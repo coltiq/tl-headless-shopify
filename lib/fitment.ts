@@ -18,8 +18,10 @@ export const GARAGE_COOKIE = "tl_garage";
 
 export const UNIVERSAL_FIT_TAG = "fits-universal";
 
-// TODO: source from metaobject — hardcoded stub until the full vehicle picker ships.
-export const VEHICLE_GENERATIONS: VehicleGeneration[] = [
+// Served by getVehicles() only until vehicle metaobject entries exist in admin
+// (and whenever the metaobject fetch fails). The live list comes from Shopify;
+// these five exist so the app works before/without that admin setup.
+export const FALLBACK_VEHICLE_GENERATIONS: VehicleGeneration[] = [
   {
     handle: "ford-f150-2021-2026",
     label: "2021+ Ford F-150",
@@ -80,11 +82,15 @@ export function vehicleHandle(
   return `${make}-${model}-${yearStart}-${yearEnd}`;
 }
 
+// Every lookup takes the vehicle list explicitly — this module stays
+// client-safe and never fetches. Server callers pass `await getVehicles()`;
+// client islands pass `useVehicles()`.
 export function findGeneration(
+  vehicles: VehicleGeneration[],
   handle: string | undefined | null,
 ): VehicleGeneration | undefined {
   if (!handle) return undefined;
-  return VEHICLE_GENERATIONS.find((gen) => gen.handle === handle);
+  return vehicles.find((gen) => gen.handle === handle);
 }
 
 // Canonical URL segments for a generation. The garage cookie stores only the
@@ -98,6 +104,7 @@ export function vehiclePathSegments(gen: VehicleGeneration): string[] {
 // Exactly 3 segments for now — loosen here (only) if drivetrain/trim segments
 // are ever added.
 export function resolveVehiclePath(
+  vehicles: VehicleGeneration[],
   segments: string[],
 ): VehicleGeneration | undefined {
   if (segments.length !== 3) return undefined;
@@ -105,7 +112,7 @@ export function resolveVehiclePath(
   if (!make || !model || !yearSegment) return undefined;
   if (!/^\d{4}$/.test(yearSegment)) return undefined;
   const year = Number(yearSegment);
-  return VEHICLE_GENERATIONS.find(
+  return vehicles.find(
     (gen) =>
       gen.make === make &&
       gen.model === model &&
@@ -114,13 +121,20 @@ export function resolveVehiclePath(
   );
 }
 
-// Reads the garage cookie in the browser. Returns undefined during SSR.
-export function readGarageGeneration(): VehicleGeneration | undefined {
+// Reads the garage cookie in the browser. Returns undefined during SSR, and
+// for a cookie whose handle is no longer in the list — a deleted generation
+// degrades silently to "no truck", which is the desired behavior.
+export function readGarageGeneration(
+  vehicles: VehicleGeneration[],
+): VehicleGeneration | undefined {
   if (typeof document === "undefined") return undefined;
   const match = document.cookie.match(
     new RegExp(`(?:^|; )${GARAGE_COOKIE}=([^;]+)`),
   );
-  return findGeneration(match ? decodeURIComponent(match[1]!) : undefined);
+  return findGeneration(
+    vehicles,
+    match ? decodeURIComponent(match[1]!) : undefined,
+  );
 }
 
 export function fitmentTag(generationHandle: string): string {

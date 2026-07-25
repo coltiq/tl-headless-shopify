@@ -4,7 +4,7 @@ import {
   TAGS,
 } from "lib/constants";
 import {
-  VEHICLE_GENERATIONS,
+  FALLBACK_VEHICLE_GENERATIONS,
   vehicleHandle,
   type VehicleGeneration,
 } from "lib/fitment";
@@ -639,7 +639,7 @@ export async function getVehicles(): Promise<VehicleGeneration[]> {
 
   if (!endpoint) {
     console.log("Skipping getVehicles - Shopify not configured");
-    return VEHICLE_GENERATIONS;
+    return FALLBACK_VEHICLE_GENERATIONS;
   }
 
   try {
@@ -668,7 +668,7 @@ export async function getVehicles(): Promise<VehicleGeneration[]> {
     console.error("getVehicles failed, using fallback generations", e);
   }
 
-  return VEHICLE_GENERATIONS;
+  return FALLBACK_VEHICLE_GENERATIONS;
 }
 
 export async function getAnnouncement(): Promise<Announcement> {

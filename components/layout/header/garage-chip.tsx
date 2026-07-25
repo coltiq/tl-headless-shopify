@@ -1,4 +1,5 @@
 import { findGeneration, GARAGE_COOKIE } from "lib/fitment";
+import { getVehicles } from "lib/shopify";
 import { cookies } from "next/headers";
 import { GarageMenu } from "./garage-menu";
 
@@ -10,10 +11,13 @@ export async function GarageChip({
   variant?: "row" | "drawer";
 }) {
   const cookieValue = (await cookies()).get(GARAGE_COOKIE)?.value;
+  // A cookie whose generation no longer exists in Shopify degrades to "no
+  // truck" — the same path as any unknown handle.
+  const vehicles = await getVehicles();
 
   return (
     <GarageMenu
-      current={findGeneration(cookieValue) ?? null}
+      current={findGeneration(vehicles, cookieValue) ?? null}
       variant={variant}
     />
   );

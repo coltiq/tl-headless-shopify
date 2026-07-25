@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useVehicles } from "components/vehicles-context";
 import {
   productFitsGeneration,
   readGarageGeneration,
@@ -61,6 +62,7 @@ export function SearchField({
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const vehicles = useVehicles();
   const [value, setValue] = useState(searchParams?.get("q") || "");
   const [results, setResults] = useState<PredictiveSearchResult>(EMPTY);
   const [open, setOpen] = useState(false);
@@ -190,7 +192,7 @@ export function SearchField({
             setOpen(true);
           }}
           onFocus={() => {
-            setGarage(readGarageGeneration());
+            setGarage(readGarageGeneration(vehicles));
             setOpen(true);
           }}
           placeholder={

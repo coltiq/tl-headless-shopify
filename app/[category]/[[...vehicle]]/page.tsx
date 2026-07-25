@@ -11,7 +11,7 @@ import {
   UNIVERSAL_FIT_TAG,
   type VehicleGeneration,
 } from "lib/fitment";
-import { getCollection, getCollectionProducts } from "lib/shopify";
+import { getCollection, getCollectionProducts, getVehicles } from "lib/shopify";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -42,7 +42,7 @@ export async function generateMetadata(props: {
 
   if (collection.fitmentDisabled) return notFound();
 
-  const gen = resolveVehiclePath(vehicle);
+  const gen = resolveVehiclePath(await getVehicles(), vehicle);
   if (!gen) return notFound();
 
   return {
@@ -73,7 +73,9 @@ export default async function CategoryPage(props: {
   if (vehicle && vehicle.length > 0) {
     // Lifestyle collections have no vehicle URLs.
     if (collection.fitmentDisabled) notFound();
-    gen = resolveVehiclePath(vehicle);
+    // Both getCollection and getVehicles are `use cache`, so the shell stays
+    // prerenderable — a generation deleted in admin makes its URLs 404.
+    gen = resolveVehiclePath(await getVehicles(), vehicle);
     if (!gen) notFound();
   }
 

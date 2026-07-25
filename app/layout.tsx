@@ -1,8 +1,9 @@
 import { CartProvider } from "components/cart/cart-context";
 import { Header } from "components/layout/header";
+import { VehiclesProvider } from "components/vehicles-context";
 import { WelcomeToast } from "components/welcome-toast";
 import { GeistSans } from "geist/font/sans";
-import { getCart } from "lib/shopify";
+import { getCart, getVehicles } from "lib/shopify";
 import {
   Archivo,
   Barlow_Condensed,
@@ -60,6 +61,9 @@ export default async function RootLayout({
 }) {
   // Don't await the fetch, pass the Promise to the context provider
   const cart = getCart();
+  // Safe to await: getVehicles is `use cache`, so the layout stays
+  // prerenderable (same as Header awaiting getNavMenu).
+  const vehicles = await getVehicles();
 
   return (
     <html
@@ -67,14 +71,16 @@ export default async function RootLayout({
       className={`${GeistSans.variable} ${archivo.variable} ${barlowCondensed.variable} ${plexMono.variable} ${inter.variable}`}
     >
       <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
-        <CartProvider cartPromise={cart}>
-          <Header />
-          <main>
-            {children}
-            <Toaster closeButton />
-            <WelcomeToast />
-          </main>
-        </CartProvider>
+        <VehiclesProvider vehicles={vehicles}>
+          <CartProvider cartPromise={cart}>
+            <Header />
+            <main>
+              {children}
+              <Toaster closeButton />
+              <WelcomeToast />
+            </main>
+          </CartProvider>
+        </VehiclesProvider>
       </body>
     </html>
   );

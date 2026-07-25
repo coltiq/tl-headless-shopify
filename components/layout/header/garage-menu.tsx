@@ -1,11 +1,12 @@
 "use client";
 
 import clsx from "clsx";
-import { VEHICLE_GENERATIONS, VehicleGeneration } from "lib/fitment";
+import { VehicleGeneration } from "lib/fitment";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { clearGarageVehicle, setGarageVehicle } from "./actions";
 import { IconGarage } from "./icons";
+import { VehiclePicker } from "./vehicle-picker";
 
 export function GarageMenu({
   current,
@@ -103,11 +104,9 @@ export function GarageMenu({
       </button>
 
       {open ? (
-        // TODO: source from metaobject — stub picker; the full vehicle-picker UX
-        // is a separate task.
         <div
           className={clsx(
-            "absolute top-full z-50 mt-1.5 min-w-56 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
+            "absolute top-full z-50 mt-1.5 min-w-64 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
             variant === "row" && "right-0",
             variant === "drawer" && "inset-x-0",
             variant === "inline" && "left-0",
@@ -116,23 +115,7 @@ export function GarageMenu({
           <p className="px-4 pb-1.5 pt-3 font-tl-mono text-[9px] uppercase tracking-[0.14em] text-tl-mute-white">
             Your truck
           </p>
-          <ul>
-            {VEHICLE_GENERATIONS.map((gen) => (
-              <li key={gen.handle}>
-                <button
-                  type="button"
-                  onClick={() => choose(gen.handle)}
-                  className={clsx(
-                    "flex h-11 w-full items-center px-4 text-left font-tl-text text-sm text-tl-ink hover:bg-tl-fog",
-                    current?.handle === gen.handle &&
-                      "bg-tl-tint font-semibold",
-                  )}
-                >
-                  {gen.label}
-                </button>
-              </li>
-            ))}
-          </ul>
+          <VehiclePicker current={current} onChoose={choose} />
           {current ? (
             <button
               type="button"

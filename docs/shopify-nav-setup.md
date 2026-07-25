@@ -220,7 +220,9 @@ Lifestyle (merch) collections opt out. One-time setup:
 3. **Tag every Lifestyle _product_ `fits-universal`** so merch still
    appears in fitment-filtered search (parts get `fits-<generation>` tags).
    An untagged product vanishes from filtered views — deliberate, but worth
-   knowing when a product "disappears".
+   knowing when a product "disappears". The generation list itself, and the
+   exact tag strings it implies, are set up in
+   **`docs/shopify-vehicle-setup.md`**.
 4. **Pre-deploy link sweep** — audit the footer menu
    (`next-js-frontend-footer-menu`) and every nav metaobject `link` field:
    any CMS-page link (`/pages/<handle>`, or a bare `/<handle>` pointing at a
