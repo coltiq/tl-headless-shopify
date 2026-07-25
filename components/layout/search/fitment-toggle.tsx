@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { GarageMenu } from "components/layout/header/garage-menu";
-import { VehicleGeneration } from "lib/fitment";
+import { vehicleShortLabel, type VehicleSelection } from "lib/fitment";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 // "Fits my vehicle" control for /search. With a garage truck it's a switch —
@@ -12,7 +12,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 export default function FitmentToggle({
   garage,
 }: {
-  garage: VehicleGeneration | null;
+  garage: VehicleSelection | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -61,7 +61,7 @@ export default function FitmentToggle({
         />
       </span>
       <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-        Fits my {garage.shortLabel}
+        Fits my {vehicleShortLabel(garage)}
       </span>
     </button>
   );

@@ -4,9 +4,10 @@ import clsx from "clsx";
 import { useVehicles } from "components/vehicles-context";
 import {
   productFitsGeneration,
-  readGarageGeneration,
+  readGarage,
   UNIVERSAL_FIT_TAG,
-  VehicleGeneration,
+  vehicleShortLabel,
+  type VehicleSelection,
 } from "lib/fitment";
 import { PredictiveSearchResult } from "lib/shopify/types";
 import Form from "next/form";
@@ -66,9 +67,7 @@ export function SearchField({
   const [value, setValue] = useState(searchParams?.get("q") || "");
   const [results, setResults] = useState<PredictiveSearchResult>(EMPTY);
   const [open, setOpen] = useState(false);
-  const [garage, setGarage] = useState<VehicleGeneration | undefined>(
-    undefined,
-  );
+  const [garage, setGarage] = useState<VehicleSelection | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -137,7 +136,7 @@ export function SearchField({
   // predictions with fitment indicated per result.
   const fitting = garage
     ? results.products.filter((p) =>
-        productFitsGeneration(p.tags, garage.handle),
+        productFitsGeneration(p.tags, garage.gen.handle),
       )
     : results.products;
   const filtered = !!garage && fitting.length > 0;
@@ -192,7 +191,7 @@ export function SearchField({
             setOpen(true);
           }}
           onFocus={() => {
-            setGarage(readGarageGeneration(vehicles));
+            setGarage(readGarage(vehicles));
             setOpen(true);
           }}
           placeholder={
@@ -222,13 +221,13 @@ export function SearchField({
             <>
               <p className={groupLabel}>
                 {filtered && garage
-                  ? `Parts · fit your ${garage.shortLabel}`
+                  ? `Parts · fit your ${vehicleShortLabel(garage)}`
                   : "Parts"}
               </p>
               {garage && !filtered ? (
                 <p className="px-[15px] pb-2 font-tl-text text-xs text-tl-mute-white">
-                  No exact matches for your {garage.shortLabel} — showing all
-                  parts.
+                  No exact matches for your {vehicleShortLabel(garage)} —
+                  showing all parts.
                 </p>
               ) : null}
               {products.map((product) => (

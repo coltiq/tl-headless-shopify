@@ -3,9 +3,9 @@ import ProductGridItems from "components/layout/product-grid-items";
 import FitmentToggle from "components/layout/search/fitment-toggle";
 import { defaultSort, sorting } from "lib/constants";
 import {
-  findGeneration,
   fitmentSearchClause,
   GARAGE_COOKIE,
+  resolveGarageCookie,
 } from "lib/fitment";
 import { getProducts, getVehicles } from "lib/shopify";
 import { cookies } from "next/headers";
@@ -30,13 +30,13 @@ export default async function SearchPage(props: {
   // What's in the garage and whether the filter is applied are separate:
   // ?all=1 turns the filter off, but the toggle must stay visible (in its off
   // state) so the visitor can turn it back on.
-  const cookieGen = findGeneration(
+  const garage = resolveGarageCookie(
     await getVehicles(),
     (await cookies()).get(GARAGE_COOKIE)?.value,
   );
-  const applyFitment = Boolean(cookieGen) && all !== "1";
+  const applyFitment = Boolean(garage) && all !== "1";
   const query = applyFitment
-    ? [searchValue, fitmentSearchClause(cookieGen!.handle)]
+    ? [searchValue, fitmentSearchClause(garage!.gen.handle)]
         .filter(Boolean)
         .join(" ")
     : searchValue;
@@ -46,7 +46,7 @@ export default async function SearchPage(props: {
 
   return (
     <>
-      <FitmentToggle garage={cookieGen ?? null} />
+      <FitmentToggle garage={garage ?? null} />
       {searchValue ? (
         <p className="mb-4">
           {products.length === 0

@@ -1,7 +1,11 @@
 "use client";
 
 import clsx from "clsx";
-import { VehicleGeneration } from "lib/fitment";
+import {
+  vehicleLabel,
+  vehicleShortLabel,
+  type VehicleSelection,
+} from "lib/fitment";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { clearGarageVehicle, setGarageVehicle } from "./actions";
@@ -12,7 +16,7 @@ export function GarageMenu({
   current,
   variant,
 }: {
-  current: VehicleGeneration | null;
+  current: VehicleSelection | null;
   variant: "row" | "drawer" | "inline";
 }) {
   const [open, setOpen] = useState(false);
@@ -29,11 +33,11 @@ export function GarageMenu({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
-  const choose = (handle: string | null) => {
+  const choose = (selection: VehicleSelection | null) => {
     setOpen(false);
     startTransition(async () => {
-      if (handle) {
-        await setGarageVehicle(handle);
+      if (selection) {
+        await setGarageVehicle(selection.gen.handle, selection.year);
       } else {
         await clearGarageVehicle();
       }
@@ -71,15 +75,15 @@ export function GarageMenu({
           variant === "row" ? (
             <>
               <span className="font-tl-sans text-xs font-bold group-data-[condensed]:hidden">
-                {current.label}
+                {vehicleLabel(current)}
               </span>
               <span className="hidden font-tl-sans text-xs font-bold group-data-[condensed]:inline">
-                {current.shortLabel}
+                {vehicleShortLabel(current)}
               </span>
             </>
           ) : (
             <span className="font-tl-sans text-[13.5px] font-bold">
-              {current.label}
+              {vehicleLabel(current)}
             </span>
           )
         ) : (

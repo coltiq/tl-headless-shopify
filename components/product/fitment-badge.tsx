@@ -4,9 +4,10 @@ import clsx from "clsx";
 import { useVehicles } from "components/vehicles-context";
 import {
   fitmentTag,
-  readGarageGeneration,
+  readGarage,
   UNIVERSAL_FIT_TAG,
-  type VehicleGeneration,
+  vehicleLabel,
+  type VehicleSelection,
 } from "lib/fitment";
 import { useEffect, useState } from "react";
 
@@ -19,26 +20,27 @@ import { useEffect, useState } from "react";
 // the badge appearing one frame late.
 export function FitmentBadge({ tags }: { tags: string[] }) {
   const vehicles = useVehicles();
-  const [gen, setGen] = useState<VehicleGeneration | undefined>(undefined);
+  const [garage, setGarage] = useState<VehicleSelection | undefined>(undefined);
 
   useEffect(() => {
-    setGen(readGarageGeneration(vehicles));
+    setGarage(readGarage(vehicles));
   }, [vehicles]);
 
   // No truck set: say nothing rather than guess. The header chip is already
   // prompting for one.
-  if (!gen) return null;
+  if (!garage) return null;
 
   const universal = tags.includes(UNIVERSAL_FIT_TAG);
-  const fitsThis = tags.includes(fitmentTag(gen.handle));
+  const fitsThis = tags.includes(fitmentTag(garage.gen.handle));
+  const truck = vehicleLabel(garage);
 
-  // Explicit fitment beats a universal tag: "Fits your 2021+ Ford F-150" is a
+  // Explicit fitment beats a universal tag: "Fits your 2022 Ford F-150" is a
   // stronger, more specific claim than "Universal fit" when both are true.
   const { text, tone } = fitsThis
-    ? { text: `Fits your ${gen.label}`, tone: "fits" as const }
+    ? { text: `Fits your ${truck}`, tone: "fits" as const }
     : universal
       ? { text: "Universal fit", tone: "fits" as const }
-      : { text: `Doesn't fit your ${gen.label}`, tone: "no" as const };
+      : { text: `Doesn't fit your ${truck}`, tone: "no" as const };
 
   return (
     <p

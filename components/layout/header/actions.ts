@@ -1,14 +1,25 @@
 "use server";
 
-import { findGeneration, GARAGE_COOKIE } from "lib/fitment";
+import { encodeGarageCookie, findGeneration, GARAGE_COOKIE } from "lib/fitment";
 import { getVehicles } from "lib/shopify";
 import { cookies } from "next/headers";
 
-export async function setGarageVehicle(handle: string): Promise<void> {
+export async function setGarageVehicle(
+  handle: string,
+  year: number,
+): Promise<void> {
   // Only handles from the live generation list may be written.
-  if (!findGeneration(await getVehicles(), handle)) return;
+  const gen = findGeneration(await getVehicles(), handle);
+  if (!gen) return;
 
-  (await cookies()).set(GARAGE_COOKIE, handle, {
+  // And only a year that generation actually covers — the cookie is the source
+  // of every "2022 Ford F-150" the visitor reads, so it must not be able to
+  // claim a year the truck doesn't come in.
+  if (!Number.isInteger(year) || year < gen.yearStart || year > gen.yearEnd) {
+    return;
+  }
+
+  (await cookies()).set(GARAGE_COOKIE, encodeGarageCookie({ gen, year }), {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",

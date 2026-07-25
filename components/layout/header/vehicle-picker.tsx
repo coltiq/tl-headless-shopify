@@ -1,7 +1,7 @@
 "use client";
 
 import { useVehicles } from "components/vehicles-context";
-import type { VehicleGeneration } from "lib/fitment";
+import type { VehicleGeneration, VehicleSelection } from "lib/fitment";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -17,21 +17,22 @@ const selectClass =
 // Cascading Year → Make → Model selects. Native <select> on purpose: mobile
 // ergonomics beat a custom listbox here.
 //
-// The cookie stores only the generation handle — the exact year chosen here is
-// not persisted (vehicle URLs canonicalize to the generation's first year), it
-// only narrows the make/model lists.
+// Both halves of the answer are kept: the **generation** decides which
+// `fits-*` tag matches, and the **exact year** is what the visitor sees
+// everywhere afterwards. Pick 2022 and the site says "2022 Ford F-150", not
+// "2021+ Ford F-150" — the generation never surfaces.
 export function VehiclePicker({
   current,
   onChoose,
 }: {
-  current: VehicleGeneration | null;
-  onChoose: (handle: string) => void;
+  current: VehicleSelection | null;
+  onChoose: (selection: VehicleSelection) => void;
 }) {
   const vehicles = useVehicles();
 
-  const [year, setYear] = useState<number | null>(current?.yearStart ?? null);
-  const [make, setMake] = useState<string | null>(current?.make ?? null);
-  const [model, setModel] = useState<string | null>(current?.model ?? null);
+  const [year, setYear] = useState<number | null>(current?.year ?? null);
+  const [make, setMake] = useState<string | null>(current?.gen.make ?? null);
+  const [model, setModel] = useState<string | null>(current?.gen.model ?? null);
 
   // Derivations are pure and cheap at this list size — recomputed in render.
   const years = [
@@ -146,8 +147,10 @@ export function VehiclePicker({
 
       <button
         type="button"
-        disabled={!resolved}
-        onClick={() => resolved && onChoose(resolved.handle)}
+        disabled={!resolved || year === null}
+        onClick={() =>
+          resolved && year !== null && onChoose({ gen: resolved, year })
+        }
         className="mt-1 h-10 rounded-[3px] bg-tl-indigo font-tl-sans text-xs font-bold text-white transition-colors hover:bg-tl-indigo-lift disabled:bg-tl-hairline disabled:text-tl-mute-white"
       >
         {current ? "Update truck" : "Add my truck"}

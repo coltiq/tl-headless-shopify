@@ -1,4 +1,4 @@
-import { findGeneration, GARAGE_COOKIE } from "lib/fitment";
+import { GARAGE_COOKIE, resolveGarageCookie } from "lib/fitment";
 import { getVehicles } from "lib/shopify";
 import { cookies } from "next/headers";
 import { GarageMenu } from "./garage-menu";
@@ -17,7 +17,7 @@ export async function GarageChip({
 
   return (
     <GarageMenu
-      current={findGeneration(vehicles, cookieValue) ?? null}
+      current={resolveGarageCookie(vehicles, cookieValue) ?? null}
       variant={variant}
     />
   );

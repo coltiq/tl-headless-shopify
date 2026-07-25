@@ -117,18 +117,32 @@ range), not per year. Until this exists the app falls back to five hardcoded
 generations (`FALLBACK_VEHICLE_GENERATIONS` in `lib/fitment.ts`), so the
 storefront ships and works before any of this is done.
 
-| Field key     | Type             | Required | Notes                                                                                     |
-| ------------- | ---------------- | -------- | ----------------------------------------------------------------------------------------- |
-| `make`        | Single line text | Yes      | **URL slug.** Add validation regex `^[a-z0-9]+$`. See the slug contract below             |
-| `model`       | Single line text | Yes      | **URL slug.** Same regex                                                                  |
-| `year_start`  | Integer          | Yes      | 4-digit year                                                                              |
-| `year_end`    | Integer          | Yes      | 4-digit year, ≥ `year_start`                                                              |
-| `label`       | Single line text | Yes      | Display name, e.g. `2021+ Ford F-150`; set as the display name field. Never used for URLs |
-| `short_label` | Single line text | No       | Condensed chip text, e.g. `21+ F-150`. Falls back to `label` when empty                   |
+| Field key     | Type             | Required | Notes                                                                                           |
+| ------------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `make`        | Single line text | Yes      | **URL slug.** Add validation regex `^[a-z0-9]+$`. See the slug contract below                   |
+| `model`       | Single line text | Yes      | **URL slug.** Same regex                                                                        |
+| `year_start`  | Integer          | Yes      | 4-digit year                                                                                    |
+| `year_end`    | Integer          | Yes      | 4-digit year, ≥ `year_start`                                                                    |
+| `label`       | Single line text | Yes      | Truck name **with no years** — `Ford F-150`; set as the display name field. Never used for URLs |
+| `short_label` | Single line text | No       | Condensed name, still no years — `F-150`. Falls back to `label` when empty                      |
 
 Enable **Storefront API access**. Without it the query throws and the app
 serves the fallback generations — the picker looks fine but shows the wrong
 trucks.
+
+### Labels carry no years
+
+**A generation is internal.** It exists to pick a `fits-*` tag and to keep one
+canonical URL per year range. Customers never see it.
+
+What they see is the year they actually chose, composed at render time:
+`label` = `Ford F-150`, visitor picks 2022, every surface reads
+**"2022 Ford F-150"**. Pick 2024 and the same entry reads "2024 Ford F-150".
+
+So two generations of the same truck get the **same** `label` and
+`short_label` — that's correct, it's the same truck, and the year tells them
+apart. Never write `2021+ Ford F-150` or `15–20 F-150` into these fields; the
+app would render "2022 2021+ Ford F-150".
 
 ### The vehicle slug contract (binding)
 
@@ -394,13 +408,18 @@ Content → Metaobjects → Vehicle. Enter the five generations the storefront
 already ships as fallbacks, **with exactly these values** — they are baked into
 live URLs, existing visitor cookies, and the `fits-*` tags applied to products.
 
-| `make`   | `model`     | `year_start` | `year_end` | `label`                      | `short_label`   |
-| -------- | ----------- | ------------ | ---------- | ---------------------------- | --------------- |
-| `ford`   | `f150`      | 2021         | 2026       | `2021+ Ford F-150`           | `21+ F-150`     |
-| `ford`   | `f150`      | 2015         | 2020       | `2015–2020 Ford F-150`       | `15–20 F-150`   |
-| `chevy`  | `silverado` | 2019         | 2025       | `2019+ Chevy Silverado 1500` | `19+ Silverado` |
-| `ram`    | `1500`      | 2019         | 2025       | `2019+ Ram 1500`             | `19+ Ram 1500`  |
-| `toyota` | `tacoma`    | 2016         | 2023       | `2016–2023 Toyota Tacoma`    | `16–23 Tacoma`  |
+| `make`   | `model`     | `year_start` | `year_end` | `label`                | `short_label` |
+| -------- | ----------- | ------------ | ---------- | ---------------------- | ------------- |
+| `ford`   | `f150`      | 2021         | 2026       | `Ford F-150`           | `F-150`       |
+| `ford`   | `f150`      | 2015         | 2020       | `Ford F-150`           | `F-150`       |
+| `chevy`  | `silverado` | 2019         | 2025       | `Chevy Silverado 1500` | `Silverado`   |
+| `ram`    | `1500`      | 2019         | 2025       | `Ram 1500`             | `Ram 1500`    |
+| `toyota` | `tacoma`    | 2016         | 2023       | `Toyota Tacoma`        | `Tacoma`      |
+
+The two F-150 rows sharing a label is intentional — see "Labels carry no years"
+above. A visitor who picks 2018 sees "2018 Ford F-150" and gets the 2015–2020
+generation's parts; one who picks 2022 sees "2022 Ford F-150" and gets the
+2021–2026 generation's. Neither ever sees a year range.
 
 Derived handles: `ford-f150-2021-2026`, `ford-f150-2015-2020`,
 `chevy-silverado-2019-2025`, `ram-1500-2019-2025`, `toyota-tacoma-2016-2023`.
@@ -508,12 +527,14 @@ caches.
 2. **Garage picker** — Year → Make → Model cascade (picking a year narrows the
    makes, picking a make narrows the models); the confirm button stays disabled
    until all three are chosen.
-3. **Chip** — adding a truck shows your `label`; the condensed (scrolled) header
-   shows `short_label`.
+3. **Chip** — picking 2022 shows **"2022 Ford F-150"**, not a year range; the
+   condensed (scrolled) header shows "2022 F-150". Pick a different year on the
+   same truck and the chip follows it.
 4. **Vehicle URLs** — clicking a category with a truck set lands you on
-   `/<category path>/<make>/<model>/<year_start>`. Every in-range year also
-   resolves (`/lighting/ford/f150/2024`) and canonicalizes to the first year.
-   The vehicle suffix works at **any** depth, including depth 3.
+   `/<category path>/<make>/<model>/<the year you picked>`. Every in-range year
+   resolves, shows that year in the `<h1>` and title, and canonicalizes to the
+   generation's first year. The vehicle suffix works at **any** depth,
+   including depth 3.
 5. **Category paths** — every derived path resolves; `/lighting/2021` and
    `/a/b/c/d` land on the branded 404; `/rock-lights` sends you to
    `/lighting/rock-lights`; `/gift-cards` still renders flat. The breadcrumb

@@ -3,7 +3,13 @@
 
 export type VehicleGeneration = {
   handle: string;
+  // Display names **without years** — "Ford F-150", "Chevy Silverado 1500".
+  // The year is composed in at render time from the visitor's actual choice
+  // (vehicleLabel), so one generation reads as "2022 Ford F-150" for one
+  // visitor and "2024 Ford F-150" for another. Two generations of the same
+  // truck therefore share a label, which is correct: it is the same truck.
   label: string;
+  // Condensed form for the header chip and inline badges — "F-150".
   shortLabel: string;
   // URL slugs, not display names: lowercase alphanumeric, no hyphens or spaces
   // (e.g. "chevy"/"silverado", "ford"/"f150"). The vehicle metaobject must use
@@ -12,6 +18,17 @@ export type VehicleGeneration = {
   model: string;
   yearStart: number;
   yearEnd: number;
+};
+
+// A truck as the visitor sees it: the exact year they picked, plus the
+// generation that year falls into.
+//
+// **The generation is internal.** It exists to pick a `fits-*` tag and to keep
+// one canonical URL per year range; it is never displayed. Everything the
+// visitor reads is built from `year` + the generation's year-less label.
+export type VehicleSelection = {
+  gen: VehicleGeneration;
+  year: number;
 };
 
 export const GARAGE_COOKIE = "tl_garage";
@@ -24,8 +41,8 @@ export const UNIVERSAL_FIT_TAG = "fits-universal";
 export const FALLBACK_VEHICLE_GENERATIONS: VehicleGeneration[] = [
   {
     handle: "ford-f150-2021-2026",
-    label: "2021+ Ford F-150",
-    shortLabel: "21+ F-150",
+    label: "Ford F-150",
+    shortLabel: "F-150",
     make: "ford",
     model: "f150",
     yearStart: 2021,
@@ -33,8 +50,8 @@ export const FALLBACK_VEHICLE_GENERATIONS: VehicleGeneration[] = [
   },
   {
     handle: "ford-f150-2015-2020",
-    label: "2015–2020 Ford F-150",
-    shortLabel: "15–20 F-150",
+    label: "Ford F-150",
+    shortLabel: "F-150",
     make: "ford",
     model: "f150",
     yearStart: 2015,
@@ -42,8 +59,8 @@ export const FALLBACK_VEHICLE_GENERATIONS: VehicleGeneration[] = [
   },
   {
     handle: "chevy-silverado-2019-2025",
-    label: "2019+ Chevy Silverado 1500",
-    shortLabel: "19+ Silverado",
+    label: "Chevy Silverado 1500",
+    shortLabel: "Silverado",
     make: "chevy",
     model: "silverado",
     yearStart: 2019,
@@ -51,8 +68,8 @@ export const FALLBACK_VEHICLE_GENERATIONS: VehicleGeneration[] = [
   },
   {
     handle: "ram-1500-2019-2025",
-    label: "2019+ Ram 1500",
-    shortLabel: "19+ Ram 1500",
+    label: "Ram 1500",
+    shortLabel: "Ram 1500",
     make: "ram",
     model: "1500",
     yearStart: 2019,
@@ -60,8 +77,8 @@ export const FALLBACK_VEHICLE_GENERATIONS: VehicleGeneration[] = [
   },
   {
     handle: "toyota-tacoma-2016-2023",
-    label: "2016–2023 Toyota Tacoma",
-    shortLabel: "16–23 Tacoma",
+    label: "Toyota Tacoma",
+    shortLabel: "Tacoma",
     make: "toyota",
     model: "tacoma",
     yearStart: 2016,
@@ -93,45 +110,91 @@ export function findGeneration(
   return vehicles.find((gen) => gen.handle === handle);
 }
 
-// Canonical URL segments for a generation. The garage cookie stores only the
-// generation handle, so the first year is the deterministic canonical link;
-// resolveVehiclePath accepts any in-range year.
-export function vehiclePathSegments(gen: VehicleGeneration): string[] {
-  return [gen.make, gen.model, String(gen.yearStart)];
+// A year the generation actually covers. Guards the case where admin narrows
+// year_start/year_end after a visitor already chose — showing a year the
+// generation no longer covers would be a lie, so fall back to its first year.
+function coveredYear(gen: VehicleGeneration, year: number | undefined): number {
+  if (year === undefined) return gen.yearStart;
+  return year >= gen.yearStart && year <= gen.yearEnd ? year : gen.yearStart;
 }
 
-// Resolves /<category>/<make>/<model>/<year> segments to a generation.
-// Exactly 3 segments for now — loosen here (only) if drivetrain/trim segments
-// are ever added.
+// Everything a visitor reads about their truck. "2022 Ford F-150" — never
+// "2021+ Ford F-150", which is the generation and is nobody's truck.
+export function vehicleLabel({ gen, year }: VehicleSelection): string {
+  return `${year} ${gen.label}`;
+}
+
+export function vehicleShortLabel({ gen, year }: VehicleSelection): string {
+  return `${year} ${gen.shortLabel}`;
+}
+
+// URL segments for a selection. The visitor's own year rides in the URL — it
+// resolves identically to any other in-range year, and the page canonicalizes
+// to the generation's first year so the ranking signal still concentrates on
+// one URL per generation.
+export function vehiclePathSegments({ gen, year }: VehicleSelection): string[] {
+  return [gen.make, gen.model, String(coveredYear(gen, year))];
+}
+
+// Resolves /<category>/<make>/<model>/<year> segments. Exactly 3 segments for
+// now — loosen here (only) if drivetrain/trim segments are ever added. Returns
+// the year from the URL, not the generation's first year: the page shows the
+// year the visitor is actually looking at.
 export function resolveVehiclePath(
   vehicles: VehicleGeneration[],
   segments: string[],
-): VehicleGeneration | undefined {
+): VehicleSelection | undefined {
   if (segments.length !== 3) return undefined;
   const [make, model, yearSegment] = segments;
   if (!make || !model || !yearSegment) return undefined;
   if (!/^\d{4}$/.test(yearSegment)) return undefined;
   const year = Number(yearSegment);
-  return vehicles.find(
-    (gen) =>
-      gen.make === make &&
-      gen.model === model &&
-      gen.yearStart <= year &&
-      year <= gen.yearEnd,
+  const gen = vehicles.find(
+    (candidate) =>
+      candidate.make === make &&
+      candidate.model === model &&
+      candidate.yearStart <= year &&
+      year <= candidate.yearEnd,
   );
+  return gen ? { gen, year } : undefined;
 }
 
-// Reads the garage cookie in the browser. Returns undefined during SSR, and
-// for a cookie whose handle is no longer in the list — a deleted generation
-// degrades silently to "no truck", which is the desired behavior.
-export function readGarageGeneration(
+// The garage cookie is `<generation handle>:<year>` — the generation drives
+// fitment, the year drives every piece of text the visitor sees. A bare handle
+// with no year is still accepted: it predates per-year garages and degrades to
+// the generation's first year.
+export function encodeGarageCookie({ gen, year }: VehicleSelection): string {
+  return `${gen.handle}:${coveredYear(gen, year)}`;
+}
+
+// Resolves a raw cookie value against the live vehicle list. A generation that
+// no longer exists degrades silently to "no truck", which is the desired
+// behavior.
+export function resolveGarageCookie(
   vehicles: VehicleGeneration[],
-): VehicleGeneration | undefined {
+  value: string | undefined | null,
+): VehicleSelection | undefined {
+  if (!value) return undefined;
+
+  const [handle, yearPart] = value.split(":");
+  const gen = findGeneration(vehicles, handle);
+  if (!gen) return undefined;
+
+  const year =
+    yearPart && /^\d{4}$/.test(yearPart) ? Number(yearPart) : undefined;
+
+  return { gen, year: coveredYear(gen, year) };
+}
+
+// Browser-side read of the same cookie. Returns undefined during SSR.
+export function readGarage(
+  vehicles: VehicleGeneration[],
+): VehicleSelection | undefined {
   if (typeof document === "undefined") return undefined;
   const match = document.cookie.match(
     new RegExp(`(?:^|; )${GARAGE_COOKIE}=([^;]+)`),
   );
-  return findGeneration(
+  return resolveGarageCookie(
     vehicles,
     match ? decodeURIComponent(match[1]!) : undefined,
   );

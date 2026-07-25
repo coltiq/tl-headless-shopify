@@ -1,5 +1,5 @@
 import { ancestorsOf, indexByHandle, indexByPath } from "lib/categories";
-import { resolveVehiclePath, type VehicleGeneration } from "lib/fitment";
+import { resolveVehiclePath, type VehicleSelection } from "lib/fitment";
 import { getCategoryTree, getCollection, getVehicles } from "lib/shopify";
 import type { CategoryNode, Collection } from "lib/shopify/types";
 
@@ -16,7 +16,7 @@ export type CategoryResolution =
       kind: "category";
       node: CategoryNode;
       collection: Collection | undefined;
-      gen: VehicleGeneration | undefined;
+      vehicle: VehicleSelection | undefined;
       ancestors: Crumb[];
       // Direct child categories, used by the safety net below and nowhere
       // else — the grid never has to merge descendants (decision 6).
@@ -24,7 +24,11 @@ export type CategoryResolution =
     }
   // A live collection with no position in the nav tree (gift-cards, the-lab,
   // best-sellers…). Renders flat at /<handle>, no redirect.
-  | { kind: "flat"; collection: Collection; gen: VehicleGeneration | undefined }
+  | {
+      kind: "flat";
+      collection: Collection;
+      vehicle: VehicleSelection | undefined;
+    }
   // The handle has a tree position, so /<handle> is not the canonical URL.
   | { kind: "redirect"; to: string }
   | { kind: "none" };
@@ -63,10 +67,12 @@ export async function resolveCategoryPath(
     const base = `/${segments.slice(0, -3).join("/")}`;
     const node = byPath.get(base);
     if (node) {
-      const gen = await resolveVehicleSegments(segments.slice(-3));
+      const vehicle = await resolveVehicleSegments(segments.slice(-3));
       // The base is a real category, so these last three segments can only
       // ever have been a vehicle. Nothing further can match.
-      return gen ? categoryResolution(node, gen, byPath) : { kind: "none" };
+      return vehicle
+        ? categoryResolution(node, vehicle, byPath)
+        : { kind: "none" };
     }
   }
 
@@ -80,15 +86,15 @@ export async function resolveCategoryPath(
 
     const collection = await liveCollection(handle);
     return collection
-      ? { kind: "flat", collection, gen: undefined }
+      ? { kind: "flat", collection, vehicle: undefined }
       : { kind: "none" };
   }
 
   // 4 — a bare collection handle plus a vehicle.
   if (segments.length === 4) {
     const handle = segments[0]!;
-    const gen = await resolveVehicleSegments(segments.slice(1));
-    if (gen) {
+    const vehicle = await resolveVehicleSegments(segments.slice(1));
+    if (vehicle) {
       const inTree = byHandle.get(handle);
       if (inTree) {
         return {
@@ -100,7 +106,7 @@ export async function resolveCategoryPath(
       const collection = await liveCollection(handle);
       // Lifestyle collections have no vehicle URLs.
       if (collection && !collection.fitmentDisabled) {
-        return { kind: "flat", collection, gen };
+        return { kind: "flat", collection, vehicle };
       }
     }
   }
@@ -121,7 +127,7 @@ async function liveCollection(handle: string): Promise<Collection | undefined> {
 // loss. generateMetadata canonicalizes it back to the lowercase form.
 async function resolveVehicleSegments(
   segments: string[],
-): Promise<VehicleGeneration | undefined> {
+): Promise<VehicleSelection | undefined> {
   return resolveVehiclePath(
     await getVehicles(),
     segments.map((segment) => segment.toLowerCase()),
@@ -130,7 +136,7 @@ async function resolveVehicleSegments(
 
 async function categoryResolution(
   node: CategoryNode,
-  gen: VehicleGeneration | undefined,
+  vehicle: VehicleSelection | undefined,
   byPath: Map<string, CategoryNode>,
 ): Promise<CategoryResolution> {
   const ancestors = ancestorsOf(node, byPath).map(toCrumb);
@@ -152,21 +158,21 @@ async function categoryResolution(
         ? `Category ${node.path} references collection "${node.collectionHandle}", which is missing, deleted, or unpublished from the sales channel`
         : `Category ${node.path} ("${node.title}") has no collection reference`,
     );
-    return gen
+    return vehicle
       ? { kind: "none" }
       : {
           kind: "category",
           node,
           collection: undefined,
-          gen: undefined,
+          vehicle: undefined,
           ancestors,
           children,
         };
   }
 
-  if (gen && collection.fitmentDisabled) return { kind: "none" };
+  if (vehicle && collection.fitmentDisabled) return { kind: "none" };
 
-  return { kind: "category", node, collection, gen, ancestors, children };
+  return { kind: "category", node, collection, vehicle, ancestors, children };
 }
 
 export function toCrumb(node: CategoryNode): Crumb {

@@ -8,7 +8,8 @@ import {
   fitmentTag,
   productFitsGeneration,
   UNIVERSAL_FIT_TAG,
-  type VehicleGeneration,
+  vehicleLabel,
+  type VehicleSelection,
 } from "lib/fitment";
 import {
   getCategoryTree,
@@ -87,7 +88,7 @@ export async function generateMetadata(props: {
     images: [{ url: ogImageUrl(cardTitle), width: 1200, height: 630 }],
   });
 
-  if (!resolved.gen) {
+  if (!resolved.vehicle) {
     return {
       title,
       // ?sort=/?all= variants must not index separately. For the flat
@@ -99,11 +100,15 @@ export async function generateMetadata(props: {
     };
   }
 
-  const gen = resolved.gen;
+  // The visitor's own year, straight from the URL — "2022 Ford F-150 Lighting",
+  // never the generation. The canonical below still collapses every in-range
+  // year onto the generation's first year.
+  const { gen } = resolved.vehicle;
+  const truck = vehicleLabel(resolved.vehicle);
   return {
-    title: `${gen.label} ${title}`,
-    description: `${title} that fits your ${gen.label}.`,
-    openGraph: openGraph(`${gen.label} ${title}`),
+    title: `${truck} ${title}`,
+    description: `${title} that fits your ${truck}.`,
+    openGraph: openGraph(`${truck} ${title}`),
     // Every in-range year serves identical content, so all year variants
     // canonicalize to the generation's first-year URL. Switch to
     // self-referencing canonicals if fitment ever becomes year-specific
@@ -137,7 +142,7 @@ export default async function CategoryPage(props: {
   // The nav label wins for a category: it is the text the visitor clicked and
   // the text in the breadcrumb trail. Collections keep their own title.
   const title = isCategory ? resolved.node.title : resolved.collection.title;
-  const gen = resolved.gen;
+  const vehicle = resolved.vehicle;
   const trail = isCategory ? resolved.ancestors : [];
 
   // Safety net, not a render mode: a node whose collection reference is
@@ -164,13 +169,13 @@ export default async function CategoryPage(props: {
     <CategoryShell
       trail={trail}
       title={title}
-      current={gen ? gen.label : title}
+      current={vehicle ? vehicleLabel(vehicle) : title}
       description={collection.description || null}
       sortRail
     >
-      {gen ? (
+      {vehicle ? (
         <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
-          Showing {title} that fits your {gen.label}.{" "}
+          Showing {title} that fits your {vehicleLabel(vehicle)}.{" "}
           <Link
             href={`${basePath}?all=1`}
             className="underline underline-offset-4"
@@ -197,14 +202,14 @@ export default async function CategoryPage(props: {
           collectionHandle={collection.handle}
           basePath={basePath}
           title={title}
-          gen={gen}
+          vehicle={vehicle}
           searchParams={props.searchParams}
         />
       </Suspense>
       {/* Bare fitment-enabled view only: lifestyle pages never bounce to a
           vehicle URL, and the vehicle view rendering it would loop. Suspense
           is required — it calls useSearchParams. */}
-      {!gen && !collection.fitmentDisabled ? (
+      {!vehicle && !collection.fitmentDisabled ? (
         <Suspense fallback={null}>
           <GarageRedirect basePath={basePath} />
         </Suspense>
@@ -271,13 +276,13 @@ async function SortedGrid({
   collectionHandle,
   basePath,
   title,
-  gen,
+  vehicle,
   searchParams,
 }: {
   collectionHandle: string;
   basePath: string;
   title: string;
-  gen?: VehicleGeneration;
+  vehicle?: VehicleSelection;
   searchParams?: SearchParams;
 }) {
   const { sort } = ((await searchParams) ?? {}) as { sort?: string };
@@ -294,25 +299,28 @@ async function SortedGrid({
     collection: collectionHandle,
     sortKey,
     reverse,
-    ...(gen && {
-      filters: [{ tag: fitmentTag(gen.handle) }, { tag: UNIVERSAL_FIT_TAG }],
+    ...(vehicle && {
+      filters: [
+        { tag: fitmentTag(vehicle.gen.handle) },
+        { tag: UNIVERSAL_FIT_TAG },
+      ],
     }),
   });
 
   // Safety net: until the Tag filter is enabled in the Search & Discovery
   // app, Shopify silently ignores `filters` and returns the unfiltered list.
-  const visible = gen
+  const visible = vehicle
     ? products.filter((product) =>
-        productFitsGeneration(product.tags, gen.handle),
+        productFitsGeneration(product.tags, vehicle.gen.handle),
       )
     : products;
 
   if (visible.length === 0) {
     return (
       <p className="py-3 text-lg">
-        {gen ? (
+        {vehicle ? (
           <>
-            No {title} fit your {gen.label} yet.{" "}
+            No {title} fit your {vehicleLabel(vehicle)} yet.{" "}
             <Link
               href={`${basePath}?all=1`}
               className="underline underline-offset-4"
