@@ -50,7 +50,7 @@ export const getNavMenuQuery = /* GraphQL */ `
     }
   }
 
-  # Category fields (PLAN-CATEGORY-URLS.md Step 1). \`slug\` is the URL segment —
+  # Category fields (CLAUDE.md, "The category URL space"). \`slug\` is the URL segment —
   # the full path comes from tree position, never from \`label\` or the
   # collection handle. \`collection\` is an explicit reference because a slug and
   # its collection handle are allowed to differ.

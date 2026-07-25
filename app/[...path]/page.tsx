@@ -126,7 +126,7 @@ export default async function CategoryPage(props: {
   // reached, so Next serves a client-side `__next-page-redirect` rather than
   // an HTTP 308 — same root cause as the 200-status 404s. The canonical tag
   // on the destination is what carries the SEO weight until that changes; see
-  // docs/PHASE3-RED-FLAGS.md.
+  // docs/plans/OPEN-ITEMS.md.
   if (resolved.kind === "redirect") permanentRedirect(resolved.to);
 
   const isCategory = resolved.kind === "category";

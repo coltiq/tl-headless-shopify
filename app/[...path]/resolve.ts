@@ -29,7 +29,7 @@ export type CategoryResolution =
   | { kind: "redirect"; to: string }
   | { kind: "none" };
 
-// Resolution order (PLAN-CATEGORY-URLS.md Step 3). Steps 1–2 are in-memory
+// Resolution order (CLAUDE.md, "The category URL space"). Steps 1–2 are in-memory
 // lookups against the cached index, so trying both costs nothing and a real
 // category always beats a vehicle reading of the same segments.
 //

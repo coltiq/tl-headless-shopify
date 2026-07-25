@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 // TODO: placeholder — L1 nav section landing page, to be custom-built.
 // L1 items are standalone destinations outside the category URL space
-// (docs/plans/PLAN-CATEGORY-URLS.md decision 2), so this static route shadows
+// (CLAUDE.md, "The category URL space"), so this static route shadows
 // the [...path] catch-all.
 export default function BehindTheBuildPage() {
   return (

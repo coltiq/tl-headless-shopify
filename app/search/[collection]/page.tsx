@@ -12,7 +12,7 @@ import { permanentRedirect } from "next/navigation";
 // degrades this to a client-side `__next-page-redirect` rather than an HTTP
 // 308. `export const dynamic` would fix it but is rejected outright by
 // cacheComponents. A real 308 needs middleware — see
-// docs/PHASE3-RED-FLAGS.md.
+// docs/plans/OPEN-ITEMS.md.
 export default async function LegacyCollectionPage(props: {
   params: Promise<{ collection: string }>;
 }) {

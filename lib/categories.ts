@@ -4,7 +4,7 @@
 //
 // The category URL space is *derived from the nav_item tree*: an author types a
 // slug, the app builds the path from tree position with L1 (the four nav
-// sections) contributing no segment. See docs/plans/PLAN-CATEGORY-URLS.md.
+// sections) contributing no segment. See CLAUDE.md, "The category URL space".
 
 import { NAV_LEVEL_CAPS } from "lib/constants";
 import type { CategoryNode, MenuItem, ShopifyNavItem } from "lib/shopify/types";
@@ -30,7 +30,7 @@ const navStyle = (node: ShopifyNavItem) =>
 // finds to `out` and returning the menu items plus the category paths that
 // belong to `parentPath` directly.
 //
-// Walk rules (PLAN-CATEGORY-URLS.md Step 2):
+// Walk rules (CLAUDE.md, "The category URL space"):
 //  - a node contributes a segment only if it has a valid, unique `slug`;
 //  - a node without a slug is a menu heading — its children attach to *its*
 //    parent's path, so headings never appear in a URL or a breadcrumb;

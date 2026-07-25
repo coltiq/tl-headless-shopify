@@ -1,9 +1,9 @@
 # Shopify setup — the complete admin checklist
 
 Everything that has to exist in the Shopify admin for this storefront to work,
-in the order it has to be done. Replaces the former `shopify-nav-setup.md` and
-`shopify-vehicle-setup.md`, and folds in every admin prerequisite named in the
-plans under `docs/plans/`.
+in the order it has to be done. Authoritative for admin setup; how the app
+_reads_ any of it is in `CLAUDE.md`, and what's still outstanding is in
+`docs/plans/OPEN-ITEMS.md`.
 
 **Read the order rules first — several steps fail if run out of sequence.**
 
@@ -39,8 +39,8 @@ work that is planned but not built. Every table below is marked:
 - **Live** — the app reads it now.
 - **Phase 3B** — deferred until after the UI pass. Don't build it yet.
 
-> **Phase 3 shipped 2026-07-25.** The multi-level category URL space
-> (`docs/plans/PLAN-CATEGORY-URLS.md`) is built and every field it needs is now
+> **Phase 3 shipped 2026-07-25.** The multi-level category URL space is built
+> and every field it needs is now
 > **Live**. Until the `slug` and `collection` fields are actually filled in on
 > the `nav_item` entries, the category tree is empty and only single-segment
 > collection URLs resolve — which is why the deep nav links
@@ -532,7 +532,7 @@ caches.
 
 # Part 9 — Webhook reference
 
-> Formerly `PLAN-WEBHOOK.md`. Deploy-time only: webhooks need a publicly
+> Deploy-time only: webhooks need a publicly
 > reachable URL, so none of this applies locally. Until they exist the deployed
 > site still works — content edits just take up to a day (`cacheLife("days")`)
 > to appear instead of seconds.
