@@ -2,6 +2,7 @@
 
 import { useVehicles } from "components/vehicles-context";
 import type { VehicleGeneration } from "lib/fitment";
+import Link from "next/link";
 import { useState } from "react";
 
 // Slugs seed the dropdowns; the full display name lives in `label`, so
@@ -151,6 +152,15 @@ export function VehiclePicker({
       >
         {current ? "Update truck" : "Add my truck"}
       </button>
+
+      {/* Escape hatch: the vehicle list only covers the generations we stock
+          for. Without this a visitor whose truck is missing has no next step. */}
+      <Link
+        href="/contact"
+        className="text-center font-tl-text text-[11px] text-tl-mute-white underline underline-offset-4 hover:text-tl-ink"
+      >
+        My truck isn&apos;t listed
+      </Link>
     </div>
   );
 }

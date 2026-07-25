@@ -14,6 +14,11 @@ export const createUrl = (
   return `${pathname}${queryString}`;
 };
 
+// Category pages can't use Next's `opengraph-image` file convention — it is
+// illegal inside a catch-all segment — so they point at app/api/og instead.
+export const ogImageUrl = (title: string) =>
+  `/api/og?title=${encodeURIComponent(title)}`;
+
 export const ensureStartsWith = (stringToCheck: string, startsWith: string) =>
   stringToCheck.startsWith(startsWith)
     ? stringToCheck

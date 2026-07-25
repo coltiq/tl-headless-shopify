@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import CartModal from "components/cart/modal";
 import OpenCart from "components/cart/open-cart";
+import { HEADER_MENU_HANDLE, NAV_ROOT_HANDLE } from "lib/constants";
 import { getAnnouncement, getNavMenu } from "lib/shopify";
 import { ensureStartsWith } from "lib/utils";
 import Link from "next/link";
@@ -16,19 +17,17 @@ import { MobileLinksBand } from "./mobile-links";
 import { SearchField, SearchFieldSkeleton } from "./search";
 import { Wordmark } from "./wordmark";
 
-// The nav is sourced from the nav_item metaobject tree rooted at this handle
-// (see docs/shopify-setup.md) and renders up to four levels. Until the
-// metaobject exists in admin, the native menu below serves as the fallback
-// (capped at three levels by Shopify).
-const NAV_METAOBJECT_HANDLE = "main-nav";
-const HEADER_MENU_HANDLE = "main-menu-v2";
-
+// The nav is sourced from the nav_item metaobject tree rooted at
+// NAV_ROOT_HANDLE (see docs/shopify-setup.md) and renders up to four levels.
+// Until the metaobject exists in admin, the native menu serves as the fallback
+// (capped at three levels by Shopify). The same tree derives the category URL
+// space, so both handles live in lib/constants.ts.
 const utilityIcon =
   "grid h-[46px] w-[46px] place-items-center rounded-[3px] text-tl-ink group-data-[condensed]:h-11 group-data-[condensed]:w-11";
 
 export async function Header() {
   const [menu, announcement] = await Promise.all([
-    getNavMenu(NAV_METAOBJECT_HANDLE, HEADER_MENU_HANDLE),
+    getNavMenu(NAV_ROOT_HANDLE, HEADER_MENU_HANDLE),
     getAnnouncement(),
   ]);
 

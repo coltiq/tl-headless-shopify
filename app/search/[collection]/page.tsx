@@ -1,54 +1,23 @@
-import { getCollection, getCollectionProducts } from "lib/shopify";
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { indexByHandle } from "lib/categories";
+import { getCategoryTree } from "lib/shopify";
+import { permanentRedirect } from "next/navigation";
 
-import Grid from "components/grid";
-import ProductGridItems from "components/layout/product-grid-items";
-import { defaultSort, sorting } from "lib/constants";
-
-export async function generateMetadata(props: {
+// Legacy route from the upstream template. Nothing links here any more, and a
+// canonical tag is weaker than a redirect, so every hit is sent to the
+// canonical category URL: the derived tree path when the handle has a tree
+// position, the flat path otherwise.
+//
+// Caveat, same root cause as the 200-status 404s: under cacheComponents the
+// route shell is flushed before permanentRedirect() is reached, so Next
+// degrades this to a client-side `__next-page-redirect` rather than an HTTP
+// 308. `export const dynamic` would fix it but is rejected outright by
+// cacheComponents. A real 308 needs middleware — see
+// docs/PHASE3-RED-FLAGS.md.
+export default async function LegacyCollectionPage(props: {
   params: Promise<{ collection: string }>;
-}): Promise<Metadata> {
-  const params = await props.params;
-  const collection = await getCollection(params.collection);
-
-  if (!collection) return notFound();
-
-  return {
-    title: collection.seo?.title || collection.title,
-    description:
-      collection.seo?.description ||
-      collection.description ||
-      `${collection.title} products`,
-    // Route kept for compatibility; SEO concentrates on the /<handle> URLs.
-    alternates: { canonical: `/${params.collection}` },
-  };
-}
-
-export default async function CategoryPage(props: {
-  params: Promise<{ collection: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const searchParams = await props.searchParams;
-  const params = await props.params;
-  const { sort } = searchParams as { [key: string]: string };
-  const { sortKey, reverse } =
-    sorting.find((item) => item.slug === sort) || defaultSort;
-  const products = await getCollectionProducts({
-    collection: params.collection,
-    sortKey,
-    reverse,
-  });
+  const { collection } = await props.params;
+  const node = indexByHandle(await getCategoryTree()).get(collection);
 
-  return (
-    <section>
-      {products.length === 0 ? (
-        <p className="py-3 text-lg">{`No products found in this collection`}</p>
-      ) : (
-        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <ProductGridItems products={products} />
-        </Grid>
-      )}
-    </section>
-  );
+  permanentRedirect(node ? node.path : `/${collection}`);
 }

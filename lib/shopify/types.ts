@@ -94,17 +94,6 @@ export type Money = {
   currencyCode: string;
 };
 
-export type Page = {
-  id: string;
-  title: string;
-  handle: string;
-  body: string;
-  bodySummary: string;
-  seo?: SEO;
-  createdAt: string;
-  updatedAt: string;
-};
-
 export type Product = Omit<ShopifyProduct, "variants" | "images"> & {
   variants: ProductVariant[];
   images: Image[];
@@ -300,9 +289,38 @@ export type ShopifyNavItem = {
   label: Maybe<{ value: string }>;
   link: Maybe<{ value: string }>;
   style: Maybe<{ value: string }>;
+  // Category fields. `slug` is one URL segment; the path is built from tree
+  // position. `collection.reference` is `{}` rather than null when the
+  // reference points at something that isn't a Collection.
+  slug: Maybe<{ value: string }>;
+  layout: Maybe<{ value: string }>;
+  showGrid: Maybe<{ value: string }>;
+  collection: Maybe<{
+    reference: Maybe<{ handle?: string; title?: string }>;
+  }>;
   children?: Maybe<{
     references: Maybe<{ nodes: ShopifyNavItem[] }>;
   }>;
+};
+
+// One category page, flattened out of the nav_item tree. Flat with
+// parentPath/childPaths rather than nested children: no cycles, no
+// duplication, and trivially serializable across the `use cache` boundary.
+export type CategoryNode = {
+  // Derived from tree position with L1 skipped, e.g. "/lighting/rock-lights".
+  path: string;
+  segments: string[];
+  slug: string;
+  // From `label` — display only.
+  title: string;
+  // Explicit reference. null means the admin entry is incomplete or points at
+  // a deleted/unpublished collection; the page renders child links instead.
+  collectionHandle: string | null;
+  // `landing` is Phase 3B and currently renders as `grid`.
+  layout: "grid" | "landing";
+  showGrid: boolean;
+  parentPath: string | null;
+  childPaths: string[];
 };
 
 export type ShopifyNavMenuOperation = {
@@ -368,17 +386,6 @@ export type ShopifyPredictiveSearchOperation = {
   };
   variables: {
     query: string;
-  };
-};
-
-export type ShopifyPageOperation = {
-  data: { pageByHandle: Page };
-  variables: { handle: string };
-};
-
-export type ShopifyPagesOperation = {
-  data: {
-    pages: Connection<Page>;
   };
 };
 

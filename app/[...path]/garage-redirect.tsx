@@ -9,7 +9,10 @@ import { useEffect, useRef } from "react";
 // purpose: vehicle identity lives in the URL, never in a server cookie read,
 // so the category shell stays cacheable across visitors. Renders nothing;
 // the one-frame flash of the unfiltered grid is an accepted tradeoff.
-export default function GarageRedirect({ category }: { category: string }) {
+//
+// `basePath` is the full category path ("/lighting/rock-lights"), so this works
+// identically at any depth.
+export default function GarageRedirect({ basePath }: { basePath: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const vehicles = useVehicles();
@@ -21,13 +24,15 @@ export default function GarageRedirect({ category }: { category: string }) {
     if (searchParams.get("all") === "1") return;
     const gen = readGarageGeneration(vehicles);
     if (!gen) return;
-    const sort = searchParams.get("sort");
+    // Carry every param across, not just `sort` — anything dropped here is a
+    // filter the visitor set and would silently lose on the bounce.
+    const query = searchParams.toString();
     router.replace(
-      `/${category}/${vehiclePathSegments(gen).join("/")}${
-        sort ? `?sort=${encodeURIComponent(sort)}` : ""
+      `${basePath}/${vehiclePathSegments(gen).join("/")}${
+        query ? `?${query}` : ""
       }`,
     );
-  }, [category, router, searchParams, vehicles]);
+  }, [basePath, router, searchParams, vehicles]);
 
   return null;
 }

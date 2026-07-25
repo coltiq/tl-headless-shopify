@@ -1,5 +1,7 @@
+import { buildNavProjection } from "lib/categories";
 import {
   HIDDEN_PRODUCT_TAG,
+  NAV_ROOT_HANDLE,
   SHOPIFY_GRAPHQL_API_ENDPOINT,
   TAGS,
 } from "lib/constants";
@@ -27,7 +29,6 @@ import {
 } from "./queries/collection";
 import { getHeaderMenuQuery, getMenuQuery } from "./queries/menu";
 import { getNavMenuQuery } from "./queries/nav";
-import { getPageQuery, getPagesQuery } from "./queries/page";
 import { getPredictiveSearchQuery } from "./queries/predictive-search";
 import { getShopAnnouncementQuery } from "./queries/shop";
 import {
@@ -39,12 +40,12 @@ import { getVehiclesQuery } from "./queries/vehicles";
 import {
   Announcement,
   Cart,
+  CategoryNode,
   Collection,
   Connection,
   Image,
   Menu,
   MenuItem,
-  Page,
   PredictiveSearchResult,
   Product,
   ShopifyAddToCartOperation,
@@ -60,9 +61,7 @@ import {
   ShopifyMenuOperation,
   ShopifyNavItem,
   ShopifyNavMenuOperation,
-  ShopifyPageOperation,
   ShopifyPredictiveSearchOperation,
-  ShopifyPagesOperation,
   ShopifyProduct,
   ShopifyProductOperation,
   ShopifyProductRecommendationsOperation,
@@ -500,18 +499,41 @@ export async function getHeaderMenu(handle: string): Promise<MenuItem[]> {
   return reshapeMenuItems(res.body?.data?.menu?.items);
 }
 
-const reshapeNavItems = (nodes: ShopifyNavItem[] = []): MenuItem[] =>
-  nodes
-    // A missing label means the node is either a non-Metaobject reference
-    // (deserialized as {}) or a misconfigured entry — drop it.
-    .filter((node) => node?.label?.value)
-    .map((node) => ({
-      title: node.label!.value,
-      path: node.link?.value ? menuUrlToPath(node.link.value) : "#",
-      style:
-        node.style?.value === "links-row" ? ("links-row" as const) : undefined,
-      items: reshapeNavItems(node.children?.references?.nodes ?? []),
-    }));
+// The raw L1 nodes of the nav_item tree, or null when the metaobject can't be
+// read — callers decide what to do about that (the menu falls back to the
+// native Shopify menu; the category index has no fallback and goes empty).
+export async function getNavTree(
+  handle: string = NAV_ROOT_HANDLE,
+): Promise<ShopifyNavItem[] | null> {
+  "use cache";
+  cacheTag(TAGS.menu, TAGS.collections);
+  cacheLife("days");
+
+  if (!endpoint) {
+    console.log(`Skipping getNavTree for '${handle}' - Shopify not configured`);
+    return null;
+  }
+
+  try {
+    const res = await shopifyFetch<ShopifyNavMenuOperation>({
+      query: getNavMenuQuery,
+      variables: {
+        handle,
+      },
+    });
+    const root = res.body?.data?.metaobject;
+    if (root) {
+      return root.children?.references?.nodes ?? [];
+    }
+  } catch (e) {
+    // A missing unauthenticated_read_metaobjects scope or disabled storefront
+    // access on the definition throws rather than resolving null — callers
+    // must degrade, not crash.
+    console.error(`getNavTree for '${handle}' failed`, e);
+  }
+
+  return null;
+}
 
 export async function getNavMenu(
   handle: string,
@@ -530,25 +552,30 @@ export async function getNavMenu(
     return [];
   }
 
-  try {
-    const res = await shopifyFetch<ShopifyNavMenuOperation>({
-      query: getNavMenuQuery,
-      variables: {
-        handle,
-      },
-    });
-    const root = res.body?.data?.metaobject;
-    if (root) {
-      return reshapeNavItems(root.children?.references?.nodes ?? []);
-    }
-  } catch (e) {
-    // A missing unauthenticated_read_metaobjects scope or disabled storefront
-    // access on the definition throws rather than resolving null — the header
-    // must fall back, not crash.
-    console.error(`getNavMenu for '${handle}' failed, using fallback menu`, e);
+  const tree = await getNavTree(handle);
+  if (tree) {
+    return buildNavProjection(tree, menuUrlToPath).menu;
   }
 
+  console.error(
+    `getNavMenu for '${handle}' has no nav_item tree, using fallback menu`,
+  );
   return getHeaderMenu(fallbackMenuHandle);
+}
+
+// The flat category index every URL in the category space resolves against.
+// Empty when the nav_item tree is unreadable: the native-menu fallback has no
+// slugs, so there is nothing to derive paths from — single-segment collection
+// URLs still work through the flat fallback in app/[...path].
+export async function getCategoryTree(): Promise<CategoryNode[]> {
+  "use cache";
+  cacheTag(TAGS.menu, TAGS.collections);
+  cacheLife("days");
+
+  const tree = await getNavTree();
+  if (!tree) return [];
+
+  return buildNavProjection(tree, menuUrlToPath).categories;
 }
 
 const reshapeVehicles = (nodes: ShopifyVehicleNode[]): VehicleGeneration[] => {
@@ -733,29 +760,6 @@ export async function getPredictiveSearch(
         path: `/${collection.handle}`,
       })),
   };
-}
-
-export async function getPage(handle: string): Promise<Page> {
-  "use cache";
-  cacheLife("days");
-
-  const res = await shopifyFetch<ShopifyPageOperation>({
-    query: getPageQuery,
-    variables: { handle },
-  });
-
-  return res.body.data.pageByHandle;
-}
-
-export async function getPages(): Promise<Page[]> {
-  "use cache";
-  cacheLife("days");
-
-  const res = await shopifyFetch<ShopifyPagesOperation>({
-    query: getPagesQuery,
-  });
-
-  return removeEdgesAndNodes(res.body.data.pages);
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {

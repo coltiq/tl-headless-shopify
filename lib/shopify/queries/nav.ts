@@ -50,6 +50,14 @@ export const getNavMenuQuery = /* GraphQL */ `
     }
   }
 
+  # Category fields (PLAN-CATEGORY-URLS.md Step 1). \`slug\` is the URL segment —
+  # the full path comes from tree position, never from \`label\` or the
+  # collection handle. \`collection\` is an explicit reference because a slug and
+  # its collection handle are allowed to differ.
+  #
+  # \`sections\` (Phase 3B) is deliberately absent: it is a metaobject-reference
+  # *list*, so selecting it adds another multiplying connection at all four
+  # levels for a field nothing reads yet. Add it with Step 7.
   fragment navItemFields on Metaobject {
     label: field(key: "label") {
       value
@@ -59,6 +67,23 @@ export const getNavMenuQuery = /* GraphQL */ `
     }
     style: field(key: "style") {
       value
+    }
+    slug: field(key: "slug") {
+      value
+    }
+    layout: field(key: "layout") {
+      value
+    }
+    showGrid: field(key: "show_grid") {
+      value
+    }
+    collection: field(key: "collection") {
+      reference {
+        ... on Collection {
+          handle
+          title
+        }
+      }
     }
   }
 `;

@@ -20,7 +20,8 @@ Requires env vars from `.env.example` in `.env.local`: `SHOPIFY_STORE_DOMAIN`, `
 ## Docs
 
 - `docs/shopify-setup.md` — the complete Shopify admin checklist in dependency order: metaobject/metafield definitions, webhooks, collections, nav entries, vehicle entries, product tagging, storefront filters. Authoritative for anything that has to exist in the admin, including the full webhook reference (Part 9).
-- `docs/plans/` — build plans, current and historical. `PLAN-CATEGORY-URLS.md` is the active one (multi-level category URLs); `PLAN-GARAGE.md` / `PLAN-GARAGE-PHASE2.md` are shipped; `PLAN-WEBHOOK.md` is superseded by the setup doc.
+- `docs/PHASE3-RED-FLAGS.md` — self-audit of the category-URL build: where it deviates from the plan, and where the plan was wrong about the framework. Read before touching routing or SEO — in particular, `notFound()` still returns HTTP 200 under `cacheComponents`.
+- `docs/plans/` — build plans, current and historical. `PLAN-CATEGORY-URLS.md` Steps 1–6 and 8 are shipped (Step 7 / Phase 3B deferred); `PLAN-GARAGE.md` / `PLAN-GARAGE-PHASE2.md` are shipped; `PLAN-WEBHOOK.md` is superseded by the setup doc.
 
 ## Imports
 
@@ -53,8 +54,10 @@ Cart state lives in Shopify, identified by a `cartId` cookie. `components/cart/c
 
 ### Routes (`app/`)
 
-- `/` — homepage; `/product/[handle]` — product detail; `/search` and `/search/[collection]` — listings with sort options defined in `lib/constants.ts` (`sorting`).
-- `/[page]` — catch-all rendering Shopify CMS pages by handle.
+- `/` — homepage; `/product/[handle]` — product detail; `/search` — listing with sort options defined in `lib/constants.ts` (`sorting`).
+- `app/[...path]` — the category URL space. Paths are **derived from the `nav_item` tree** (`getCategoryTree()` → `lib/categories.ts`), with the four L1 sections contributing no segment; an optional trailing `make/model/year` filters by fitment at any depth. `app/[...path]/resolve.ts` holds the resolution order shared by the page, its metadata, and the OG card. Static siblings (`/parts`, `/design-build`, `/lifestyle`, `/behind-the-build`, `/contact`, `/search`) always beat it.
+- `/search/[collection]` — legacy, redirects to the canonical category path.
+- `middleware.ts` — issues the **real** 308s (flat handle → tree path, legacy `/search/<handle>`). `permanentRedirect()` inside a page is not a 308 under `cacheComponents`; the shell flushes first and Next degrades it to a client-side redirect with a 200. Middleware reads `app/api/category-index` (which calls the cached `getCategoryTree()`, so no extra Shopify traffic) and memoizes it for 60s. It falls through to `next()` on any failure — never break rendering from here.
 - Dynamic OpenGraph images via `opengraph-image.tsx` files sharing `components/opengraph-image.tsx`.
 
 ## Rules

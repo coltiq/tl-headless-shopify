@@ -1,5 +1,6 @@
 import { AddToCart } from "components/cart/add-to-cart";
 import Price from "components/price";
+import { FitmentBadge } from "components/product/fitment-badge";
 import Prose from "components/prose";
 import { Product } from "lib/shopify/types";
 import { VariantSelector } from "./variant-selector";
@@ -16,6 +17,9 @@ export function ProductDescription({ product }: { product: Product }) {
           />
         </div>
       </div>
+      {/* Above the variant picker on purpose: whether it fits is the question
+          to answer before which size/finish. */}
+      <FitmentBadge tags={product.tags} />
       <VariantSelector options={product.options} variants={product.variants} />
       {product.descriptionHtml ? (
         <Prose

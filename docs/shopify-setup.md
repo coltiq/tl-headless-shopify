@@ -37,9 +37,15 @@ Some of what follows is read by the app today; some is the target state for
 work that is planned but not built. Every table below is marked:
 
 - **Live** — the app reads it now.
-- **Phase 3** — specified in `docs/plans/PLAN-CATEGORY-URLS.md`, not yet built.
-  Safe to set up early; the app ignores it until the code ships.
 - **Phase 3B** — deferred until after the UI pass. Don't build it yet.
+
+> **Phase 3 shipped 2026-07-25.** The multi-level category URL space
+> (`docs/plans/PLAN-CATEGORY-URLS.md`) is built and every field it needs is now
+> **Live**. Until the `slug` and `collection` fields are actually filled in on
+> the `nav_item` entries, the category tree is empty and only single-segment
+> collection URLs resolve — which is why the deep nav links
+> (`/lighting/rock-lights`, `/lighting/rock-lights/diy-kits`, …) still 404.
+> **Part 4.3 is the work that turns them on.**
 
 ---
 
@@ -87,11 +93,11 @@ the item is dropped or the whole nav falls back.
 | `link`       | Single line text                                  | Live     | Plain text on purpose: the URL field type only accepts absolute URLs, but the nav needs relative paths. Empty = heading |
 | `children`   | Metaobject reference → Nav item, **list**         | Live     | Self-reference. List order is display order                                                                             |
 | `style`      | Single line text, preset `default` / `links-row`  | Live     | `links-row` on an L2 item moves it out of the mega panel rail; its children render as the links row at the panel's foot |
-| `slug`       | Single line text                                  | Phase 3  | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                         |
-| `collection` | Collection reference                              | Phase 3  | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                   |
-| `layout`     | Single line text, preset `grid` / `landing`       | Phase 3  | Defaults to `grid`                                                                                                      |
-| `sections`   | Metaobject reference → Category section, **list** | Phase 3B | Ignored while `layout` is `grid`                                                                                        |
-| `show_grid`  | True/false                                        | Phase 3B | Landing pages only; default true = the full grid follows the authored sections                                          |
+| `slug`       | Single line text                                  | Live     | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                         |
+| `collection` | Collection reference                              | Live     | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                   |
+| `layout`     | Single line text, preset `grid` / `landing`       | Live     | Read and stored; defaults to `grid`. `landing` still renders the grid until Phase 3B ships                              |
+| `show_grid`  | True/false                                        | Live     | Read and stored; unset = true. Only starts mattering when `landing` renders differently (Phase 3B)                      |
+| `sections`   | Metaobject reference → Category section, **list** | Phase 3B | **Not in the query yet.** A reference _list_ multiplies query cost at all four levels, so it is added with Phase 3B     |
 
 Then, under the definition's options, enable **Storefront API access**
 (Storefronts: Read).
@@ -268,14 +274,10 @@ don't look like category paths:
 Because these are code routes, **a collection can never use those four
 handles** — a static route always beats the category resolver.
 
-## 4.3 Category items (L2 and below)
+## 4.3 Category items (L2 and below) — **the Phase 3 migration**
 
-**Today (Live):** the app resolves single-segment paths only. Put the full path
-in `link` as `/<collection-handle>` — e.g. `/lighting`, `/rock-lights`.
-
-**After Phase 3:** fill in `slug` (the URL segment) and `collection` (the
-reference), and leave `link` empty. The app builds the full path from tree
-position with L1 skipped:
+**Fill in `slug` (the URL segment) and `collection` (the reference), and clear
+`link`.** The app builds the full path from tree position, with L1 skipped:
 
 ```
 Parts                         (L1 — section, contributes no segment)
@@ -284,16 +286,60 @@ Parts                         (L1 — section, contributes no segment)
        └ Kits      slug: rock-light-kits → /lighting/rock-lights/rock-light-kits
 ```
 
-Re-parenting an item in admin moves its URL automatically, so the menu and the
-URL space can never disagree.
+An author types **one** slug per item; the app never sees a full path in admin
+and never infers one from a collection handle. Re-parenting an item moves its
+URL automatically, so the menu and the URL space can never disagree — which is
+exactly the failure this replaces.
 
-### Category slug rules (Phase 3, binding)
+**Why the deep nav links 404 right now.** The existing entries put a multi-level
+path straight into `link` (`/lighting/rock-lights/diy-kits`). Nothing derives
+that path, so nothing serves it. The app now prefers a derived path and falls
+back to `link` only when there's no slug, so the migration is safe to do one
+item at a time — each item starts working the moment it gets a `slug` and a
+`collection`, and untouched items keep their old behavior.
+
+Three rules the walk enforces, worth knowing before authoring:
+
+- **A node with no `slug` is a heading.** It contributes no segment, and its
+  children attach to _its_ parent's path. That's how a "Shop by truck" column
+  heading can sit in the mega panel without inventing a URL level.
+- **A node with a bad slug is dropped, along with everything under it** — the
+  menu entry stays (so the breakage is visible) but the URLs disappear. Check
+  the server logs for `Dropping nav_item …` after any nav edit.
+- **Every category node needs a `collection`.** A node without one renders a
+  page listing its child categories instead of a grid, and logs an error. It is
+  a bug indicator, not a supported page type.
+
+### Category slug rules (binding)
 
 - Lowercase alphanumeric plus internal hyphens. `plug-play`, never `p&p` — `&`
   is not URL-safe and `%26` in a path is a permanent readability tax.
 - **A slug may never be four digits.** `/lighting/2021` would collide with the
   vehicle year segment. Four-digit slugs are dropped with a console error.
-- Slugs must be unique among siblings.
+- Slugs must be unique among siblings — and, because L1 contributes no segment,
+  also across the four L1 sections at the first level. Two sections both
+  holding a `lighting` child produce one `/lighting`; the second is dropped
+  with an error.
+- **The four L1 handles are reserved forever.** `/parts`, `/design-build`,
+  `/lifestyle`, and `/behind-the-build` are static code routes and always beat
+  the category resolver, so no slug (and no collection handle) can ever use
+  them.
+
+### How a URL resolves (for reference)
+
+Given a path, the app tries, in order: the whole path as a category; the path
+minus its last three segments as a category with `make/model/year` appended;
+a single segment as a bare collection handle; a collection handle plus
+`make/model/year`. A real category always wins over a vehicle reading of the
+same segments. Anything left over is a 404.
+
+Two consequences worth remembering:
+
+- **A collection whose handle has a tree position is only canonical at its tree
+  path.** `/rock-lights` redirects to `/lighting/rock-lights`.
+- **Collections outside the tree keep rendering flat** at `/<handle>` —
+  `gift-cards`, `shop-labor`, `the-lab`, `best-sellers`. They need no nav entry
+  and no slug.
 
 ### Link formats for non-category destinations
 
@@ -302,7 +348,7 @@ Handles must match Shopify exactly — a typo renders a working-looking link tha
 
 | Destination                      | Enter                                                                                                    |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Category (collection)            | `/<handle>` today; `slug` + `collection` after Phase 3                                                   |
+| Category (collection)            | **Nothing** — use `slug` + `collection` instead, and leave `link` empty                                  |
 | Product                          | `/product/<handle>`                                                                                      |
 | Custom page                      | The route's path, e.g. `/contact`. **Shopify CMS pages are never rendered**                              |
 | All products / search            | `/search`                                                                                                |
@@ -314,9 +360,11 @@ Full store URLs pasted from the admin also work — the domain is stripped, and
 
 ## 4.4 Per-level item caps
 
-Extras are **silently dropped** — see `lib/shopify/queries/nav.ts` before
-raising them. After Phase 3 these caps also bound the category URL space: a tree
-wider or deeper than the caps quietly loses pages.
+Extras are **silently dropped by Shopify** — see `lib/shopify/queries/nav.ts`
+before raising them. These caps also bound the category URL space: a tree wider
+or deeper than the caps quietly loses pages, not just menu entries. The app now
+logs `nav_item level N is at its cap …` whenever a level is sitting on one, so
+check the server logs before assuming a page is missing for another reason.
 
 | Level              | Cap |
 | ------------------ | --- |
@@ -324,6 +372,11 @@ wider or deeper than the caps quietly loses pages.
 | L2 (rail)          | 12  |
 | L3 (column groups) | 12  |
 | L4 (links)         | 16  |
+
+Depth is capped at four nav levels, i.e. **three URL segments** after L1 is
+skipped (`/lighting/rock-lights/kits`). The resolver itself has no depth limit;
+going deeper means adding a nesting level in `nav.ts` and re-reviewing query
+cost.
 
 ---
 
@@ -452,12 +505,21 @@ caches.
 4. **Vehicle URLs** — clicking a category with a truck set lands you on
    `/<category path>/<make>/<model>/<year_start>`. Every in-range year also
    resolves (`/lighting/ford/f150/2024`) and canonicalizes to the first year.
-5. **Fitment** — a tagged part appears on its vehicle's page; an untagged one
+   The vehicle suffix works at **any** depth, including depth 3.
+5. **Category paths** — every derived path resolves; `/lighting/2021` and
+   `/a/b/c/d` land on the branded 404; `/rock-lights` sends you to
+   `/lighting/rock-lights`; `/gift-cards` still renders flat. The breadcrumb
+   trail matches the nav position at every depth.
+6. **Nav logs** — after any nav edit, check the server logs for
+   `Dropping nav_item …` and `nav_item level N is at its cap …`. Both are
+   silent in the UI and both cost URLs.
+7. **Fitment** — a tagged part appears on its vehicle's page; an untagged one
    does not. `/search` with a truck set filters; the toggle turns it off via
-   `?all=1` and stays visible in the off state.
-6. **Cascade** — a parent category's grid contains everything its children's
+   `?all=1` and stays visible in the off state. The PDP shows the fitment badge
+   once a truck is set.
+8. **Cascade** — a parent category's grid contains everything its children's
    grids do.
-7. **Fitment-disabled** — a collection with `custom.fitment_disabled` set shows
+9. **Fitment-disabled** — a collection with `custom.fitment_disabled` set shows
    no garage bounce and no vehicle URLs beneath it.
 
 > The curl in 8.2 proves the route, not Shopify's delivery. There are community

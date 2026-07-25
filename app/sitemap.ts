@@ -1,4 +1,4 @@
-import { getCollections, getProducts } from "lib/shopify";
+import { getCategoryTree, getCollections, getProducts } from "lib/shopify";
 import { baseUrl, validateEnvironmentVariables } from "lib/utils";
 import { MetadataRoute } from "next";
 
@@ -9,20 +9,73 @@ type Route = {
 
 export const dynamic = "force-dynamic";
 
+// Static code routes with no Shopify content behind them. The four L1 nav
+// sections permanently claim these paths — a static route always beats the
+// [...path] catch-all, so no collection can ever use those handles.
+const STATIC_ROUTES = [
+  "",
+  "/search",
+  "/contact",
+  "/parts",
+  "/design-build",
+  "/lifestyle",
+  "/behind-the-build",
+];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   validateEnvironmentVariables();
 
-  const routesMap = [""].map((route) => ({
+  const now = new Date().toISOString();
+  const routesMap = STATIC_ROUTES.map((route) => ({
     url: `${baseUrl}${route}`,
-    lastModified: new Date().toISOString(),
+    lastModified: now,
   }));
 
-  const collectionsPromise = getCollections().then((collections) =>
-    collections.map((collection) => ({
-      url: `${baseUrl}${collection.path}`,
-      lastModified: collection.updatedAt,
-    })),
-  );
+  // Category URLs are the tree paths, not the collection handles: /<handle>
+  // 308s to the derived path whenever the handle has a tree position, so only
+  // out-of-tree collections belong here flat.
+  //
+  // Vehicle URLs stay out of the sitemap (Phase 2 decision, unchanged) —
+  // categories × generations is a combinatorial explosion of near-duplicate
+  // pages, and they're all reachable by crawl anyway.
+  const categoriesPromise = getCategoryTree();
+  const collectionsPromise = getCollections();
+
+  const categoryRoutes = async (): Promise<Route[]> => {
+    const [categories, collections] = await Promise.all([
+      categoriesPromise,
+      collectionsPromise,
+    ]);
+    const inTree = new Set(
+      categories.map((node) => node.collectionHandle).filter(Boolean),
+    );
+    const updatedAt = new Map(
+      collections.map((collection) => [
+        collection.handle,
+        collection.updatedAt,
+      ]),
+    );
+
+    return [
+      ...categories.map((node) => ({
+        url: `${baseUrl}${node.path}`,
+        lastModified:
+          (node.collectionHandle && updatedAt.get(node.collectionHandle)) ||
+          now,
+      })),
+      ...collections
+        .filter(
+          (collection) =>
+            collection.handle &&
+            !collection.handle.startsWith("hidden") &&
+            !inTree.has(collection.handle),
+        )
+        .map((collection) => ({
+          url: `${baseUrl}/${collection.handle}`,
+          lastModified: collection.updatedAt,
+        })),
+    ];
+  };
 
   const productsPromise = getProducts({}).then((products) =>
     products.map((product) => ({
@@ -35,7 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     fetchedRoutes = (
-      await Promise.all([collectionsPromise, productsPromise])
+      await Promise.all([categoryRoutes(), productsPromise])
     ).flat();
   } catch (error) {
     throw JSON.stringify(error, null, 2);
