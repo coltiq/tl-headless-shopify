@@ -38,10 +38,14 @@ function SortFilterItem({ item }: { item: SortFilterItem }) {
   const searchParams = useSearchParams();
   const active = searchParams.get("sort") === item.slug;
   const q = searchParams.get("q");
+  // Dropping `all` would re-apply the fitment filter (and re-arm the garage
+  // redirect on category pages) when a widened view is re-sorted.
+  const all = searchParams.get("all");
   const href = createUrl(
     pathname,
     new URLSearchParams({
       ...(q && { q }),
+      ...(all && { all }),
       ...(item.slug && item.slug.length && { sort: item.slug }),
     }),
   );

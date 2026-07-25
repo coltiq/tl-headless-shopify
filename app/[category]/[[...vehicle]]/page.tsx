@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import Grid from "components/grid";
 import ProductGridItems from "components/layout/product-grid-items";
+import FilterList from "components/layout/search/filter";
 import { defaultSort, sorting } from "lib/constants";
 import {
   fitmentTag,
@@ -14,6 +15,7 @@ import { getCollection, getCollectionProducts } from "lib/shopify";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import GarageRedirect from "../garage-redirect";
 
 type Params = Promise<{ category: string; vehicle?: string[] }>;
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -79,45 +81,58 @@ export default async function CategoryPage(props: {
   // Suspense-wrapped grid reads it, so the page shell stays prerenderable
   // under cacheComponents and the grid is the only dynamic hole.
   return (
-    <section className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-4">
-      <h1 className="mb-2 text-2xl font-bold">{collection.title}</h1>
-      {collection.description ? (
-        <p className="mb-4 text-neutral-500 dark:text-neutral-400">
-          {collection.description}
-        </p>
-      ) : null}
-      {gen ? (
-        <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
-          Showing {collection.title} that fits your {gen.label}.{" "}
-          <Link
-            href={`/${category}?all=1`}
-            className="underline underline-offset-4"
-          >
-            View all {collection.title}
-          </Link>
-        </p>
-      ) : null}
-      <Suspense
-        fallback={
-          <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {Array(12)
-              .fill(0)
-              .map((_, index) => (
-                <Grid.Item
-                  key={index}
-                  className="animate-pulse bg-neutral-100 dark:bg-neutral-800"
-                />
-              ))}
-          </Grid>
-        }
-      >
-        <SortedGrid
-          category={category}
-          collectionTitle={collection.title}
-          gen={gen}
-          searchParams={props.searchParams}
-        />
-      </Suspense>
+    <section className="mx-auto flex max-w-(--breakpoint-2xl) flex-col gap-8 px-4 pb-4 text-black md:flex-row dark:text-white">
+      <div className="order-last min-h-screen w-full md:order-none">
+        <h1 className="mb-2 text-2xl font-bold">{collection.title}</h1>
+        {collection.description ? (
+          <p className="mb-4 text-neutral-500 dark:text-neutral-400">
+            {collection.description}
+          </p>
+        ) : null}
+        {gen ? (
+          <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
+            Showing {collection.title} that fits your {gen.label}.{" "}
+            <Link
+              href={`/${category}?all=1`}
+              className="underline underline-offset-4"
+            >
+              View all {collection.title}
+            </Link>
+          </p>
+        ) : null}
+        <Suspense
+          fallback={
+            <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {Array(12)
+                .fill(0)
+                .map((_, index) => (
+                  <Grid.Item
+                    key={index}
+                    className="animate-pulse bg-neutral-100 dark:bg-neutral-800"
+                  />
+                ))}
+            </Grid>
+          }
+        >
+          <SortedGrid
+            category={category}
+            collectionTitle={collection.title}
+            gen={gen}
+            searchParams={props.searchParams}
+          />
+        </Suspense>
+        {/* Bare fitment-enabled view only: lifestyle pages never bounce to a
+            vehicle URL, and the vehicle view rendering it would loop. Suspense
+            is required — it calls useSearchParams. */}
+        {!gen && !collection.fitmentDisabled ? (
+          <Suspense fallback={null}>
+            <GarageRedirect category={category} />
+          </Suspense>
+        ) : null}
+      </div>
+      <div className="order-none flex-none md:order-last md:w-[125px]">
+        <FilterList list={sorting} title="Sort by" />
+      </div>
     </section>
   );
 }
