@@ -195,11 +195,11 @@ Two metaobject definitions, then four shop metafields pointing at them.
 
 **Name:** Announcement, **Type:** `announcement`.
 
-| Field key   | Type             | Create it? | Notes                                                                          |
-| ----------- | ---------------- | ---------- | ------------------------------------------------------------------------------ |
-| `label`     | Single line text | **Yes**    | The message. Set as the display name field                                     |
-| `url`       | Single line text | **Yes**    | Where it links. Leave empty for a message that isn't clickable                 |
-| `link_text` | Single line text | **Yes**    | The part of `label` that becomes the link. Leave empty to link the whole label |
+| Field key   | Type             | Create it? | Notes                                                                            |
+| ----------- | ---------------- | ---------- | -------------------------------------------------------------------------------- |
+| `label`     | Single line text | **Yes**    | The message. Set as the display name field                                       |
+| `url`       | Single line text | **Yes**    | **Not the URL type** — see below. Leave empty for a message that isn't clickable |
+| `link_text` | Single line text | **Yes**    | The part of `label` that becomes the link. Leave empty to link the whole label   |
 
 **`link_text` must appear verbatim inside `label`** — that's how the clickable
 run is located. Given `label` = "Free shipping over $199. See details" and
@@ -219,11 +219,11 @@ not silently unlinked.
 the utility links on the right of the desktop band, and the whole mobile links
 band beneath the brand bar.
 
-| Field key | Type             | Create it? | Notes                                            |
-| --------- | ---------------- | ---------- | ------------------------------------------------ |
-| `label`   | Single line text | **Yes**    | Link text. Rendered uppercase                    |
-| `url`     | Single line text | **Yes**    | Required — a link with no destination is dropped |
-| `icon`    | File             | **Yes**    | Optional per entry; the link renders without one |
+| Field key | Type             | Create it? | Notes                                                                             |
+| --------- | ---------------- | ---------- | --------------------------------------------------------------------------------- |
+| `label`   | Single line text | **Yes**    | Link text. Rendered uppercase                                                     |
+| `url`     | Single line text | **Yes**    | **Not the URL type** — see below. Required; a link with no destination is dropped |
+| `icon`    | File             | **Yes**    | Optional per entry; the link renders without one                                  |
 
 **The icon must already be the right colour.** It sits on the indigo band and
 the app can't recolour an uploaded file, so upload **white** SVG or PNG. It is
@@ -268,10 +268,18 @@ lets a single entry appear in both lists.
   by the query and logged.
 - **Two bar links is what the mobile band is designed for.** More render, split
   evenly, but get cramped fast.
+- **`url` is single line text, deliberately — not Shopify's URL type.** The URL
+  type validates against a scheme (`https`, `http`, `mailto`, `tel`, `sms`), so
+  it rejects a bare path like `/design-build`. Same reason `nav_item.link` is
+  plain text. Using it would force every internal link to be absolute, which
+  sends visitors to the Shopify domain instead of keeping them on this
+  storefront. The trade is that nothing validates the value — a typo renders a
+  working-looking link that 404s.
 - **Prefer relative paths** in `url` — `/design-build`, not
-  `https://www.thetrucklab.com/pages/design-build`. An absolute URL to the
-  Shopify domain leaves the storefront, and this app never renders Shopify CMS
-  pages (see Part 8.1).
+  `https://www.thetrucklab.com/pages/design-build`. Absolute URLs still work
+  and render as external links (`rel="noopener noreferrer"`), which is right
+  for genuinely off-site destinations and wrong for your own pages. This app
+  never renders Shopify CMS pages (see Part 8.1).
 
 ## 1.5 `category_section` metaobject — **Phase 3B, do not build yet**
 
