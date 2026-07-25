@@ -2,7 +2,7 @@ import clsx from "clsx";
 import CartModal from "components/cart/modal";
 import OpenCart from "components/cart/open-cart";
 import { HEADER_MENU_HANDLE, NAV_ROOT_HANDLE } from "lib/constants";
-import { getAnnouncement, getNavMenu } from "lib/shopify";
+import { getAnnouncements, getNavMenu } from "lib/shopify";
 import { ensureStartsWith } from "lib/utils";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -26,10 +26,28 @@ const utilityIcon =
   "grid h-[46px] w-[46px] place-items-center rounded-[3px] text-tl-ink group-data-[condensed]:h-11 group-data-[condensed]:w-11";
 
 export async function Header() {
-  const [menu, announcement] = await Promise.all([
+  const [
+    menu,
+    { announcements, barLinks, mobileAnnouncements, mobileBarLinks },
+  ] = await Promise.all([
     getNavMenu(NAV_ROOT_HANDLE, HEADER_MENU_HANDLE),
-    getAnnouncement(),
+    getAnnouncements(),
   ]);
+
+  // The desktop band holds the rotating copy *and* the utility links, so it
+  // survives either list being empty and only collapses when both are —
+  // otherwise adding bar links before writing an announcement would silently
+  // hide them.
+  const hasDesktopBand = announcements.length > 0 || barLinks.length > 0;
+
+  // Every band collapses when its content is empty, so the spacer below has to
+  // be computed from the same checks rather than hardcoded — and from the
+  // *mobile* lists for the mobile spacer, since they can differ.
+  const mobileOffset =
+    60 +
+    (mobileAnnouncements.length > 0 ? 34 : 0) +
+    (mobileBarLinks.length > 0 ? 34 : 0);
+  const desktopOffset = 120 + (hasDesktopBand ? 38 : 0);
 
   // Hosted customer accounts live on the Shopify domain.
   const accountHref = process.env.SHOPIFY_STORE_DOMAIN
@@ -39,11 +57,11 @@ export async function Header() {
   return (
     <>
       <HeaderScroll>
-        {announcement.desktop ? (
-          <AnnouncementBar message={announcement.desktop} />
+        {hasDesktopBand ? (
+          <AnnouncementBar announcements={announcements} links={barLinks} />
         ) : null}
-        {announcement.mobile ? (
-          <MobileAnnouncementBar message={announcement.mobile} />
+        {mobileAnnouncements.length > 0 ? (
+          <MobileAnnouncementBar announcements={mobileAnnouncements} />
         ) : null}
 
         {/* Desktop: brand + utility row */}
@@ -122,26 +140,22 @@ export async function Header() {
           </Suspense>
         </div>
 
-        {/* Mobile: hardcoded links band */}
-        <MobileLinksBand />
+        {/* Mobile: the same utility links the desktop band shows */}
+        <MobileLinksBand links={mobileBarLinks} />
       </HeaderScroll>
 
-      {/* Offset the page by the real resting header height. The announcement
-          bands collapse when their metafield is null, so the height is
-          conditional — never a hardcoded constant. */}
+      {/* Offset the page by the real resting header height. Both bands
+          collapse when their list is empty, so the height is computed — never
+          a hardcoded constant. */}
       <div
         aria-hidden
-        className={clsx(
-          "md:hidden",
-          announcement.mobile ? "h-[128px]" : "h-[94px]",
-        )}
+        className="md:hidden"
+        style={{ height: `${mobileOffset}px` }}
       />
       <div
         aria-hidden
-        className={clsx(
-          "hidden md:block",
-          announcement.desktop ? "h-[158px]" : "h-[120px]",
-        )}
+        className="hidden md:block"
+        style={{ height: `${desktopOffset}px` }}
       />
     </>
   );

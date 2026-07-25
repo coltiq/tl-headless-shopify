@@ -65,9 +65,32 @@ export type MenuItem = {
   items: MenuItem[];
 };
 
+// One rotating announcement. `linkText` is the substring of `label` that
+// becomes the clickable, underlined part; when it's null the whole label is
+// clickable and not underlined. With no `url` the label is plain text.
 export type Announcement = {
-  desktop: string | null;
-  mobile: string | null;
+  label: string;
+  url: string | null;
+  linkText: string | null;
+};
+
+// A utility link in the announcement band ("Custom builds", "Get the app").
+// The icon is an uploaded file, so it must already be the right color — the
+// app can't recolor a raster or a remote SVG.
+export type AnnouncementBarLink = {
+  label: string;
+  url: string;
+  icon: { url: string; width: number; height: number } | null;
+};
+
+// Desktop lists plus their mobile overrides. Each mobile list falls back to
+// its desktop counterpart when empty, so a store that wants one message
+// everywhere fills in one list.
+export type ShopAnnouncements = {
+  announcements: Announcement[];
+  barLinks: AnnouncementBarLink[];
+  mobileAnnouncements: Announcement[];
+  mobileBarLinks: AnnouncementBarLink[];
 };
 
 export type PredictiveProduct = {
@@ -358,11 +381,39 @@ export type ShopifyVehiclesOperation = {
   };
 };
 
-export type ShopifyShopAnnouncementOperation = {
+// Raw metaobject shapes behind the announcement band. Fields are Maybe
+// because unset metaobject fields resolve to null, and a reference pointing at
+// something that isn't the expected type deserializes as {}.
+export type ShopifyAnnouncementNode = {
+  label: Maybe<{ value: string }>;
+  url: Maybe<{ value: string }>;
+  linkText: Maybe<{ value: string }>;
+};
+
+export type ShopifyAnnouncementBarLinkNode = {
+  label: Maybe<{ value: string }>;
+  url: Maybe<{ value: string }>;
+  icon: Maybe<{
+    reference: Maybe<{
+      image: Maybe<{ url: string; width: number; height: number }>;
+    }>;
+  }>;
+};
+
+type ShopifyMetaobjectList<T> = Maybe<{
+  references: Maybe<{
+    nodes: T[];
+    pageInfo: { hasNextPage: boolean };
+  }>;
+}>;
+
+export type ShopifyShopAnnouncementsOperation = {
   data: {
     shop: {
-      announcement: Maybe<{ value: string }>;
-      announcementMobile: Maybe<{ value: string }>;
+      announcements: ShopifyMetaobjectList<ShopifyAnnouncementNode>;
+      announcementsMobile: ShopifyMetaobjectList<ShopifyAnnouncementNode>;
+      barLinks: ShopifyMetaobjectList<ShopifyAnnouncementBarLinkNode>;
+      barLinksMobile: ShopifyMetaobjectList<ShopifyAnnouncementBarLinkNode>;
     };
   };
 };

@@ -30,7 +30,7 @@ import {
 import { getHeaderMenuQuery, getMenuQuery } from "./queries/menu";
 import { getNavMenuQuery } from "./queries/nav";
 import { getPredictiveSearchQuery } from "./queries/predictive-search";
-import { getShopAnnouncementQuery } from "./queries/shop";
+import { getShopAnnouncementsQuery } from "./queries/shop";
 import {
   getProductQuery,
   getProductRecommendationsQuery,
@@ -39,6 +39,7 @@ import {
 import { getVehiclesQuery } from "./queries/vehicles";
 import {
   Announcement,
+  AnnouncementBarLink,
   Cart,
   CategoryNode,
   Collection,
@@ -65,12 +66,15 @@ import {
   ShopifyProduct,
   ShopifyProductOperation,
   ShopifyProductRecommendationsOperation,
+  ShopifyAnnouncementBarLinkNode,
+  ShopifyAnnouncementNode,
   ShopifyProductsOperation,
   ShopifyRemoveFromCartOperation,
-  ShopifyShopAnnouncementOperation,
+  ShopifyShopAnnouncementsOperation,
   ShopifyUpdateCartOperation,
   ShopifyVehicleNode,
   ShopifyVehiclesOperation,
+  ShopAnnouncements,
 } from "./types";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
@@ -698,24 +702,146 @@ export async function getVehicles(): Promise<VehicleGeneration[]> {
   return FALLBACK_VEHICLE_GENERATIONS;
 }
 
-export async function getAnnouncement(): Promise<Announcement> {
-  "use cache";
-  cacheLife("hours");
+const reshapeAnnouncements = (
+  nodes: ShopifyAnnouncementNode[],
+): Announcement[] => {
+  const announcements: Announcement[] = [];
 
-  if (!endpoint) {
-    return { desktop: null, mobile: null };
+  for (const node of nodes) {
+    const label = node?.label?.value?.trim();
+    if (!label) {
+      console.error("Dropping announcement with no label", node);
+      continue;
+    }
+
+    const url = node.url?.value?.trim() || null;
+    let linkText = node.linkText?.value?.trim() || null;
+
+    // Link text without a URL links nowhere; underlining it would promise a
+    // click that does nothing.
+    if (linkText && !url) {
+      console.error(
+        `Announcement "${label}" has link text but no URL — rendering it as plain text`,
+      );
+      linkText = null;
+    }
+
+    // The link text has to be a slice of the label — that's how the clickable
+    // run is located. A typo would otherwise silently render an unlinked
+    // announcement.
+    if (linkText && !label.includes(linkText)) {
+      console.error(
+        `Announcement "${label}" has link text "${linkText}" that doesn't appear in it — falling back to linking the whole label`,
+      );
+      linkText = null;
+    }
+
+    announcements.push({ label, url, linkText });
   }
 
-  const res = await shopifyFetch<ShopifyShopAnnouncementOperation>({
-    query: getShopAnnouncementQuery,
-  });
+  return announcements;
+};
 
-  // Shop metafields resolve to null until set in admin — callers must collapse
-  // the band rather than render an empty bar.
-  return {
-    desktop: res.body.data.shop.announcement?.value || null,
-    mobile: res.body.data.shop.announcementMobile?.value || null,
+const reshapeAnnouncementBarLinks = (
+  nodes: ShopifyAnnouncementBarLinkNode[],
+): AnnouncementBarLink[] => {
+  const links: AnnouncementBarLink[] = [];
+
+  for (const node of nodes) {
+    const label = node?.label?.value?.trim();
+    const url = node?.url?.value?.trim();
+
+    // Unlike an announcement, a bar link with no destination is just a word
+    // sitting in the header.
+    if (!label || !url) {
+      console.error(
+        "Dropping announcement bar link missing a label or URL",
+        node,
+      );
+      continue;
+    }
+
+    const image = node.icon?.reference?.image;
+
+    links.push({
+      label,
+      url,
+      icon: image
+        ? { url: image.url, width: image.width, height: image.height }
+        : null,
+    });
+  }
+
+  return links;
+};
+
+export async function getAnnouncements(): Promise<ShopAnnouncements> {
+  "use cache";
+  // Tagged so a metaobject webhook refreshes it, but still short-lived: the
+  // announcement metaobject types need their own webhook subscriptions
+  // (docs/shopify-setup.md Part 9), and an hour of staleness is the acceptable
+  // failure mode if they're missing.
+  cacheTag(TAGS.announcements);
+  cacheLife("hours");
+
+  const empty: ShopAnnouncements = {
+    announcements: [],
+    barLinks: [],
+    mobileAnnouncements: [],
+    mobileBarLinks: [],
   };
+
+  if (!endpoint) return empty;
+
+  try {
+    const res = await shopifyFetch<ShopifyShopAnnouncementsOperation>({
+      query: getShopAnnouncementsQuery,
+    });
+    const { shop } = res.body.data;
+
+    // Silent truncation would read as "my announcement disappeared".
+    for (const [name, list] of [
+      ["announcement_list", shop.announcements],
+      ["announcement_list_mobile", shop.announcementsMobile],
+      ["announcement_bar_links", shop.barLinks],
+      ["announcement_bar_links_mobile", shop.barLinksMobile],
+    ] as const) {
+      if (list?.references?.pageInfo.hasNextPage) {
+        console.error(
+          `getAnnouncements: custom.${name} has more entries than the query cap — the ones beyond it never appear`,
+        );
+      }
+    }
+
+    const announcements = reshapeAnnouncements(
+      shop.announcements?.references?.nodes ?? [],
+    );
+    const barLinks = reshapeAnnouncementBarLinks(
+      shop.barLinks?.references?.nodes ?? [],
+    );
+    const mobileAnnouncements = reshapeAnnouncements(
+      shop.announcementsMobile?.references?.nodes ?? [],
+    );
+    const mobileBarLinks = reshapeAnnouncementBarLinks(
+      shop.barLinksMobile?.references?.nodes ?? [],
+    );
+
+    return {
+      announcements,
+      barLinks,
+      // An empty mobile list means "same as desktop", not "show nothing" — the
+      // mobile lists exist for shorter copy, and most stores won't want to
+      // author every message twice.
+      mobileAnnouncements:
+        mobileAnnouncements.length > 0 ? mobileAnnouncements : announcements,
+      mobileBarLinks: mobileBarLinks.length > 0 ? mobileBarLinks : barLinks,
+    };
+  } catch (e) {
+    // Metaobject reads throw on a missing scope or disabled storefront access
+    // — the header must render without the band, not crash.
+    console.error("getAnnouncements failed, collapsing the band", e);
+    return empty;
+  }
 }
 
 export async function getPredictiveSearch(
@@ -870,12 +996,14 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
   }
 
   if (isMetaobjectUpdate) {
-    // The x-shopify-topic header is identical for nav_item and vehicle
-    // subscriptions — telling them apart would mean parsing the webhook body's
-    // `type` field. Both caches are tiny and metaobject edits are rare admin
-    // actions, so revalidate both; parse the body if that trade ever changes.
+    // The x-shopify-topic header is identical for every metaobject
+    // subscription — nav_item, vehicle, announcement — so telling them apart
+    // would mean parsing the webhook body's `type` field. All three caches are
+    // tiny and metaobject edits are rare admin actions, so revalidate all
+    // three; parse the body if that trade ever changes.
     revalidateTag(TAGS.menu, "seconds");
     revalidateTag(TAGS.vehicles, "seconds");
+    revalidateTag(TAGS.announcements, "seconds");
   }
 
   return NextResponse.json({ status: 200, revalidated: true, now: Date.now() });

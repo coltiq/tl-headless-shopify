@@ -178,18 +178,100 @@ A Lifestyle collection missing the flag behaves like a parts category — the
 garage redirect fires and vehicle URLs resolve beneath it. Visible symptom,
 one-toggle fix.
 
-## 1.4 Shop metafields — announcement bars
+## 1.4 Announcement bands
 
-The header's announcement bands read two **shop** metafields. Both resolve to
-`null` until set, and the app collapses the band rather than rendering an empty
-bar — so this is optional, but nothing else tells you the fields exist.
+Everything in the two indigo bands at the top of the header — the rotating
+message and the utility links beside it — comes from here. Nothing is
+hardcoded any more except the `USD · EN` locale slot, which reflects what the
+storefront actually supports rather than an editorial choice.
 
-| Namespace / key              | Type             | Drives                   |
-| ---------------------------- | ---------------- | ------------------------ |
-| `custom.announcement`        | Single line text | Desktop announcement bar |
-| `custom.announcement_mobile` | Single line text | Mobile announcement bar  |
+> **Replaces `custom.announcement` and `custom.announcement_mobile`** (plain
+> text, one message, no link). Those keys are no longer read and can be
+> deleted.
 
-Storefront API access required on both.
+Two metaobject definitions, then four shop metafields pointing at them.
+
+### 1.4.1 `announcement` metaobject
+
+**Name:** Announcement, **Type:** `announcement`.
+
+| Field key   | Type             | Create it? | Notes                                                                          |
+| ----------- | ---------------- | ---------- | ------------------------------------------------------------------------------ |
+| `label`     | Single line text | **Yes**    | The message. Set as the display name field                                     |
+| `url`       | Single line text | **Yes**    | Where it links. Leave empty for a message that isn't clickable                 |
+| `link_text` | Single line text | **Yes**    | The part of `label` that becomes the link. Leave empty to link the whole label |
+
+**`link_text` must appear verbatim inside `label`** — that's how the clickable
+run is located. Given `label` = "Free shipping over $199. See details" and
+`link_text` = "See details", the band renders the sentence with just "See
+details" underlined and clickable.
+
+Leave `link_text` empty and the **whole label** is clickable with no underline.
+A `link_text` that isn't a substring of `label` is dropped with a console error
+and falls back to that whole-label behavior — so a typo is visible in the logs,
+not silently unlinked.
+
+`link_text` without a `url` links nowhere, so it's ignored (also logged).
+
+### 1.4.2 `announcement_bar_link` metaobject
+
+**Name:** Announcement bar link, **Type:** `announcement_bar_link`. These are
+the utility links on the right of the desktop band, and the whole mobile links
+band beneath the brand bar.
+
+| Field key | Type             | Create it? | Notes                                            |
+| --------- | ---------------- | ---------- | ------------------------------------------------ |
+| `label`   | Single line text | **Yes**    | Link text. Rendered uppercase                    |
+| `url`     | Single line text | **Yes**    | Required — a link with no destination is dropped |
+| `icon`    | File             | **Yes**    | Optional per entry; the link renders without one |
+
+**The icon must already be the right colour.** It sits on the indigo band and
+the app can't recolour an uploaded file, so upload **white** SVG or PNG. It is
+rendered at 15px tall on desktop, 12px on mobile, width auto — so upload a
+square-ish, simple glyph and don't worry about the exact pixel size.
+
+The icon is decorative (`alt=""`): the label sits right beside it, and having a
+screen reader read both would be repetition.
+
+### 1.4.3 Shop metafields
+
+Settings → Custom data → Shop. All four are **metaobject reference, list**,
+with **Storefront API access** enabled.
+
+| Namespace / key                        | References              | Drives                     |
+| -------------------------------------- | ----------------------- | -------------------------- |
+| `custom.announcement_list`             | `announcement`          | Desktop band message       |
+| `custom.announcement_list_mobile`      | `announcement`          | Mobile band message        |
+| `custom.announcement_bar_links`        | `announcement_bar_link` | Desktop band utility links |
+| `custom.announcement_bar_links_mobile` | `announcement_bar_link` | Mobile links band          |
+
+**An empty mobile list means "same as desktop."** The mobile lists exist so
+mobile can carry shorter copy — the band is one truncated line — not so every
+message has to be written twice. Fill in only the desktop list and both bands
+show it.
+
+The app reads fields **by key**, not by metaobject type, so if you'd rather
+keep mobile entries in their own definitions (`announcement_mobile`,
+`announcement_bar_link_mobile`) you can — point the `*_mobile` metafields at
+them and keep the same field keys. Reusing the one definition is simpler and
+lets a single entry appear in both lists.
+
+### 1.4.4 Behaviour worth knowing
+
+- **More than one announcement rotates every 7 seconds.** A single announcement
+  never starts a timer. Rotation pauses while the pointer is over the band or
+  keyboard focus is inside it.
+- **Each band collapses when it has nothing to show**, and the page offset
+  shrinks with it. The desktop band survives on utility links alone, so adding
+  links before writing any announcement still shows them.
+- **Caps:** 10 announcements, 6 bar links per list. Anything beyond is dropped
+  by the query and logged.
+- **Two bar links is what the mobile band is designed for.** More render, split
+  evenly, but get cramped fast.
+- **Prefer relative paths** in `url` — `/design-build`, not
+  `https://www.thetrucklab.com/pages/design-build`. An absolute URL to the
+  Shopify domain leaves the storefront, and this app never renders Shopify CMS
+  pages (see Part 8.1).
 
 ## 1.5 `category_section` metaobject — **Phase 3B, do not build yet**
 
@@ -210,8 +292,10 @@ against the real page instead of guessed at.
 
 # Part 2 — Webhook subscriptions
 
-**Do this now, before creating any entries.** Twelve subscriptions total: six
-for products and collections, three for `nav_item`, three for `vehicle`.
+**Do this now, before creating any entries.** Six for products and
+collections, then **three per metaobject type you created** — `nav_item`,
+`vehicle`, and each announcement type from Part 1.4. Twelve with the two
+original types; eighteen if you add `announcement` and `announcement_bar_link`.
 
 The full mutations, the inventory table, and the known gaps are in **Part 9**
 at the bottom of this document. Create them, confirm every `userErrors` array
@@ -574,11 +658,11 @@ The handler (`revalidate()` in `lib/shopify/index.ts`) checks the secret, reads
 `x-shopify-topic`, and maps it to a cache tag. Any other topic is acknowledged
 and ignored.
 
-| Topic group | Topics                                                                                              | Tag revalidated               | Refreshes                                                           |
-| ----------- | --------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------- |
-| Products    | `products/create`, `products/update`, `products/delete`                                             | `TAGS.products`               | product pages, grids, search, predictive search                     |
-| Collections | `collections/create`, `collections/update`, `collections/delete`                                    | `TAGS.collections`            | category pages, collection metadata, sidebar, sitemap, nav fallback |
-| Metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (filter `type:nav_item`/`vehicle`) | `TAGS.menu` + `TAGS.vehicles` | header nav **and** the vehicle list / garage picker                 |
+| Topic group | Topics                                                                                 | Tag revalidated                                      | Refreshes                                                                     |
+| ----------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Products    | `products/create`, `products/update`, `products/delete`                                | `TAGS.products`                                      | product pages, grids, search, predictive search                               |
+| Collections | `collections/create`, `collections/update`, `collections/delete`                       | `TAGS.collections`                                   | category pages, collection metadata, sidebar, sitemap, nav fallback           |
+| Metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (one filter per type) | `TAGS.menu` + `TAGS.vehicles` + `TAGS.announcements` | header nav, the vehicle list / garage picker, **and** both announcement bands |
 
 **Metaobject topics revalidate both tags.** The handler only reads
 `x-shopify-topic`, which is identical for `nav_item` and `vehicle`
@@ -766,9 +850,21 @@ mutation CreateNavWebhooks {
 ## 9.4 Vehicle metaobjects (3 topics, API-only)
 
 Identical to 9.3 with `filter: "type:vehicle"` in all three spots. The `vehicle`
-definition must exist first (Part 1.2). These are subscriptions 10–12 of 12.
+definition must exist first (Part 1.2).
 
-## 9.5 Caveats that apply to every metaobject subscription
+## 9.5 Announcement metaobjects (3 topics per type, API-only)
+
+Identical again, with `filter: "type:announcement"` and
+`filter: "type:announcement_bar_link"` — one set of three per definition you
+created in Part 1.4 (plus any `*_mobile` definitions, if you made separate
+ones). Each definition must exist before its subscription.
+
+**These are the least urgent subscriptions in this document.** The announcement
+fetcher uses `cacheLife("hours")` rather than the day-long lifetime everything
+else gets, so band edits surface within the hour even with no webhook at all.
+Skipping them costs you freshness, not correctness.
+
+## 9.6 Caveats that apply to every metaobject subscription
 
 - The `filter` is **mandatory**, not optional scoping: `metaobjects/*` topics
   require one, wildcards (`type:*`) are rejected, and the type is validated
@@ -789,7 +885,7 @@ definition must exist first (Part 1.2). These are subscriptions 10–12 of 12.
 - Subscriptions belong to the app that created them: uninstalling the GraphiQL
   app deletes its subscriptions.
 
-## 9.6 Known gaps (verified 2026-07-24 against Shopify docs + community)
+## 9.7 Known gaps (verified 2026-07-24 against Shopify docs + community)
 
 - **Collection metafield edits do NOT fire `collections/update`.** That topic
   fires on manual product add/remove and rule changes only. Consequence:
@@ -806,7 +902,7 @@ definition must exist first (Part 1.2). These are subscriptions 10–12 of 12.
   does, and product grids are dual-tagged (`TAGS.collections, TAGS.products`),
   so the app still refreshes.
 
-## 9.7 Verifying a deployed environment
+## 9.8 Verifying a deployed environment
 
 1. `curl -X POST "https://<site-domain>/api/revalidate?secret=<secret>" -H "x-shopify-topic: collections/update"`
    → `{"status":200,"revalidated":true,...}`; wrong secret → `{"status":401}`.
