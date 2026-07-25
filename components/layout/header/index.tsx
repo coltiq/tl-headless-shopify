@@ -17,7 +17,7 @@ import { SearchField, SearchFieldSkeleton } from "./search";
 import { Wordmark } from "./wordmark";
 
 // The nav is sourced from the nav_item metaobject tree rooted at this handle
-// (see docs/shopify-nav-setup.md) and renders up to four levels. Until the
+// (see docs/shopify-setup.md) and renders up to four levels. Until the
 // metaobject exists in admin, the native menu below serves as the fallback
 // (capped at three levels by Shopify).
 const NAV_METAOBJECT_HANDLE = "main-nav";

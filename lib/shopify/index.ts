@@ -835,7 +835,7 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
     "products/update",
   ];
   // nav_item + vehicle metaobject edits; subscriptions must be created via the
-  // Admin API — see docs/shopify-nav-setup.md and docs/shopify-vehicle-setup.md.
+  // Admin API — see docs/shopify-setup.md (Part 9).
   const metaobjectWebhooks = [
     "metaobjects/create",
     "metaobjects/delete",

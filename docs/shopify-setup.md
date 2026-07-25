@@ -1,0 +1,743 @@
+# Shopify setup — the complete admin checklist
+
+Everything that has to exist in the Shopify admin for this storefront to work,
+in the order it has to be done. Replaces the former `shopify-nav-setup.md` and
+`shopify-vehicle-setup.md`, and folds in every admin prerequisite named in the
+plans under `docs/plans/`.
+
+**Read the order rules first — several steps fail if run out of sequence.**
+
+## Order of operations
+
+| Part | What                                       | Why it must come when it does                                           |
+| ---- | ------------------------------------------ | ----------------------------------------------------------------------- |
+| 0    | Environment + Storefront token             | Nothing reads without it                                                |
+| 1    | Metaobject + metafield **definitions**     | Metaobject webhook filters are validated against existing definitions   |
+| 2    | **Webhook subscriptions** (detail: Part 9) | Content created before the subscriptions can sit behind a day-old cache |
+| 3    | Collections                                | The nav references them; the app resolves a category to a collection    |
+| 4    | Nav entries                                | Needs the definition (Part 1) and the collections (Part 3)              |
+| 5    | Vehicle entries                            | Needs the definition (Part 1)                                           |
+| 6    | Product tagging                            | Needs the vehicle entries (Part 5) — tags embed the generation handle   |
+| 7    | Storefront filters                         | Independent, but fitment filtering is silently inert until it's done    |
+| 8    | Flush + verify                             | Last — proves the whole pipe                                            |
+| 9    | Webhook reference                          | The mutations and inventory Part 2 sends you to                         |
+
+Two hard ordering rules, both enforced by Shopify rather than by convention:
+
+- **Definitions before webhooks.** Creating a `metaobjects/*` subscription
+  before its definition exists fails with _"The specified filter is invalid,
+  please ensure you specify the field(s) you wish to filter on."_
+- **Webhooks before entries.** If content is created first, the storefront may
+  have already cached the fallback for up to a day with nothing firing to
+  refresh it. The manual flush in Part 8 covers this either way.
+
+## Status legend
+
+Some of what follows is read by the app today; some is the target state for
+work that is planned but not built. Every table below is marked:
+
+- **Live** — the app reads it now.
+- **Phase 3** — specified in `docs/plans/PLAN-CATEGORY-URLS.md`, not yet built.
+  Safe to set up early; the app ignores it until the code ships.
+- **Phase 3B** — deferred until after the UI pass. Don't build it yet.
+
+---
+
+# Part 0 — Environment and access
+
+Required in `.env.local` (see `.env.example`):
+
+| Variable                          | Notes                                                                       |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `SHOPIFY_STORE_DOMAIN`            | e.g. `your-store.myshopify.com`; no brackets                                |
+| `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | A **private** Storefront token — sent as `Shopify-Storefront-Private-Token` |
+| `SHOPIFY_REVALIDATION_SECRET`     | Shared secret in the webhook URL                                            |
+| `COMPANY_NAME`                    | Footer copyright                                                            |
+| `SITE_NAME`                       | Title template, metadata                                                    |
+
+`VERCEL_PROJECT_PRODUCTION_URL` is set by the host and drives `baseUrl` for
+canonicals and the sitemap; locally it falls back to `http://localhost:3000`.
+
+**Token scopes.** The private Storefront token needs
+`unauthenticated_read_metaobjects` on top of the usual product/collection
+scopes. Without it, every metaobject query throws and the app silently serves
+its fallbacks — the nav drops to the native menu and the garage picker shows
+the five hardcoded trucks. It looks like it's working. It isn't.
+
+---
+
+# Part 1 — Definitions
+
+## 1.1 `nav_item` metaobject
+
+Settings → Custom data → Metaobjects → Add definition. **Name:** Nav item,
+**Type:** `nav_item`.
+
+The header nav comes from a self-referencing `nav_item` tree rather than a
+native Shopify menu, because native menus cap at three nesting levels and the
+header renders four (L1 nav bar → L2 rail → L3 column headings → L4 links).
+Until this exists the storefront falls back to the native `main-menu-v2` menu.
+
+**Field keys must match exactly** — a mismatched key resolves to `null`, and
+the item is dropped or the whole nav falls back.
+
+| Field key    | Type                                              | Status   | Notes                                                                                                                   |
+| ------------ | ------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `label`      | Single line text                                  | Live     | Display name; set as the definition's display name field. **Display only** — never used to build a URL                  |
+| `link`       | Single line text                                  | Live     | Plain text on purpose: the URL field type only accepts absolute URLs, but the nav needs relative paths. Empty = heading |
+| `children`   | Metaobject reference → Nav item, **list**         | Live     | Self-reference. List order is display order                                                                             |
+| `style`      | Single line text, preset `default` / `links-row`  | Live     | `links-row` on an L2 item moves it out of the mega panel rail; its children render as the links row at the panel's foot |
+| `slug`       | Single line text                                  | Phase 3  | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                         |
+| `collection` | Collection reference                              | Phase 3  | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                   |
+| `layout`     | Single line text, preset `grid` / `landing`       | Phase 3  | Defaults to `grid`                                                                                                      |
+| `sections`   | Metaobject reference → Category section, **list** | Phase 3B | Ignored while `layout` is `grid`                                                                                        |
+| `show_grid`  | True/false                                        | Phase 3B | Landing pages only; default true = the full grid follows the authored sections                                          |
+
+Then, under the definition's options, enable **Storefront API access**
+(Storefronts: Read).
+
+## 1.2 `vehicle` metaobject
+
+**Name:** Vehicle, **Type:** `vehicle`. One entry per generation (a year
+range), not per year. Until this exists the app falls back to five hardcoded
+generations (`FALLBACK_VEHICLE_GENERATIONS` in `lib/fitment.ts`), so the
+storefront ships and works before any of this is done.
+
+| Field key     | Type             | Required | Notes                                                                                     |
+| ------------- | ---------------- | -------- | ----------------------------------------------------------------------------------------- |
+| `make`        | Single line text | Yes      | **URL slug.** Add validation regex `^[a-z0-9]+$`. See the slug contract below             |
+| `model`       | Single line text | Yes      | **URL slug.** Same regex                                                                  |
+| `year_start`  | Integer          | Yes      | 4-digit year                                                                              |
+| `year_end`    | Integer          | Yes      | 4-digit year, ≥ `year_start`                                                              |
+| `label`       | Single line text | Yes      | Display name, e.g. `2021+ Ford F-150`; set as the display name field. Never used for URLs |
+| `short_label` | Single line text | No       | Condensed chip text, e.g. `21+ F-150`. Falls back to `label` when empty                   |
+
+Enable **Storefront API access**. Without it the query throws and the app
+serves the fallback generations — the picker looks fine but shows the wrong
+trucks.
+
+### The vehicle slug contract (binding)
+
+`make` and `model` are URL segments, not display names. Indexed URLs are
+permanent, and both the garage cookie and the `fits-*` product tags embed these
+values, so getting them wrong breaks live URLs, existing visitor cookies, and
+existing product tags at once.
+
+- Lowercase alphanumeric only — **no hyphens or spaces inside a value**.
+- Common make names, not corporate ones: `chevy`, not `chevrolet`.
+- Compact models: `f150`, not `f-150`; `1500`, not `ram-1500`.
+- All display text lives in `label` / `short_label`. Never derive a URL from
+  them.
+
+**The metaobject's own Shopify handle is never read.** The app derives each
+generation's handle as `<make>-<model>-<year_start>-<year_end>`, keeping it
+deterministic and immune to handle typos or Shopify's auto-generation. Set the
+entry handle to the same string anyway, for sanity when browsing the admin.
+
+## 1.3 Collection metafield — `custom.fitment_disabled`
+
+Settings → Custom data → Collections → Add definition. **Name** "Fitment
+disabled", **Namespace and key** `custom.fitment_disabled`, **Type** True/false.
+Enable **Storefront API access** — without it the API returns `null` and the
+flag silently reads as "fitment on".
+
+Category pages apply vehicle fitment **by default**; only Lifestyle (merch)
+collections opt out. Unset/false = fitment on, so Parts collections need no
+setup at all. Set it `true` on every Lifestyle collection (t-shirts, hats,
+accessories…).
+
+A Lifestyle collection missing the flag behaves like a parts category — the
+garage redirect fires and vehicle URLs resolve beneath it. Visible symptom,
+one-toggle fix.
+
+## 1.4 Shop metafields — announcement bars
+
+The header's announcement bands read two **shop** metafields. Both resolve to
+`null` until set, and the app collapses the band rather than rendering an empty
+bar — so this is optional, but nothing else tells you the fields exist.
+
+| Namespace / key              | Type             | Drives                   |
+| ---------------------------- | ---------------- | ------------------------ |
+| `custom.announcement`        | Single line text | Desktop announcement bar |
+| `custom.announcement_mobile` | Single line text | Mobile announcement bar  |
+
+Storefront API access required on both.
+
+## 1.5 `category_section` metaobject — **Phase 3B, do not build yet**
+
+Recorded so the schema isn't reinvented later. Authored landing pages are
+deferred until after the UI pass, when the section shape can be designed
+against the real page instead of guessed at.
+
+| Field key    | Type                    | Notes                                      |
+| ------------ | ----------------------- | ------------------------------------------ |
+| `heading`    | Single line text        | Required                                   |
+| `body`       | Multi-line text         | Optional intro copy                        |
+| `image`      | File                    | Optional                                   |
+| `collection` | Collection reference    | Products come from here…                   |
+| `products`   | Product reference, list | …or are hand-picked here (takes priority)  |
+| `limit`      | Integer                 | How many to show when a collection is used |
+
+---
+
+# Part 2 — Webhook subscriptions
+
+**Do this now, before creating any entries.** Twelve subscriptions total: six
+for products and collections, three for `nav_item`, three for `vehicle`.
+
+The full mutations, the inventory table, and the known gaps are in **Part 9**
+at the bottom of this document. Create them, confirm every `userErrors` array
+comes back empty, then continue to Part 3.
+
+Webhooks require a publicly reachable URL, so **none of this applies to local
+development** — Shopify cannot call `localhost`. Locally, caches refresh when
+`cacheLife` expires or the server restarts. Do Part 2 and Part 9 once per
+deployed environment.
+
+---
+
+# Part 3 — Collections
+
+## 3.1 Create the collections the nav will reference
+
+Every category in the nav resolves to a Shopify collection. Create them before
+authoring the nav, so the `collection` reference field has something to point
+at.
+
+**Handles are global and must be unique**, so two different parents can't both
+have a child called "kits" — use `rock-light-kits` and `lightbar-kits`.
+
+## 3.2 Membership must cascade
+
+The app assumes **a parent collection contains everything in its descendants**:
+a product in `rock-light-kits` is also in `rock-lights` and in `lighting`. That
+assumption is what lets every category page be a single query with native
+Shopify sorting.
+
+Nothing in the app can verify it. If a product is added to a leaf but not to its
+parents, the parent page silently under-reports — no error, no empty grid, just
+a quietly incomplete page nobody notices for months.
+
+**Strongly recommended: make the parent tiers smart collections** (rules on tag
+or product type) so membership is computed and cannot drift. Leaves can stay
+manual.
+
+## 3.3 Hidden collections
+
+Collections whose handle starts with `hidden-` are filtered out of the `/search`
+sidebar, the sitemap, and predictive search, and their pages 404. Use the prefix
+for anything that is a merchandising device rather than a browsable category —
+`best-selling-products`, `newest-products`, `homepage-feature` are all currently
+public category pages by accident.
+
+Two hidden collections are **required by the homepage** and don't exist yet
+(the build logs `No collection found` for both):
+
+| Handle                           | Drives                   |
+| -------------------------------- | ------------------------ |
+| `hidden-homepage-carousel`       | Homepage carousel        |
+| `hidden-homepage-featured-items` | Homepage three-item grid |
+
+Until they exist the homepage renders zero products.
+
+---
+
+# Part 4 — Nav entries
+
+Content → Metaobjects → Nav item.
+
+## 4.1 The root
+
+Create one **root** entry with handle **`main-nav`** (label "Main nav", no
+link). The app looks this handle up — it must match exactly. The root's
+`children` are the L1 nav bar items.
+
+## 4.2 The four L1 sections
+
+L1 items **group the menu and contribute nothing to any URL**. They are
+standalone destinations backed by custom code routes, which is why their links
+don't look like category paths:
+
+| Label            | `link`              | Route status                  |
+| ---------------- | ------------------- | ----------------------------- |
+| Customize        | `/design-build`     | Title-only placeholder, built |
+| Parts            | `/parts`            | Title-only placeholder, built |
+| Lifestyle        | `/lifestyle`        | Title-only placeholder, built |
+| Behind The Build | `/behind-the-build` | Title-only placeholder, built |
+
+Because these are code routes, **a collection can never use those four
+handles** — a static route always beats the category resolver.
+
+## 4.3 Category items (L2 and below)
+
+**Today (Live):** the app resolves single-segment paths only. Put the full path
+in `link` as `/<collection-handle>` — e.g. `/lighting`, `/rock-lights`.
+
+**After Phase 3:** fill in `slug` (the URL segment) and `collection` (the
+reference), and leave `link` empty. The app builds the full path from tree
+position with L1 skipped:
+
+```
+Parts                         (L1 — section, contributes no segment)
+ └ Lighting        slug: lighting        → /lighting
+    └ Rock Lights  slug: rock-lights     → /lighting/rock-lights
+       └ Kits      slug: rock-light-kits → /lighting/rock-lights/rock-light-kits
+```
+
+Re-parenting an item in admin moves its URL automatically, so the menu and the
+URL space can never disagree.
+
+### Category slug rules (Phase 3, binding)
+
+- Lowercase alphanumeric plus internal hyphens. `plug-play`, never `p&p` — `&`
+  is not URL-safe and `%26` in a path is a permanent readability tax.
+- **A slug may never be four digits.** `/lighting/2021` would collide with the
+  vehicle year segment. Four-digit slugs are dropped with a console error.
+- Slugs must be unique among siblings.
+
+### Link formats for non-category destinations
+
+Handles must match Shopify exactly — a typo renders a working-looking link that
+404s, and nothing validates it.
+
+| Destination                      | Enter                                                                                                    |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Category (collection)            | `/<handle>` today; `slug` + `collection` after Phase 3                                                   |
+| Product                          | `/product/<handle>`                                                                                      |
+| Custom page                      | The route's path, e.g. `/contact`. **Shopify CMS pages are never rendered**                              |
+| All products / search            | `/search`                                                                                                |
+| Pre-filtered vehicle link (rare) | `/<category path>/<make>/<model>/<year>` — usually unnecessary, the garage redirect lands visitors there |
+| Heading only (no link)           | Leave empty                                                                                              |
+
+Full store URLs pasted from the admin also work — the domain is stripped, and
+`/collections/<handle>` is rewritten to `/<handle>`.
+
+## 4.4 Per-level item caps
+
+Extras are **silently dropped** — see `lib/shopify/queries/nav.ts` before
+raising them. After Phase 3 these caps also bound the category URL space: a tree
+wider or deeper than the caps quietly loses pages.
+
+| Level              | Cap |
+| ------------------ | --- |
+| L1 (nav bar)       | 8   |
+| L2 (rail)          | 12  |
+| L3 (column groups) | 12  |
+| L4 (links)         | 16  |
+
+---
+
+# Part 5 — Vehicle entries
+
+Content → Metaobjects → Vehicle. Enter the five generations the storefront
+already ships as fallbacks, **with exactly these values** — they are baked into
+live URLs, existing visitor cookies, and the `fits-*` tags applied to products.
+
+| `make`   | `model`     | `year_start` | `year_end` | `label`                      | `short_label`   |
+| -------- | ----------- | ------------ | ---------- | ---------------------------- | --------------- |
+| `ford`   | `f150`      | 2021         | 2026       | `2021+ Ford F-150`           | `21+ F-150`     |
+| `ford`   | `f150`      | 2015         | 2020       | `2015–2020 Ford F-150`       | `15–20 F-150`   |
+| `chevy`  | `silverado` | 2019         | 2025       | `2019+ Chevy Silverado 1500` | `19+ Silverado` |
+| `ram`    | `1500`      | 2019         | 2025       | `2019+ Ram 1500`             | `19+ Ram 1500`  |
+| `toyota` | `tacoma`    | 2016         | 2023       | `2016–2023 Toyota Tacoma`    | `16–23 Tacoma`  |
+
+Derived handles: `ford-f150-2021-2026`, `ford-f150-2015-2020`,
+`chevy-silverado-2019-2025`, `ram-1500-2019-2025`, `toyota-tacoma-2016-2023`.
+`label` and `short_label` are display-only and safe to reword later; the four
+slug/year fields are not.
+
+Rules the app enforces on read (`reshapeVehicles` in `lib/shopify/index.ts`):
+
+- An entry failing validation — bad slug, non-4-digit year,
+  `year_start > year_end`, empty `label` — is **dropped** with a
+  `console.error`; the rest of the picker still renders.
+- Two entries sharing a make+model with **overlapping year ranges** make
+  year → generation resolution ambiguous. The app keeps one and drops the rest
+  with an error. Ranges for the same truck must be adjacent, not overlapping
+  (2015–2020 then 2021–2026).
+- Cap of 250 entries (one Storefront page). Beyond that entries go missing and
+  the app logs an error; add pagination before the list gets near it.
+- If **every** entry is deleted, the five fallbacks resurrect. Expected during
+  rollout.
+
+Deleting a generation is a real deletion: its URLs 404 after revalidation, and
+a visitor whose cookie points at it silently reverts to "Add Your Truck".
+
+Adding a new generation is always two steps — create the entry, then tag the
+products that fit it (Part 6).
+
+---
+
+# Part 6 — Product tagging
+
+Fitment matching is **tag-based**. The vehicle metaobject supplies the vehicle
+list and the URLs; it does not describe which product fits what.
+
+| Tag                                           | Applies to                                                          |
+| --------------------------------------------- | ------------------------------------------------------------------- |
+| `fits-<make>-<model>-<year_start>-<year_end>` | Parts — exactly the derived handle, e.g. `fits-ford-f150-2021-2026` |
+| `fits-universal`                              | Lifestyle / merch, and anything that fits everything                |
+| `nextjs-frontend-hidden`                      | Hides a product from every listing                                  |
+
+A product can carry as many `fits-*` tags as it has generations.
+
+**An untagged product vanishes** from vehicle pages and from fitment-filtered
+search. That is deliberate — better hidden than shown with unconfirmed fitment
+— but it's the first thing to check when a product "disappears".
+
+> **Current state:** no product in the store carries any tag, so selecting a
+> truck currently empties every category page and every search. This part is
+> what makes the garage feature functional.
+
+Tag edits are core product fields and fire `products/update`, so they
+revalidate normally.
+
+---
+
+# Part 7 — Storefront filters
+
+**Search & Discovery app → Filters → Edit filters → enable the Tag filter.**
+
+Without it, Shopify **silently ignores** the `filters` argument the app sends on
+`collection.products`. No error, no warning — the unfiltered list simply comes
+back, and category pages fall back to an in-memory safety net that only sees the
+first 100 products in the collection.
+
+Verified inert as of 2026-07-25: a product with zero tags is returned through a
+`fits-ford-f150-2021-2026` filter, and the only filters the storefront exposes
+are `custom.build_preference` and Price.
+
+> **Verification gate — do this the moment the Tag filter is on.** The app sends
+> two tag filters and relies on them combining with **OR**
+> (`fits-<generation>` OR `fits-universal`). If Shopify ANDs them instead, no
+> product can ever match both and every vehicle page goes blank. That would be a
+> **code** fix, not an admin one. It is untestable until the filter is enabled,
+> because the argument is currently being discarded wholesale.
+
+---
+
+# Part 8 — Flush, sweep, and verify
+
+## 8.1 Link sweep
+
+Audit the footer menu (`next-js-frontend-footer-menu`) and every nav `link`
+field. Shopify CMS pages are **not rendered** by this storefront — any
+`/pages/<handle>` link, or a bare `/<handle>` pointing at a Shopify page, 404s.
+Each must either get its custom code route built or be removed from the menu.
+End state: no CMS-page links anywhere; every page is a custom code route.
+
+## 8.2 Flush the cache
+
+Regardless of webhook setup, finish with a manual revalidation so the storefront
+drops any cached fallback immediately:
+
+```sh
+curl -X POST "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>" \
+  -H "x-shopify-topic: metaobjects/update"
+```
+
+Swap the topic for `collections/update` or `products/update` to flush those
+caches.
+
+## 8.3 Verify on the storefront
+
+1. **Nav** — every link resolves. Edit a `nav_item` label in admin, confirm a
+   `POST /api/revalidate` arrives in the app logs, and the header updates
+   within seconds.
+2. **Garage picker** — Year → Make → Model cascade (picking a year narrows the
+   makes, picking a make narrows the models); the confirm button stays disabled
+   until all three are chosen.
+3. **Chip** — adding a truck shows your `label`; the condensed (scrolled) header
+   shows `short_label`.
+4. **Vehicle URLs** — clicking a category with a truck set lands you on
+   `/<category path>/<make>/<model>/<year_start>`. Every in-range year also
+   resolves (`/lighting/ford/f150/2024`) and canonicalizes to the first year.
+5. **Fitment** — a tagged part appears on its vehicle's page; an untagged one
+   does not. `/search` with a truck set filters; the toggle turns it off via
+   `?all=1` and stays visible in the off state.
+6. **Cascade** — a parent category's grid contains everything its children's
+   grids do.
+7. **Fitment-disabled** — a collection with `custom.fitment_disabled` set shows
+   no garage bounce and no vehicle URLs beneath it.
+
+> The curl in 8.2 proves the route, not Shopify's delivery. There are community
+> reports of filtered metaobject subscriptions registering successfully but
+> never delivering — so verify end-to-end by editing an entry and watching the
+> logs. If delivery is flaky, edits only surface at cache expiry (up to a day),
+> and the curl is the stopgap.
+
+---
+
+# Part 9 — Webhook reference
+
+> Formerly `PLAN-WEBHOOK.md`. Deploy-time only: webhooks need a publicly
+> reachable URL, so none of this applies locally. Until they exist the deployed
+> site still works — content edits just take up to a day (`cacheLife("days")`)
+> to appear instead of seconds.
+
+## 9.1 How revalidation works here
+
+Shopify POSTs to
+`https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>`.
+The handler (`revalidate()` in `lib/shopify/index.ts`) checks the secret, reads
+`x-shopify-topic`, and maps it to a cache tag. Any other topic is acknowledged
+and ignored.
+
+| Topic group | Topics                                                                                              | Tag revalidated               | Refreshes                                                           |
+| ----------- | --------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------- |
+| Products    | `products/create`, `products/update`, `products/delete`                                             | `TAGS.products`               | product pages, grids, search, predictive search                     |
+| Collections | `collections/create`, `collections/update`, `collections/delete`                                    | `TAGS.collections`            | category pages, collection metadata, sidebar, sitemap, nav fallback |
+| Metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (filter `type:nav_item`/`vehicle`) | `TAGS.menu` + `TAGS.vehicles` | header nav **and** the vehicle list / garage picker                 |
+
+**Metaobject topics revalidate both tags.** The handler only reads
+`x-shopify-topic`, which is identical for `nav_item` and `vehicle`
+subscriptions — telling them apart would mean parsing the webhook body's `type`
+field. Both caches are tiny and metaobject edits are rare admin actions, so a
+nav edit also refreshes vehicles and vice versa. Body parsing is the escalation
+if that ever stops being a good trade.
+
+## 9.2 Products + collections (6 topics)
+
+Creatable either in the **admin UI** (Settings → Notifications → Webhooks →
+Create webhook, format JSON, paste the URL above) or via the Admin GraphQL API.
+GraphQL version — one aliased request, substitute domain + secret in every
+`uri`:
+
+```graphql
+mutation CreateCatalogWebhooks {
+  productsCreate: webhookSubscriptionCreate(
+    topic: PRODUCTS_CREATE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+  productsUpdate: webhookSubscriptionCreate(
+    topic: PRODUCTS_UPDATE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+  productsDelete: webhookSubscriptionCreate(
+    topic: PRODUCTS_DELETE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+  collectionsCreate: webhookSubscriptionCreate(
+    topic: COLLECTIONS_CREATE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+  collectionsUpdate: webhookSubscriptionCreate(
+    topic: COLLECTIONS_UPDATE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+  collectionsDelete: webhookSubscriptionCreate(
+    topic: COLLECTIONS_DELETE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+```
+
+Run it in the [GraphiQL app](https://shopify-graphiql-app.shopifycloud.com/) or
+the `shopify` CLI on a recent API version (needs `write_webhooks`; admin-created
+apps have it by default).
+
+## 9.3 Nav metaobjects (3 topics, API-only)
+
+Metaobject topics do **not** appear in the admin UI. The `nav_item` definition
+must exist first (Part 1.1).
+
+```graphql
+mutation CreateNavWebhooks {
+  create: webhookSubscriptionCreate(
+    topic: METAOBJECTS_CREATE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+      filter: "type:nav_item"
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+      filter
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+  update: webhookSubscriptionCreate(
+    topic: METAOBJECTS_UPDATE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+      filter: "type:nav_item"
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+      filter
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+  delete: webhookSubscriptionCreate(
+    topic: METAOBJECTS_DELETE
+    webhookSubscription: {
+      uri: "https://<site-domain>/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>"
+      format: JSON
+      filter: "type:nav_item"
+    }
+  ) {
+    webhookSubscription {
+      id
+      topic
+      filter
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+```
+
+## 9.4 Vehicle metaobjects (3 topics, API-only)
+
+Identical to 9.3 with `filter: "type:vehicle"` in all three spots. The `vehicle`
+definition must exist first (Part 1.2). These are subscriptions 10–12 of 12.
+
+## 9.5 Caveats that apply to every metaobject subscription
+
+- The `filter` is **mandatory**, not optional scoping: `metaobjects/*` topics
+  require one, wildcards (`type:*`) are rejected, and the type is validated
+  against existing definitions. A filter that passes validation but names the
+  wrong type silently suppresses all deliveries.
+- Use `uri` (current field), not the legacy `callbackUrl`.
+- The `uri` must be the deployed public URL — Shopify cannot reach localhost.
+- **The `uri` cannot be on any domain connected to the store** (Settings →
+  Domains — e.g. `thetrucklab.com`, `www.thetrucklab.com`, the `*.myshopify.com`
+  hosts). Shopify rejects those with _"Address cannot be any of the domains…"_
+  even though the custom domain actually points at Vercel, not Shopify. Use the
+  hosting platform's own deployment URL instead (the project's production
+  `*.vercel.app` alias) — same deployment, same cache, so the revalidation
+  applies to the custom domain too.
+- If Vercel Deployment Protection covers production `*.vercel.app` URLs,
+  Shopify's POSTs are blocked before reaching the route — scope protection to
+  previews only, or append a "Protection Bypass for Automation" token.
+- Subscriptions belong to the app that created them: uninstalling the GraphiQL
+  app deletes its subscriptions.
+
+## 9.6 Known gaps (verified 2026-07-24 against Shopify docs + community)
+
+- **Collection metafield edits do NOT fire `collections/update`.** That topic
+  fires on manual product add/remove and rule changes only. Consequence:
+  flipping `custom.fitment_disabled` won't auto-revalidate — it takes effect
+  when the day-long cache expires, or immediately if you also make a trivial
+  collection edit (touch the description) to force the webhook, or run the curl
+  in 8.2 with `-H "x-shopify-topic: collections/update"`. There is no webhook
+  topic for metafield _values_ (only `metafield_definitions/*`).
+- **Product metafield and tag edits are fine** — tags are core product fields
+  and product metafield edits do fire `products/update`, so `fits-*` tagging
+  revalidates normally.
+- `collections/update` also does **not** fire when a smart collection's
+  membership changes because a product attribute changed — but `products/update`
+  does, and product grids are dual-tagged (`TAGS.collections, TAGS.products`),
+  so the app still refreshes.
+
+## 9.7 Verifying a deployed environment
+
+1. `curl -X POST "https://<site-domain>/api/revalidate?secret=<secret>" -H "x-shopify-topic: collections/update"`
+   → `{"status":200,"revalidated":true,...}`; wrong secret → `{"status":401}`.
+2. Rename a product in admin → the product page reflects it within seconds.
+3. Edit a `nav_item` label → the header nav updates within seconds.
+4. Edit a `vehicle` entry's label → the garage chip updates within seconds.
+5. List live subscriptions and confirm all 12 exist:
+
+```graphql
+query {
+  webhookSubscriptions(first: 20) {
+    nodes {
+      id
+      topic
+      filter
+      endpoint {
+        __typename
+        ... on WebhookHttpEndpoint {
+          callbackUrl
+        }
+      }
+    }
+  }
+}
+```

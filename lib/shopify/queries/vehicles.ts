@@ -1,5 +1,5 @@
 // Fetches vehicle generations as `vehicle` metaobject entries (one per
-// make/model/year-range — see docs/shopify-vehicle-setup.md). Needs the
+// make/model/year-range — see docs/shopify-setup.md). Needs the
 // unauthenticated_read_metaobjects scope and storefront access enabled on the
 // definition, same as nav_item.
 //

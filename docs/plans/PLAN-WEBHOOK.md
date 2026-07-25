@@ -1,5 +1,10 @@
 # Webhook setup (deploy-time only)
 
+> ⚠️ **Superseded — kept as a historical record.** This document's contents were
+> folded into **`docs/shopify-setup.md` Part 9** on 2026-07-25, which is now the
+> authoritative version and is maintained. Read that instead; edit that if
+> something changes. Anything below may drift.
+
 > **When this matters:** webhooks require a publicly reachable URL, so none of this
 > applies to local dev — Shopify can't call `localhost`. Locally, caches refresh when
 > `cacheLife` expires or the server restarts. Do this checklist **once per deployed
@@ -147,12 +152,12 @@ Metaobject topics don't appear in the admin UI — Admin GraphQL only, and the
 `nav_item` metaobject **definition must exist before** the subscriptions (Shopify
 validates the `filter` against existing definitions). The exact aliased mutation
 (`METAOBJECTS_CREATE`/`UPDATE`/`DELETE` with `filter: "type:nav_item"`) is already
-written out in **`docs/shopify-nav-setup.md` §2** — use that.
+written out in **`docs/shopify-setup.md` §2** — use that.
 
 ### 3. Vehicle metaobjects (3 topics, API-only)
 
 Same shape as §2 with `filter: "type:vehicle"` — the exact mutation is written out
-in **`docs/shopify-vehicle-setup.md` §2**, alongside the rest of the vehicle admin
+in **`docs/shopify-setup.md` §2**, alongside the rest of the vehicle admin
 setup (definition, entries, product tagging). Three more subscriptions, 9 → 12 total.
 The `vehicle` definition must exist first, same validation rule as `nav_item`.
 

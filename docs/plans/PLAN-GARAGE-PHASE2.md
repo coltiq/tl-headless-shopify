@@ -45,7 +45,7 @@ prerenderable (same as `Header` awaiting `getNavMenu`).
 ## Data contract — `vehicle` metaobject
 
 One entry per generation (year range), per PLAN-GARAGE.md Phase 2 outline.
-Definition (admin setup in `docs/shopify-vehicle-setup.md`, created by this
+Definition (admin setup in `docs/shopify-setup.md`, created by this
 build):
 
 | Field key     | Type             | Validation / notes                                                          |
@@ -97,8 +97,8 @@ for sanity, but the app never reads it.
 | Modify | `app/[category]/garage-redirect.tsx` — `useVehicles()`                                                               |
 | Modify | `app/[category]/[[...vehicle]]/page.tsx` — `resolveVehiclePath(await getVehicles(), …)` in page + `generateMetadata` |
 | Modify | `app/search/page.tsx` — `findGeneration(await getVehicles(), …)`                                                     |
-| Modify | `PLAN-WEBHOOK.md` — §3 resolved: vehicle topics revalidate `TAGS.vehicles` (dual with `TAGS.menu`)                   |
-| Create | `docs/shopify-vehicle-setup.md` — definition, initial entries, webhooks, tagging rules                               |
+| Modify | `docs/shopify-setup.md` Part 9 — §3 resolved: vehicle topics revalidate `TAGS.vehicles` (dual with `TAGS.menu`)      |
+| Create | `docs/shopify-setup.md` — definition, initial entries, webhooks, tagging rules                                       |
 
 Untouched: `fitment-toggle.tsx` (its GarageMenu child self-serves from context;
 the `garage` prop keeps coming from the page's server-side cookie read), URL
@@ -267,11 +267,11 @@ desired behavior).
 
 - **Three new subscriptions** (Admin GraphQL only): `METAOBJECTS_CREATE` /
   `UPDATE` / `DELETE` with `filter: "type:vehicle"` — copy the aliased mutation
-  from `docs/shopify-nav-setup.md` §2 with the filter swapped. Total goes
+  from `docs/shopify-setup.md` §2 with the filter swapped. Total goes
   9 → 12. The `vehicle` definition must exist first (Shopify validates the
-  filter). Update `PLAN-WEBHOOK.md` §3 from "Phase 2 must decide" to the
+  filter). Update `docs/shopify-setup.md` Part 9 §3 from "Phase 2 must decide" to the
   decided behavior (dual-tag revalidation).
-- **Create `docs/shopify-vehicle-setup.md`** — admin checklist:
+- **Create `docs/shopify-setup.md`** — admin checklist:
   1. Create the `vehicle` metaobject definition (field table above), regex
      validations on `make`/`model`, **Storefront access enabled**.
   2. Restate the binding slug contract (lowercase alphanumeric, common make

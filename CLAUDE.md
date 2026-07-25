@@ -17,6 +17,11 @@ Use npm (`package-lock.json` is current; `pnpm-lock.yaml` is a leftover from the
 
 Requires env vars from `.env.example` in `.env.local`: `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN` (a _private_ Storefront token, sent as `Shopify-Storefront-Private-Token`), `SHOPIFY_REVALIDATION_SECRET`, `COMPANY_NAME`, `SITE_NAME`.
 
+## Docs
+
+- `docs/shopify-setup.md` — the complete Shopify admin checklist in dependency order: metaobject/metafield definitions, webhooks, collections, nav entries, vehicle entries, product tagging, storefront filters. Authoritative for anything that has to exist in the admin, including the full webhook reference (Part 9).
+- `docs/plans/` — build plans, current and historical. `PLAN-CATEGORY-URLS.md` is the active one (multi-level category URLs); `PLAN-GARAGE.md` / `PLAN-GARAGE-PHASE2.md` are shipped; `PLAN-WEBHOOK.md` is superseded by the setup doc.
+
 ## Imports
 
 `tsconfig.json` sets `baseUrl: "."` — imports are root-relative with no prefix, e.g. `import { getCart } from "lib/shopify"` and `import Price from "components/price"`.

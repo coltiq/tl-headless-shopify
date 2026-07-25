@@ -1,5 +1,5 @@
 // Fetches the header nav as a `nav_item` metaobject tree (see
-// docs/shopify-nav-setup.md): the root entry's children are the L1 nav bar
+// docs/shopify-setup.md): the root entry's children are the L1 nav bar
 // items, expanding four levels deep (L1 bar → L2 rail → L3 column headings →
 // L4 links). GraphQL cannot recurse, so each level is spelled out.
 //
@@ -7,7 +7,7 @@
 // the `first` caps multiply (8×12×12×16 potential nodes) — trim here if the
 // Storefront API rejects the query for cost, starting with the L4 cap, then
 // the L2/L3 caps. Items beyond a cap are silently dropped; the caps are
-// documented for menu editors in docs/shopify-nav-setup.md.
+// documented for menu editors in docs/shopify-setup.md.
 export const getNavMenuQuery = /* GraphQL */ `
   query getNavMenu($handle: String!) {
     metaobject(handle: { handle: $handle, type: "nav_item" }) {
