@@ -338,27 +338,67 @@ Nothing in the app can verify it. If a product is added to a leaf but not to its
 parents, the parent page silently under-reports — no error, no empty grid, just
 a quietly incomplete page nobody notices for months.
 
-**Strongly recommended: make the parent tiers smart collections** (rules on tag
-or product type) so membership is computed and cannot drift. Leaves can stay
-manual.
+**Strongly recommended: make the parent tiers automated collections** so
+membership is computed and cannot drift. Leaves can stay manual.
+
+**Automated collections cannot reference other collections.** Shopify's
+conditions cover product title, type, vendor, tag, price, weight, inventory,
+variant, and metafields — there is no "product is in collection X". So a parent
+tier has to be built on **tags** or **product type**:
+
+```
+Collection: lighting        (automated, match ANY condition)
+  Product tag is equal to  rock-lights
+  Product tag is equal to  wheel-lights
+```
+
+which means every product needs the tag its leaf collection is built on. Tag
+edits fire `products/update`, so this revalidates normally.
+
+**A manual parent is a snapshot, not a rule.** Adding every child product to the
+parent by hand works today and silently rots: each new leaf product has to be
+added to every ancestor forever, and the only symptom is a parent page that
+quietly shows less than it should.
 
 ## 3.3 Hidden collections
 
 Collections whose handle starts with `hidden-` are filtered out of the `/search`
-sidebar, the sitemap, and predictive search, and their pages 404. Use the prefix
-for anything that is a merchandising device rather than a browsable category —
-`best-selling-products`, `newest-products`, `homepage-feature` are all currently
-public category pages by accident.
+sidebar, the sitemap, and predictive search, and their pages 404. **The prefix
+is the only thing that hides a collection** — there is no other flag.
 
-Two hidden collections are **required by the homepage** and don't exist yet
-(the build logs `No collection found` for both):
+Two hidden collections are **required by the homepage**:
 
 | Handle                           | Drives                   |
 | -------------------------------- | ------------------------ |
 | `hidden-homepage-carousel`       | Homepage carousel        |
 | `hidden-homepage-featured-items` | Homepage three-item grid |
 
-Until they exist the homepage renders zero products.
+Until they exist the homepage renders zero products and the build logs
+`No collection found` for both.
+
+### What to do with the rest
+
+Every other collection in the store is a **public category page at
+`/<handle>`**, whether or not you meant it to be. Go through them once and ask:
+**would you put this in the nav?**
+
+- **Yes** → leave it alone.
+- **No** → **rename the handle** to `hidden-<handle>`. It keeps working as a
+  merchandising source; it just stops being a page.
+- **Nothing uses it at all** → delete it.
+
+Rename rather than delete by default: a hidden collection is still usable as a
+source for homepage sections and future landing pages, and deleting throws away
+whatever curation is in it.
+
+Shopify auto-creates `best-selling-products` and `newest-products` in every
+store, and neither is a browsable category — they're sort devices. `all` is the
+same. Prefix them.
+
+**Renaming a handle is safe while nothing is indexed.** Nav `collection` fields
+store a reference, not a handle, so category pages survive a rename untouched.
+Only out-of-tree collections take their URL from the handle, and changing those
+URLs costs nothing until the site is live — after that it needs a redirect.
 
 ---
 
