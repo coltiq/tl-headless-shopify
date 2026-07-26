@@ -20,7 +20,7 @@ moment that changes — they're marked **before launch**.
 
 **The single highest-impact item here, and it needs no code.**
 
-Verified against the live store: `/lighting`, `/parts`, and `/design-build`
+Verified against the live store: `/lighting`, `/parts`, and `/custom-work`
 resolve; `/lighting/rock-lights`, `/lighting/rock-lights/diy-kits`,
 `/lighting/rock-lights/plug-play-kits`, and
 `/lighting/rock-lights/singles-spares` all render the branded 404. Same failure
@@ -246,8 +246,17 @@ simply unread until then.
 
 ### 4.2 The four L1 sections are title-only stubs
 
-`/parts`, `/design-build`, `/lifestyle`, `/behind-the-build` render a heading
+`/parts`, `/custom-work`, `/lifestyle`, `/behind-the-build` render a heading
 and nothing else. Real pages come after the backend work.
+
+`/custom-work` is the one with a shape already decided: it is the shop side, so
+it gets **no ecommerce furniture** — no product grid, no cart, no filters, no
+garage bounce. Hero, process, gallery, inquiry. Planned children are Our Builds,
+The Process, Inside The Shop, Start Your Build, and it should cross-link with
+the retail side both ways (kit pages point at the shop that designed them; the
+shop section points at the kits it produced). **Behind The Build still needs
+renaming** — with the builds living under Custom Work, that label now describes
+the wrong section; The Journal or About.
 
 ### 4.3 Automating `fits-*` tags
 

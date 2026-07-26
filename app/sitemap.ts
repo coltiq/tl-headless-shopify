@@ -17,7 +17,7 @@ const STATIC_ROUTES = [
   "/search",
   "/contact",
   "/parts",
-  "/design-build",
+  "/custom-work",
   "/lifestyle",
   "/behind-the-build",
 ];

@@ -270,13 +270,13 @@ lets a single entry appear in both lists.
   evenly, but get cramped fast.
 - **`url` is single line text, deliberately — not Shopify's URL type.** The URL
   type validates against a scheme (`https`, `http`, `mailto`, `tel`, `sms`), so
-  it rejects a bare path like `/design-build`. Same reason `nav_item.link` is
+  it rejects a bare path like `/custom-work`. Same reason `nav_item.link` is
   plain text. Using it would force every internal link to be absolute, which
   sends visitors to the Shopify domain instead of keeping them on this
   storefront. The trade is that nothing validates the value — a typo renders a
   working-looking link that 404s.
-- **Prefer relative paths** in `url` — `/design-build`, not
-  `https://www.thetrucklab.com/pages/design-build`. Absolute URLs still work
+- **Prefer relative paths** in `url` — `/custom-work`, not
+  `https://www.thetrucklab.com/pages/custom-work`. Absolute URLs still work
   and render as external links (`rel="noopener noreferrer"`), which is right
   for genuinely off-site destinations and wrong for your own pages. This app
   never renders Shopify CMS pages (see Part 8.1).
@@ -441,13 +441,23 @@ don't look like category paths:
 
 | Label            | `link`              | Route status                  |
 | ---------------- | ------------------- | ----------------------------- |
-| Customize        | `/design-build`     | Title-only placeholder, built |
+| Custom Work      | `/custom-work`      | Title-only placeholder, built |
 | Parts            | `/parts`            | Title-only placeholder, built |
 | Lifestyle        | `/lifestyle`        | Title-only placeholder, built |
 | Behind The Build | `/behind-the-build` | Title-only placeholder, built |
 
 Because these are code routes, **a collection can never use those four
 handles** — a static route always beats the category resolver.
+
+**Custom Work is deliberately plain-language, not a sub-brand.** Truck Lab is
+one brand with two faces — retail and shop — and neither is subordinate, so the
+build side gets no name of its own competing for recognition. The label also
+has to hold both a ground-up truck and a bolt-on install without implying
+either: "Custom Builds" reads as big-money-only and loses the lift-and-bumper
+customer, "Customize" reads as a configurator, and anything containing "Shop"
+reads as a product grid on a storefront. If the label changes, it is a single
+`nav_item.label` edit — but the path is baked into
+`NEXT_MIDDLEWARE_RESERVED_SEGMENTS`, `app/sitemap.ts`, and the route folder.
 
 ## 4.3 Category items (L2 and below) — **the Phase 3 migration**
 
@@ -495,7 +505,7 @@ Three rules the walk enforces, worth knowing before authoring:
   also across the four L1 sections at the first level. Two sections both
   holding a `lighting` child produce one `/lighting`; the second is dropped
   with an error.
-- **The four L1 handles are reserved forever.** `/parts`, `/design-build`,
+- **The four L1 handles are reserved forever.** `/parts`, `/custom-work`,
   `/lifestyle`, and `/behind-the-build` are static code routes and always beat
   the category resolver, so no slug (and no collection handle) can ever use
   them.

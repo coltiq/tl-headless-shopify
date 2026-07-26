@@ -65,7 +65,7 @@ export const NAV_LEVEL_CAPS = { l1: 8, l2: 12, l3: 12, l4: 16 } as const;
 // sections are in here permanently — see docs/shopify-setup.md Part 4.2.
 export const NEXT_MIDDLEWARE_RESERVED_SEGMENTS = new Set([
   "parts",
-  "design-build",
+  "custom-work",
   "lifestyle",
   "behind-the-build",
   "contact",
