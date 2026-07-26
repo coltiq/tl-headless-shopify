@@ -505,6 +505,10 @@ Three rules the walk enforces, worth knowing before authoring:
   also across the four L1 sections at the first level. Two sections both
   holding a `lighting` child produce one `/lighting`; the second is dropped
   with an error.
+- **`/contact`, `/app`, `/search`, and `/product` are reserved too**, for the
+  same reason — they are static code routes, so no slug or collection handle
+  may use them either. The full list is
+  `NEXT_MIDDLEWARE_RESERVED_SEGMENTS` in `lib/constants.ts`.
 - **The four L1 handles are reserved forever.** `/parts`, `/custom-work`,
   `/lifestyle`, and `/the-standard` are static code routes and always beat
   the category resolver, so no slug (and no collection handle) can ever use

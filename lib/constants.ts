@@ -69,6 +69,7 @@ export const NEXT_MIDDLEWARE_RESERVED_SEGMENTS = new Set([
   "lifestyle",
   "the-standard",
   "contact",
+  "app",
   "search",
   "product",
 ]);
@@ -83,6 +84,11 @@ export const NEXT_MIDDLEWARE_RESERVED_SEGMENTS = new Set([
 // number can never ship.
 export const SHOP_PHONE_DISPLAY = "(205) 539-9794";
 export const SHOP_PHONE_HREF = "tel:+12055399794";
+
+// Store links for the lighting control app, rendered by `/app`. Each button
+// collapses while its URL is empty, so a dead store link can never ship.
+export const APP_STORE_URL = "";
+export const PLAY_STORE_URL = "";
 
 export const HIDDEN_PRODUCT_TAG = "nextjs-frontend-hidden";
 export const DEFAULT_OPTION = "Default Title";
