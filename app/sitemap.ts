@@ -19,7 +19,7 @@ const STATIC_ROUTES = [
   "/parts",
   "/custom-work",
   "/lifestyle",
-  "/behind-the-build",
+  "/the-standard",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

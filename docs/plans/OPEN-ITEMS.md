@@ -246,7 +246,7 @@ simply unread until then.
 
 ### 4.2 The four L1 sections are title-only stubs
 
-`/parts`, `/custom-work`, `/lifestyle`, `/behind-the-build` render a heading
+`/parts`, `/custom-work`, `/lifestyle`, `/the-standard` render a heading
 and nothing else. Real pages come after the backend work.
 
 `/custom-work` is the one with a shape already decided: it is the shop side, so
@@ -254,9 +254,17 @@ it gets **no ecommerce furniture** — no product grid, no cart, no filters, no
 garage bounce. Hero, process, gallery, inquiry. Planned children are Our Builds,
 The Process, Inside The Shop, Start Your Build, and it should cross-link with
 the retail side both ways (kit pages point at the shop that designed them; the
-shop section points at the kits it produced). **Behind The Build still needs
-renaming** — with the builds living under Custom Work, that label now describes
-the wrong section; The Journal or About.
+shop section points at the kits it produced).
+
+`/the-standard` is the brand side: the people, the story, the values, and the
+journal. It is **not** where support lives — see 4.5. Named for the execution
+standard the shop sells on, which is why it is not "About": the section is a
+claim, not a company-info dump.
+
+**The L1 set is final at four.** Custom Work · Parts · Lifestyle · The Standard.
+Support deliberately gets no bar slot (4.5), and the category rail inside the
+Parts panel is why the bar does not need category items on it — promoting
+categories to L1 would consume the rail's level and burn the L1 cap of 8.
 
 ### 4.3 Automating `fits-*` tags
 
@@ -271,3 +279,38 @@ Audit the footer menu (`next-js-frontend-footer-menu`) and every nav `link`
 field. Shopify CMS pages are not rendered, so any `/pages/<handle>` link — or a
 bare `/<handle>` pointing at a Shopify page — 404s. End state: no CMS-page links
 anywhere, every page a custom code route.
+
+### 4.5 Support architecture — decided, not built
+
+15–20 policy and help pages are coming (shipping, returns, warranty, FAQ,
+fitment help, order status, legal). **Support gets no L1 nav slot.** Three tiers
+instead:
+
+1. **The header contact popup is the entry point**, not the container — chat,
+   phone/email/hours, order status, the top six or eight questions, and a link
+   to the hub. Today it is a plain `/contact` link (`components/layout/header/
+index.tsx`, and "Contact support" in `mobile-drawer.tsx`); the popup enhances
+   it, and `/contact` keeps working underneath. Build it as a client island
+   alongside `garage-menu`/`vehicle-picker`, fed from a cached source — a
+   per-request fetch there drags the layout dynamic under `cacheComponents`.
+   **Load any chat widget lazily on open**, never in the root layout.
+2. **`/support` hub** — all of them, grouped.
+3. **Every article and policy stays a real indexed URL.** Overlay-only content
+   cannot rank, cannot be pasted into a support reply, and legal needs stable
+   links regardless (Shopify's checkout links policies directly). This is the
+   binding constraint on the popup: it surfaces support, it never stores it.
+
+**The footer needs grouped columns before any of this lands.** It is still the
+stock Vercel template — `FooterMenu` renders one flat `<ul>` and its `Menu` type
+carries no children, so 20 links would render as a 20-item column. Four labelled
+columns (Orders & Shipping · Returns & Warranty · Help · Company) plus a muted
+legal row absorb the volume; with the popup as the primary path the footer only
+needs the top eight, and the hub carries the long tail. Shopify menus nest two
+levels, so the columns can be authored in admin once the footer takes a nested
+source (the nav's `MenuItem` already carries `.items`).
+
+Storefront fields confirmed against the 2025-07 schema if authored content is
+ever preferred over hand-built routes: `shop.refundPolicy`, `shippingPolicy`,
+`privacyPolicy`, `termsOfService`, `subscriptionPolicy` (each `title`, `handle`,
+`body`), and `page(handle:)` / `pages(first:)`. Not the current plan — the pages
+are being hand-built — but it is the escape hatch if the volume gets tedious.

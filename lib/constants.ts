@@ -67,7 +67,7 @@ export const NEXT_MIDDLEWARE_RESERVED_SEGMENTS = new Set([
   "parts",
   "custom-work",
   "lifestyle",
-  "behind-the-build",
+  "the-standard",
   "contact",
   "search",
   "product",
