@@ -1,4 +1,4 @@
-import { SHOP_PHONE_DISPLAY, SHOP_PHONE_HREF } from "lib/constants";
+import { SHOP_PHONE_DISPLAY } from "lib/constants";
 import { resolveIcon } from "lib/icons";
 import type { Announcement, AnnouncementBarLink } from "lib/shopify/types";
 import Link from "next/link";
@@ -9,6 +9,12 @@ import { AnnouncementRotator } from "./announcement-rotator";
 // from `custom.announcement_bar_links`. Either list being empty collapses its
 // half of the band — callers must not render a bar with nothing in it, and the
 // header's spacer height depends on the same emptiness checks.
+//
+// **One type scale across the whole band**: `font-tl-sans` at 11px in white,
+// everywhere, on both breakpoints. Only tracking varies by role — 0.1em on the
+// uppercase links, 0.09em on the number, none on the announcement copy, which
+// is a sentence rather than a label. It previously mixed the body font, a mono
+// readout, and two text colours.
 //
 // The right slot holds the shop's phone number, from lib/constants.ts rather
 // than admin: it's business data, not editorial copy, and it changes about
@@ -24,9 +30,12 @@ export function AnnouncementBar({
   links: AnnouncementBarLink[];
 }) {
   return (
-    <div className="hidden h-[38px] bg-tl-indigo text-tl-ann-text md:block md:group-data-[condensed]:hidden">
+    <div className="hidden h-[38px] bg-tl-indigo text-white md:block md:group-data-[condensed]:hidden">
       <div className="page-width flex h-full items-center">
-        <AnnouncementRotator items={announcements} className="text-xs" />
+        <AnnouncementRotator
+          items={announcements}
+          className="font-tl-sans text-[11px] text-white"
+        />
         <span className="ml-auto flex items-center gap-[26px]">
           {links.map((link) => (
             <BarLink key={`${link.url}-${link.label}`} link={link} />
@@ -34,19 +43,19 @@ export function AnnouncementBar({
           {links.length > 0 && SHOP_PHONE_DISPLAY ? (
             <span aria-hidden className="h-4 w-px bg-white/25" />
           ) : null}
+          {/* Text, not a link. Nobody taps a number on a desktop, and a link
+              there only invites the misread this label exists to prevent —
+              that this is a general support line rather than the build line.
+              Mobile keeps tap-to-call, at the foot of the drawer.
+
+              Labelled, not bare: an unlabelled number in a global band reads
+              as ecommerce support to every visitor with a late package.
+              Reuses the nav's own wording so the two agree. */}
           {SHOP_PHONE_DISPLAY ? (
-            <a
-              href={SHOP_PHONE_HREF}
-              aria-label={`Call about custom work at ${SHOP_PHONE_DISPLAY}`}
-              className="font-tl-mono text-[11px] tracking-[0.09em] text-white hover:underline"
-            >
-              {/* Labelled, not bare: this is the build line, and an unlabelled
-                  number in a global band reads as ecommerce support to every
-                  visitor with a late package. Reuses the nav's own wording so
-                  the two agree. */}
+            <span className="font-tl-sans text-[11px] tracking-[0.09em] text-white">
               <span className="text-tl-ann-dim">Custom Work</span>{" "}
               {SHOP_PHONE_DISPLAY}
-            </a>
+            </span>
           ) : null}
         </span>
       </div>
@@ -64,7 +73,7 @@ export function MobileAnnouncementBar({
       {/* Short form: single line, truncated — never wraps. */}
       <AnnouncementRotator
         items={announcements}
-        className="truncate text-[11px] text-tl-ann-text"
+        className="truncate font-tl-sans text-[11px] text-white"
       />
     </div>
   );
@@ -78,7 +87,7 @@ function BarLink({ link }: { link: AnnouncementBarLink }) {
     </>
   );
   const className =
-    "flex items-center gap-[9px] font-tl-sans text-[11px] font-bold uppercase tracking-[0.12em] text-white";
+    "flex items-center gap-[9px] font-tl-sans text-[11px] font-bold uppercase tracking-[0.1em] text-white";
 
   return link.url.startsWith("/") ? (
     <Link href={link.url} className={className}>
