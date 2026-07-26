@@ -70,6 +70,7 @@ export const NEXT_MIDDLEWARE_RESERVED_SEGMENTS = new Set([
   "the-standard",
   "contact",
   "app",
+  "support",
   "search",
   "product",
 ]);

@@ -36,9 +36,14 @@ export function AnnouncementBar({
           {SHOP_PHONE_DISPLAY ? (
             <a
               href={SHOP_PHONE_HREF}
-              aria-label={`Call the shop at ${SHOP_PHONE_DISPLAY}`}
+              aria-label={`Call about custom work at ${SHOP_PHONE_DISPLAY}`}
               className="font-tl-mono text-[11px] tracking-[0.09em] text-white hover:underline"
             >
+              {/* Labelled, not bare: this is the build line, and an unlabelled
+                  number in a global band reads as ecommerce support to every
+                  visitor with a late package. Reuses the nav's own wording so
+                  the two agree. */}
+              <span className="text-tl-ann-dim">Custom Work</span>{" "}
               {SHOP_PHONE_DISPLAY}
             </a>
           ) : null}
