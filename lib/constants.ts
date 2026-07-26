@@ -71,7 +71,7 @@ export const NEXT_MIDDLEWARE_RESERVED_SEGMENTS = new Set([
   "contact",
   "app",
   "support",
-  "quotes",
+  "quote",
   "search",
   "product",
 ]);

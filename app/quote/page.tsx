@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 //
 // Reserved in NEXT_MIDDLEWARE_RESERVED_SEGMENTS so no collection handle can
 // shadow it.
-export default function QuotesPage() {
+export default function QuotePage() {
   return (
     <>
       <div className="page-width py-20">
