@@ -67,6 +67,9 @@ export const NEXT_MIDDLEWARE_RESERVED_SEGMENTS = new Set([
   "parts",
   "custom-work",
   "lifestyle",
+  "community",
+  // No longer an L1 section — it sits at L2 under Community — but still a
+  // static code route, so the segment stays reserved.
   "the-standard",
   "contact",
   "app",

@@ -246,8 +246,9 @@ simply unread until then.
 
 ### 4.2 The four L1 sections are title-only stubs
 
-`/parts`, `/custom-work`, `/lifestyle`, `/the-standard` render a heading
-and nothing else. Real pages come after the backend work.
+`/parts`, `/custom-work`, `/lifestyle` render a heading and nothing else;
+`/community` and `/the-standard` are scaffolds. Real pages come after the
+backend work.
 
 `/custom-work` is the one with a shape already decided: it is the shop side, so
 it gets **no ecommerce furniture** — no product grid, no cart, no filters, no
@@ -256,15 +257,33 @@ The Process, Inside The Shop, Start Your Build, and it should cross-link with
 the retail side both ways (kit pages point at the shop that designed them; the
 shop section points at the kits it produced).
 
-`/the-standard` is the brand side: the people, the story, the values, and the
-journal. It is **not** where support lives — see 4.5. Named for the execution
-standard the shop sells on, which is why it is not "About": the section is a
-claim, not a company-info dump.
+`/community` is the brand side, and it is a **container**: Blog, Customer
+Builds, and The Standard to start, with Events and Giveaways when they exist.
+It is **not** where support lives — see 4.5.
 
-**The L1 set is final at four.** Custom Work · Parts · Lifestyle · The Standard.
-Support deliberately gets no bar slot (4.5), and the category rail inside the
-Parts panel is why the bar does not need category items on it — promoting
-categories to L1 would consume the rail's level and burn the L1 cap of 8.
+Named Community rather than About because it is the only section whose contents
+are expected to grow — About shrinks the moment events land, Journal narrows to
+articles, and a place name makes company philosophy read as furniture. It is
+also the only heading under which The Standard fits: "what we stand for" reads
+as the terms of belonging rather than corporate boilerplate.
+
+**Customer Builds is the child that has to ship.** With nothing but a blog
+behind it the section name over-promises, and customer trucks are free content,
+social proof to link from product pages, and model-specific search traffic.
+Distinct from Custom Work's Our Builds, which is the shop's own work.
+
+`/the-standard` is now an **L2 under Community**, not an L1 section. Its URL
+does not move: an L2 with an explicit `link` and no `slug` falls back to the
+link, so nav position and path are independent here.
+
+**The blog needs a content-source decision before it gets a route.** Shopify
+articles are queryable on the Storefront API, which beats a deploy per post —
+settle that before scaffolding, and name the blog at the same time.
+
+**The L1 set is four.** Custom Work · Parts · Lifestyle · Community. Support
+deliberately gets no bar slot (4.5), and the category rail inside the Parts
+panel is why the bar does not need category items on it — promoting categories
+to L1 would consume the rail's level and burn the L1 cap of 8.
 
 ### 4.3 Automating `fits-*` tags
 

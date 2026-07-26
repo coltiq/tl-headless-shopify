@@ -57,7 +57,7 @@ Cart state lives in Shopify, identified by a `cartId` cookie. `components/cart/c
 ### Routes (`app/`)
 
 - `/` — homepage; `/product/[handle]` — product detail; `/search` — text search with sort options from `lib/constants.ts` (`sorting`).
-- `/contact`, `/app`, `/support`, `/quote`, `/parts`, `/custom-work`, `/lifestyle`, `/the-standard` — custom code routes. The last four are the L1 nav sections and **permanently reserve those paths**: a static route always beats the catch-all, so no collection handle or category slug can ever use them.
+- `/contact`, `/app`, `/support`, `/quote`, `/the-standard`, `/parts`, `/custom-work`, `/lifestyle`, `/community` — custom code routes. The last four are the L1 nav sections; the rest are ordinary pages (`/the-standard` sits at L2 under Community). All of them **permanently reserve those paths**: a static route always beats the catch-all, so no collection handle or category slug can ever use them.
 - `app/[...path]` — the category URL space (below).
 - `/search/[collection]` — legacy, redirects to the canonical category path.
 - `middleware.ts` — issues the **real** 308s.
