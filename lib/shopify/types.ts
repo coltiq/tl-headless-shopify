@@ -80,6 +80,10 @@ export type Announcement = {
 export type AnnouncementBarLink = {
   label: string;
   url: string;
+  // An exact Heroicons export name from the `icon_text` field. Takes precedence
+  // over `icon`: it renders as inline SVG and inherits `currentColor`, where an
+  // uploaded file is an <img> stuck at whatever colour it was drawn in.
+  iconName: string | null;
   icon: { url: string; width: number; height: number } | null;
 };
 
@@ -398,6 +402,7 @@ export type ShopifyAnnouncementBarLinkNode = {
   fields?: { key: string }[];
   label: Maybe<{ value: string }>;
   url: Maybe<{ value: string }>;
+  iconText: Maybe<{ value: string }>;
   icon: Maybe<{
     reference: Maybe<{
       image: Maybe<{ url: string; width: number; height: number }>;

@@ -1,4 +1,5 @@
 import { SHOP_PHONE_DISPLAY, SHOP_PHONE_HREF } from "lib/constants";
+import { resolveIcon } from "lib/icons";
 import type { Announcement, AnnouncementBarLink } from "lib/shopify/types";
 import Link from "next/link";
 import { AnnouncementRotator } from "./announcement-rotator";
@@ -90,10 +91,17 @@ function BarLink({ link }: { link: AnnouncementBarLink }) {
   );
 }
 
-// A plain <img>, not next/image: these are ~15px icons on a fixed-height band,
-// where optimization saves nothing, and Shopify serves uploaded SVGs — which
-// next/image refuses without `dangerouslyAllowSVG`. Decorative, because the
-// link's own label sits right beside it.
+// `icon_text` wins over an uploaded file: it resolves to inline SVG that
+// inherits currentColor, so it tracks the band's text in every state, where an
+// uploaded file is stuck at the colour it was drawn in. The file stays the
+// escape hatch for genuinely custom art. Neither present renders nothing —
+// the label alone reads fine, and a placeholder glyph would make a
+// misconfigured entry look deliberate.
+//
+// The uploaded branch is a plain <img>, not next/image: these are ~15px icons
+// on a fixed-height band, where optimization saves nothing, and Shopify serves
+// uploaded SVGs — which next/image refuses without `dangerouslyAllowSVG`.
+// Decorative either way, because the link's own label sits right beside it.
 export function BarLinkIcon({
   link,
   className = "h-[15px] w-auto",
@@ -101,6 +109,13 @@ export function BarLinkIcon({
   link: AnnouncementBarLink;
   className?: string;
 }) {
+  const Icon = resolveIcon(link.iconName);
+  if (Icon) {
+    // aspect-square because callers size by height with `w-auto`, and a
+    // Heroicons SVG carries no intrinsic width to derive one from.
+    return <Icon aria-hidden className={`${className} aspect-square`} />;
+  }
+
   if (!link.icon) return null;
 
   return (

@@ -779,6 +779,7 @@ const reshapeAnnouncementBarLinks = (
     links.push({
       label,
       url,
+      iconName: node.iconText?.value?.trim() || null,
       icon: image
         ? { url: image.url, width: image.width, height: image.height }
         : null,

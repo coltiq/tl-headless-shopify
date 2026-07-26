@@ -219,19 +219,32 @@ not silently unlinked.
 the utility links on the right of the desktop band, and the whole mobile links
 band beneath the brand bar.
 
-| Field key | Type             | Create it? | Notes                                                                             |
-| --------- | ---------------- | ---------- | --------------------------------------------------------------------------------- |
-| `label`   | Single line text | **Yes**    | Link text. Rendered uppercase                                                     |
-| `url`     | Single line text | **Yes**    | **Not the URL type** — see below. Required; a link with no destination is dropped |
-| `icon`    | File             | **Yes**    | Optional per entry; the link renders without one                                  |
+| Field key   | Type             | Create it? | Notes                                                                             |
+| ----------- | ---------------- | ---------- | --------------------------------------------------------------------------------- |
+| `label`     | Single line text | **Yes**    | Link text. Rendered uppercase                                                     |
+| `url`       | Single line text | **Yes**    | **Not the URL type** — see below. Required; a link with no destination is dropped |
+| `icon_text` | Single line text | **Yes**    | An exact Heroicons name. **Preferred over `icon`** — see below                    |
+| `icon`      | File             | **Yes**    | Optional fallback for custom art; the link renders without either                 |
 
-**The icon must already be the right colour.** It sits on the indigo band and
-the app can't recolour an uploaded file, so upload **white** SVG or PNG. It is
-rendered at 15px tall on desktop, 12px on mobile, width auto — so upload a
-square-ish, simple glyph and don't worry about the exact pixel size.
+**Prefer `icon_text`.** Type the **exact** export name of a
+[Heroicons](https://heroicons.com) 24px **outline** icon — `PhoneIcon`,
+`TruckIcon`, `WrenchScrewdriverIcon`, `ChatBubbleLeftRightIcon`. Copy it from
+the icon's page rather than guessing: the whole outline set is available and
+nothing needs a deploy, but the match is case-sensitive and exact. A name that
+doesn't resolve logs `Unknown icon_text "..."` and renders no icon — check the
+logs, not the header, since the band still looks fine without one.
 
-The icon is decorative (`alt=""`): the label sits right beside it, and having a
-screen reader read both would be repetition.
+`icon_text` wins when both are set, because it renders as inline SVG and
+inherits the band's text colour in every state. An uploaded file can't be
+recoloured by the app.
+
+**An uploaded `icon` must already be the right colour** — it sits on the indigo
+band, so upload **white** SVG or PNG. Both forms render 15px tall on desktop,
+12px on mobile, so a square-ish simple glyph works; don't worry about exact
+pixel size.
+
+Icons are decorative either way (`alt=""` / `aria-hidden`): the label sits right
+beside them, and having a screen reader read both would be repetition.
 
 ### 1.4.3 Shop metafields
 

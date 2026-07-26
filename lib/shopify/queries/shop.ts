@@ -80,6 +80,9 @@ export const getShopAnnouncementsQuery = /* GraphQL */ `
           url: field(key: "url") {
             value
           }
+          iconText: field(key: "icon_text") {
+            value
+          }
           icon: field(key: "icon") {
             reference {
               ... on MediaImage {
