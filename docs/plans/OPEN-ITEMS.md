@@ -288,7 +288,11 @@ instead:
 
 1. **The header contact popup is the entry point**, not the container — chat,
    phone/email/hours, order status, the top six or eight questions, and a link
-   to the hub. Today it is a plain `/contact` link (`components/layout/header/
+   to the hub. **The phone number goes front and centre in it**, because that is
+   what covers the condensed header: the announcement band carries the number on
+   desktop but hides under `group-data-[condensed]`, so once the header shrinks
+   the chat icon's popup is the only phone affordance left. Mobile's copy lives
+   at the foot of the drawer. Today it is a plain `/contact` link (`components/layout/header/
 index.tsx`, and "Contact support" in `mobile-drawer.tsx`); the popup enhances
    it, and `/contact` keeps working underneath. Build it as a client island
    alongside `garage-menu`/`vehicle-picker`, fed from a cached source — a

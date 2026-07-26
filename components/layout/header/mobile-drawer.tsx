@@ -6,7 +6,14 @@ import { MenuItem } from "lib/shopify/types";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Fragment, ReactNode, useEffect, useState } from "react";
-import { IconAccount, IconBurger, IconChat, IconClose } from "./icons";
+import { SHOP_PHONE_DISPLAY, SHOP_PHONE_HREF } from "lib/constants";
+import {
+  IconAccount,
+  IconBurger,
+  IconChat,
+  IconClose,
+  IconPhone,
+} from "./icons";
 import { SearchField } from "./search";
 
 const drawerRowClass =
@@ -171,9 +178,19 @@ export function MobileDrawer({
                     Contact support
                   </Link>
 
-                  <div className="mt-2.5 border-t border-tl-hairline px-4 py-3.5 font-tl-mono text-[10.5px] tracking-[0.09em] text-tl-steel">
-                    USD · EN
-                  </div>
+                  {/* Tap-to-call closes out the drawer, replacing a dead
+                      `USD · EN` readout. This is mobile's phone affordance:
+                      the announcement band that carries it on desktop renders
+                      the rotator only at this width. */}
+                  {SHOP_PHONE_DISPLAY ? (
+                    <a
+                      href={SHOP_PHONE_HREF}
+                      className="mt-2.5 flex h-12 items-center gap-[11px] border-t border-tl-hairline px-4 font-tl-text text-[13.5px]"
+                    >
+                      <IconPhone className="h-[17px] w-[17px]" />
+                      Call {SHOP_PHONE_DISPLAY}
+                    </a>
+                  ) : null}
                 </>
               )}
             </Dialog.Panel>

@@ -73,6 +73,17 @@ export const NEXT_MIDDLEWARE_RESERVED_SEGMENTS = new Set([
   "product",
 ]);
 
+// The announcement band's right slot. It used to hold a `USD · EN` readout,
+// which was decoration — one currency, one locale, no switcher behind it — and
+// a tap-to-call number is the shop side's highest-intent action, sitting in the
+// corner where service businesses conventionally put it.
+//
+// Display and href are separate on purpose: no formatting to parse, and no
+// guessing at a country code. **Both empty hides the slot**, so a placeholder
+// number can never ship.
+export const SHOP_PHONE_DISPLAY = "(205) 539-9794";
+export const SHOP_PHONE_HREF = "tel:+12055399794";
+
 export const HIDDEN_PRODUCT_TAG = "nextjs-frontend-hidden";
 export const DEFAULT_OPTION = "Default Title";
 export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2025-07/graphql.json";

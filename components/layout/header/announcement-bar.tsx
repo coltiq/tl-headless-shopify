@@ -1,3 +1,4 @@
+import { SHOP_PHONE_DISPLAY, SHOP_PHONE_HREF } from "lib/constants";
 import type { Announcement, AnnouncementBarLink } from "lib/shopify/types";
 import Link from "next/link";
 import { AnnouncementRotator } from "./announcement-rotator";
@@ -8,8 +9,12 @@ import { AnnouncementRotator } from "./announcement-rotator";
 // half of the band — callers must not render a bar with nothing in it, and the
 // header's spacer height depends on the same emptiness checks.
 //
-// The locale slot stays hardcoded: it reflects what the storefront actually
-// supports, not an editorial choice.
+// The right slot holds the shop's phone number, from lib/constants.ts rather
+// than admin: it's business data, not editorial copy, and it changes about
+// never. Empty constants collapse the slot along with its divider.
+//
+// **Desktop only** — MobileAnnouncementBar carries the rotator and nothing
+// else, so mobile's tap-to-call lives in the contact popup instead.
 export function AnnouncementBar({
   announcements,
   links,
@@ -25,12 +30,18 @@ export function AnnouncementBar({
           {links.map((link) => (
             <BarLink key={`${link.url}-${link.label}`} link={link} />
           ))}
-          {links.length > 0 ? (
+          {links.length > 0 && SHOP_PHONE_DISPLAY ? (
             <span aria-hidden className="h-4 w-px bg-white/25" />
           ) : null}
-          <span className="font-tl-mono text-[11px] tracking-[0.09em] text-tl-ann-dim">
-            USD · EN
-          </span>
+          {SHOP_PHONE_DISPLAY ? (
+            <a
+              href={SHOP_PHONE_HREF}
+              aria-label={`Call the shop at ${SHOP_PHONE_DISPLAY}`}
+              className="font-tl-mono text-[11px] tracking-[0.09em] text-white hover:underline"
+            >
+              {SHOP_PHONE_DISPLAY}
+            </a>
+          ) : null}
         </span>
       </div>
     </div>
