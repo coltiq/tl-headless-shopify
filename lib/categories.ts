@@ -26,6 +26,12 @@ export function joinCategoryPath(parentPath: string, slug: string): string {
 const navStyle = (node: ShopifyNavItem) =>
   node.style?.value === "links-row" ? ("links-row" as const) : undefined;
 
+// Blank and whitespace-only both mean "not written yet" — the panel layouts
+// that use it check for presence, so an empty string would render an empty
+// paragraph instead of collapsing.
+const navDescription = (node: ShopifyNavItem) =>
+  node.description?.value?.trim() || undefined;
+
 // Walks one level of the tree below `parentPath`, appending every category it
 // finds to `out` and returning the menu items plus the category paths that
 // belong to `parentPath` directly.
@@ -105,6 +111,7 @@ function walkNavLevel(
       // non-category destinations and for entries not yet migrated to slugs.
       path: path ?? (node.link?.value ? linkToPath(node.link.value) : "#"),
       style: navStyle(node),
+      description: navDescription(node),
       items: child.items,
     });
 
@@ -171,6 +178,7 @@ export function buildNavProjection(
       title,
       path: node.link?.value ? linkToPath(node.link.value) : "#",
       style: navStyle(node),
+      description: navDescription(node),
       items: child.items,
     });
   }

@@ -62,6 +62,10 @@ export type MenuItem = {
   // its children as the links row beneath the rule (set via the nav_item
   // metaobject's `style` field).
   style?: "links-row";
+  // One line of copy from the nav_item `description` field, shown by the mega
+  // panel's flat layout and by a childless rail item's body. Optional
+  // throughout: without it those layouts still render the title alone.
+  description?: string;
   items: MenuItem[];
 };
 
@@ -316,6 +320,7 @@ export type ShopifyNavItem = {
   label: Maybe<{ value: string }>;
   link: Maybe<{ value: string }>;
   style: Maybe<{ value: string }>;
+  description: Maybe<{ value: string }>;
   // Category fields. `slug` is one URL segment; the path is built from tree
   // position. `collection.reference` is `{}` rather than null when the
   // reference points at something that isn't a Collection.

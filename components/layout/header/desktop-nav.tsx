@@ -138,8 +138,32 @@ function MegaPanel({
   const active = railItems[Math.min(rail, Math.max(railItems.length - 1, 0))];
   const columns = active ? distributeGroups(active.items, 3) : [];
 
+  // The rail exists to show one item's children beside all the others' names.
+  // A section where nothing has children — Community, Custom Work — has no
+  // second level to show, so the rail would sit beside a permanently empty
+  // body. Those render flat instead: the items themselves, with room for the
+  // line of copy the rail's 44px rows have nowhere to put.
+  //
+  // The split is at level 3, not level 4: a section whose rail items have
+  // childless children still fills the body, because a childless group renders
+  // as a plain link (below).
+  const hasAnyChildren = railItems.some(
+    (railItem) => railItem.items.length > 0,
+  );
+
+  if (!hasAnyChildren && railItems.length > 0) {
+    return (
+      <PanelShell>
+        <div className="mx-auto max-w-(--container-page) px-(--spacing-gutter) pb-[34px] pt-[30px]">
+          <FlatItems items={railItems} />
+          {linksRow.length > 0 ? <LinksRow links={linksRow} /> : null}
+        </div>
+      </PanelShell>
+    );
+  }
+
   return (
-    <div className="absolute inset-x-0 top-full z-50 border-b-[2.5px] border-tl-indigo bg-white shadow-[0_26px_60px_-20px_rgba(15,20,48,0.45)]">
+    <PanelShell>
       {/* No gutter padding here: the fog rail runs to the page-width boundary
           while its items carry the gutter, keeping text aligned with the nav. */}
       <div className="mx-auto grid max-w-(--container-page) grid-cols-[262px_1fr]">
@@ -232,29 +256,91 @@ function MegaPanel({
                 </div>
               ))}
             </div>
+          ) : active ? (
+            // A childless item inside a section that otherwise has depth: the
+            // rail stays, because dropping it would hide its siblings'
+            // contents and restructure the panel under the cursor. It gets a
+            // body of its own instead of the empty-section message.
+            <div className="max-w-[46ch]">
+              <p className="font-tl-text text-sm font-semibold text-tl-ink">
+                {active.title}
+              </p>
+              {active.description ? (
+                <p className="mt-2 font-tl-text text-sm text-tl-steel">
+                  {active.description}
+                </p>
+              ) : null}
+              <Link
+                href={active.path}
+                prefetch={true}
+                className="mt-4 inline-flex items-center gap-[7px] font-tl-text text-xs font-medium text-tl-indigo"
+              >
+                Visit {active.title}
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
           ) : (
+            // Only reachable when every level-2 item is styled "links-row",
+            // leaving no rail at all.
             <p className="font-tl-text text-sm text-tl-mute-white">
               More {item.title.toLowerCase()} coming soon.
             </p>
           )}
 
-          {linksRow.length > 0 ? (
-            <div className="mt-[26px] flex flex-wrap gap-[30px] border-t border-tl-hairline pt-5">
-              {linksRow.map((link, linkIndex) => (
-                <Link
-                  key={`${link.title}-${linkIndex}`}
-                  href={link.path}
-                  prefetch={true}
-                  className="flex items-center gap-[7px] font-tl-text text-xs font-medium text-tl-indigo"
-                >
-                  <span aria-hidden>◆</span>
-                  {link.title}
-                </Link>
-              ))}
-            </div>
-          ) : null}
+          {linksRow.length > 0 ? <LinksRow links={linksRow} /> : null}
         </div>
       </div>
+    </PanelShell>
+  );
+}
+
+function PanelShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="absolute inset-x-0 top-full z-50 border-b-[2.5px] border-tl-indigo bg-white shadow-[0_26px_60px_-20px_rgba(15,20,48,0.45)]">
+      {children}
+    </div>
+  );
+}
+
+// The flat layout: level-2 items as the content itself. Auto-fit rather than a
+// fixed column count so three items and six both look deliberate.
+function FlatItems({ items }: { items: MenuItem[] }) {
+  return (
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-x-10 gap-y-[30px]">
+      {items.map((child) => (
+        <div key={child.title}>
+          <Link
+            href={child.path}
+            prefetch={true}
+            className="font-tl-text text-sm font-semibold text-tl-ink"
+          >
+            {child.title}
+          </Link>
+          {child.description ? (
+            <p className="mt-[7px] max-w-[34ch] font-tl-text text-sm text-tl-steel">
+              {child.description}
+            </p>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LinksRow({ links }: { links: MenuItem[] }) {
+  return (
+    <div className="mt-[26px] flex flex-wrap gap-[30px] border-t border-tl-hairline pt-5">
+      {links.map((link, linkIndex) => (
+        <Link
+          key={`${link.title}-${linkIndex}`}
+          href={link.path}
+          prefetch={true}
+          className="flex items-center gap-[7px] font-tl-text text-xs font-medium text-tl-indigo"
+        >
+          <span aria-hidden>◆</span>
+          {link.title}
+        </Link>
+      ))}
     </div>
   );
 }

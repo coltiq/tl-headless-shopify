@@ -68,6 +68,9 @@ export const getNavMenuQuery = /* GraphQL */ `
     style: field(key: "style") {
       value
     }
+    description: field(key: "description") {
+      value
+    }
     slug: field(key: "slug") {
       value
     }

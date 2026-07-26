@@ -100,6 +100,8 @@ Collections with no tree position (`gift-cards`, `shop-labor`, `the-lab`) keep r
 
 Nav query caps (8/12/12/16, in `lib/shopify/queries/nav.ts`) bound the URL space, not just the menu — the app logs when a level is sitting on one. Depth is capped at four nav levels, i.e. three URL segments.
 
+**The mega panel picks its layout from the section's depth**, in `components/layout/header/desktop-nav.tsx`. A section whose L2 items all have children renders the rail plus the active item's groups; one where **none** do (Community, Custom Work) drops the rail and renders the L2s flat, with their `description` beneath each. In a mixed section the rail stays and a childless item shows its own description and a link, because restructuring the panel as the cursor moves down the rail is worse than either layout. The split is at L3, not L4 — a childless L3 group already renders as a plain link. `description` is optional throughout; without it these layouts render the title alone.
+
 ### Vehicle fitment (the garage)
 
 The whole design exists so **every page stays cacheable**: vehicle identity lives in the URL, which is shareable and indexable, and is never read from a server-side cookie on a cacheable page. The `tl_garage` cookie only drives a client-side redirect from bare category URLs.

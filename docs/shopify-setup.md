@@ -87,17 +87,39 @@ Until this exists the storefront falls back to the native `main-menu-v2` menu.
 **Field keys must match exactly** — a mismatched key resolves to `null`, and
 the item is dropped or the whole nav falls back.
 
-| Field key    | Type                                              | Create it?   | Notes                                                                                                                         |
-| ------------ | ------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `label`      | Single line text                                  | **Yes**      | Display name; set as the definition's display name field. **Display only** — never used to build a URL                        |
-| `link`       | Single line text                                  | **Yes**      | Plain text on purpose: the URL field type only accepts absolute URLs, but the nav needs relative paths. Empty = heading       |
-| `children`   | Metaobject reference → Nav item, **list**         | **Yes**      | Self-reference. List order is display order                                                                                   |
-| `style`      | Single line text, preset `default` / `links-row`  | **Yes**      | `links-row` on an L2 item moves it out of the mega panel rail; its children render as the links row at the panel's foot       |
-| `slug`       | Single line text                                  | **Yes**      | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                               |
-| `collection` | Collection reference                              | **Yes**      | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                         |
-| `layout`     | Single line text, preset `grid` / `landing`       | Skip for now | Read if present, but only `grid` renders — a node set to `landing` still shows the grid. Absent → `grid`                      |
-| `show_grid`  | True/false                                        | Skip for now | Read if present, but unread until `landing` renders differently. Absent → true                                                |
-| `sections`   | Metaobject reference → Category section, **list** | Skip for now | Not in the query at all, and it can't be created before the `category_section` definition that Part 1.5 says not to build yet |
+| Field key     | Type                                              | Create it?   | Notes                                                                                                                         |
+| ------------- | ------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `label`       | Single line text                                  | **Yes**      | Display name; set as the definition's display name field. **Display only** — never used to build a URL                        |
+| `link`        | Single line text                                  | **Yes**      | Plain text on purpose: the URL field type only accepts absolute URLs, but the nav needs relative paths. Empty = heading       |
+| `children`    | Metaobject reference → Nav item, **list**         | **Yes**      | Self-reference. List order is display order                                                                                   |
+| `style`       | Single line text, preset `default` / `links-row`  | **Yes**      | `links-row` on an L2 item moves it out of the mega panel rail; its children render as the links row at the panel's foot       |
+| `description` | Single line text                                  | **Yes**      | One line of copy, shown only by the mega panel's flat layout and by a childless rail item — see below. Optional everywhere    |
+| `slug`        | Single line text                                  | **Yes**      | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                               |
+| `collection`  | Collection reference                              | **Yes**      | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                         |
+| `layout`      | Single line text, preset `grid` / `landing`       | Skip for now | Read if present, but only `grid` renders — a node set to `landing` still shows the grid. Absent → `grid`                      |
+| `show_grid`   | True/false                                        | Skip for now | Read if present, but unread until `landing` renders differently. Absent → true                                                |
+| `sections`    | Metaobject reference → Category section, **list** | Skip for now | Not in the query at all, and it can't be created before the `category_section` definition that Part 1.5 says not to build yet |
+
+### How a section's depth changes its panel
+
+The mega panel picks a layout from the shape of the section, so nothing has to
+be configured — but it does mean **where you write `description` decides
+whether anyone sees it**.
+
+| The section's L2 items    | Panel                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------- |
+| All have children (Parts) | Rail of L2s on the left, the active one's L3 groups and L4 links on the right                |
+| Some have children        | Same rail. Landing on a childless one shows **its** title, `description`, and a link through |
+| None have children        | **Flat**: no rail, the L2s themselves in columns with their `description` beneath each       |
+
+So `description` is worth writing on the L2 items of shallow sections —
+Community, Custom Work — where it is the only copy in the panel. On Parts it is
+never shown, because those L2s all have children. Leave it blank and the item
+still renders as a plain heading; nothing breaks while the copy is unwritten.
+
+The split is at **level 3, not level 4**: a section that has L3 headings but no
+L4 links under them keeps the rail, and those headings render as a plain column
+of links.
 
 **"Skip for now" means skip.** A missing field key resolves to `null`, and the
 walk defaults it correctly — the three Phase 3B fields cost nothing to leave
