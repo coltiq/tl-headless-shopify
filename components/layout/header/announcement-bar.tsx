@@ -10,11 +10,15 @@ import { AnnouncementRotator } from "./announcement-rotator";
 // half of the band — callers must not render a bar with nothing in it, and the
 // header's spacer height depends on the same emptiness checks.
 //
-// **One type scale across the whole band**: `font-tl-sans` at 11px in white,
-// everywhere, on both breakpoints. Only tracking varies by role — 0.1em on the
-// uppercase links, 0.09em on the number, none on the announcement copy, which
-// is a sentence rather than a label. It previously mixed the body font, a mono
+// **One family and one colour across the whole band**: `font-tl-sans` in
+// white, on both breakpoints. It previously mixed the body font, a mono
 // readout, and two text colours.
+//
+// Size and weight answer to role rather than being uniform: the announcement
+// is sentence-case 11px, the uppercase links are 10px semibold, because
+// uppercase carries full cap-height on every letter and outweighs matched
+// sentence-case badly. Tracking follows the same logic — 0.1em on the links,
+// 0.09em on the number, none on the announcement.
 //
 // The right slot holds the shop's phone number, from lib/constants.ts rather
 // than admin: it's business data, not editorial copy, and it changes about
@@ -52,8 +56,8 @@ export function AnnouncementBar({
               as ecommerce support to every visitor with a late package.
               Reuses the nav's own wording so the two agree. */}
           {SHOP_PHONE_DISPLAY ? (
-            <span className="font-tl-sans text-[11px] tracking-[0.09em] text-white">
-              <span className="text-tl-ann-dim">Custom Work</span>{" "}
+            <span className="flex items-center gap-2.5 font-tl-sans text-[11px] tracking-[0.09em] text-white">
+              <span className="text-tl-ann-dim">Custom Work</span>
               {SHOP_PHONE_DISPLAY}
             </span>
           ) : null}
@@ -86,8 +90,12 @@ function BarLink({ link }: { link: AnnouncementBarLink }) {
       {link.label}
     </>
   );
+  // 10px semibold, not 11px bold: uppercase carries full cap-height on every
+  // letter, so at a matched pixel size it reads noticeably larger than the
+  // sentence-case announcement beside it. Mobile keeps 11px bold — there the
+  // links are a standalone band with nothing to balance against.
   const className =
-    "flex items-center gap-[9px] font-tl-sans text-[11px] font-bold uppercase tracking-[0.1em] text-white";
+    "flex items-center gap-[9px] font-tl-sans text-[10px] font-semibold uppercase tracking-[0.1em] text-white";
 
   return link.url.startsWith("/") ? (
     <Link href={link.url} className={className}>
