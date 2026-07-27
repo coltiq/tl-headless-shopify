@@ -45,7 +45,7 @@ export function SearchFieldSkeleton({
         <IconSearch
           className={clsx(
             "h-[15px] w-[15px] shrink-0",
-            variant === "desktop" ? "text-white/70" : "text-tl-steel",
+            variant === "desktop" ? "text-white" : "text-tl-steel",
           )}
         />
         <span className="truncate font-tl-text text-sm text-tl-steel">
@@ -166,7 +166,7 @@ export function SearchField({
         <IconSearch
           className={clsx(
             "h-[15px] w-[15px] shrink-0",
-            variant === "desktop" ? "text-white/70" : "text-tl-steel",
+            variant === "desktop" ? "text-white" : "text-tl-steel",
           )}
         />
         <input
@@ -194,7 +194,7 @@ export function SearchField({
           className={clsx(
             "min-w-0 flex-1 bg-transparent font-tl-text text-sm",
             variant === "desktop"
-              ? "text-white placeholder:text-white/45"
+              ? "text-white placeholder:text-white/70"
               : "text-tl-ink placeholder:text-tl-steel",
           )}
         />

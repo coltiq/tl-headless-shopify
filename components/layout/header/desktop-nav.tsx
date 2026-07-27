@@ -94,8 +94,10 @@ export function DesktopNav({
                   }
                 }}
                 className={clsx(
-                  "relative flex h-full items-center gap-[5px] font-tl-sans text-xs font-semibold uppercase tracking-[0.1em]",
-                  hasPanel ? "text-white" : "text-white/55",
+                  // Pure white for every item, panel or not. The dimmed state
+                  // that used to mark childless items was hard to read on the
+                  // dark nav, and the caret already says which ones open.
+                  "relative flex h-full items-center gap-[5px] font-tl-sans text-xs font-semibold uppercase tracking-[0.1em] text-white",
                   open === index &&
                     // White, not indigo: the brand blue is barely visible on the dark
                     // nav, and this marker has one job.
@@ -104,7 +106,7 @@ export function DesktopNav({
               >
                 {item.title}
                 {hasPanel ? (
-                  <span aria-hidden className="text-[8px] text-white/50">
+                  <span aria-hidden className="text-[8px] text-white">
                     ▾
                   </span>
                 ) : null}
