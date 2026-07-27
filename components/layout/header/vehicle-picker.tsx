@@ -86,9 +86,13 @@ function Field({
 export function VehiclePicker({
   current,
   onChoose,
+  onCancel,
 }: {
   current: VehicleSelection | null;
   onChoose: (selection: VehicleSelection) => void;
+  // Present when the picker was reached from the summary via "Edit vehicle" —
+  // there is a state to go back to, so the bottom slot offers Cancel instead.
+  onCancel?: () => void;
 }) {
   const vehicles = useVehicles();
 
@@ -209,12 +213,21 @@ export function VehiclePicker({
         {current ? "Update my truck" : "Add my truck"}
       </button>
 
-      {/* One slot, two jobs, decided by whether there is anything to undo.
-          Mid-selection the useful action is starting again; from empty it is
-          the escape hatch — the vehicle list only covers generations we stock
-          for, and without it a visitor whose truck is missing has no next
-          step. Showing both would put two links under one button. */}
-      {dirty ? (
+      {/* One slot, three jobs, decided by where the visitor came from and how
+          far they have got. Editing an existing truck, the useful action is
+          backing out; mid-selection it is starting again; from empty it is the
+          escape hatch — the vehicle list only covers generations we stock for,
+          and without it a visitor whose truck is missing has no next step.
+          Stacking all three would put a pile of links under one button. */}
+      {onCancel ? (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-center font-tl-sans text-[11px] font-medium uppercase tracking-[0.1em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
+        >
+          Cancel
+        </button>
+      ) : dirty ? (
         <button
           type="button"
           onClick={() => {

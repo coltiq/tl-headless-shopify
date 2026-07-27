@@ -8,9 +8,13 @@ import {
 } from "lib/fitment";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { clearGarageVehicle, setGarageVehicle } from "./actions";
-import { IconGarage } from "./icons";
+import { IconChevronDown, IconGarage } from "./icons";
 import { VehiclePicker } from "./vehicle-picker";
+
+const actionRowClass =
+  "flex h-10 w-full items-center px-3.5 text-left font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-tl-ink hover:bg-tl-fog";
 
 export function GarageMenu({
   current,
@@ -24,6 +28,7 @@ export function GarageMenu({
   // picker. `editing` is the way from the first to the second, and it resets
   // on close so reopening always lands on the summary.
   const [editing, setEditing] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [, startTransition] = useTransition();
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -140,38 +145,70 @@ export function GarageMenu({
                 <p className="font-tl-sans text-[11px] font-bold uppercase tracking-[0.1em] text-tl-ink">
                   Currently shopping for:
                 </p>
-                {/* Not a select: this app holds one truck, so a chevron here
-                    would open nothing. Display only. */}
-                <div className="flex h-[54px] items-center gap-3 rounded-[3px] border border-tl-hairline bg-tl-fog px-3.5">
-                  <IconGarage className="h-5 w-5 shrink-0 text-tl-indigo" />
-                  <span className="truncate font-tl-sans text-[15px] font-bold uppercase tracking-[0.02em] text-tl-ink">
-                    {vehicleLabel(current)}
-                  </span>
+                <div className="rounded-[3px] border border-tl-hairline">
+                  <button
+                    type="button"
+                    aria-expanded={expanded}
+                    onClick={() => setExpanded((v) => !v)}
+                    className="flex h-[54px] w-full items-center gap-3 px-3.5 text-left"
+                  >
+                    <IconGarage className="h-5 w-5 shrink-0 text-tl-indigo" />
+                    <span className="truncate font-tl-sans text-[15px] font-bold uppercase tracking-[0.02em] text-tl-ink">
+                      {vehicleLabel(current)}
+                    </span>
+                    <IconChevronDown
+                      className={clsx(
+                        "ml-auto h-4 w-4 shrink-0 text-tl-steel transition-transform",
+                        expanded && "rotate-180",
+                      )}
+                    />
+                  </button>
+
+                  {/* Open by default. The reference collapses because it also
+                      carries Add Vehicle and Shop Without Vehicle outside the
+                      box; with one truck those collapse into Edit and Delete,
+                      so a shut box would be a panel with nothing to do in it. */}
+                  {expanded ? (
+                    <div className="flex flex-col border-t border-tl-hairline py-1.5">
+                      {/* /search with a truck set already filters to what fits
+                          — the toggle defaults on. No vehicle segments here:
+                          the URL grammar deliberately keeps them off search. */}
+                      <Link
+                        href="/search"
+                        prefetch={true}
+                        onClick={() => setOpen(false)}
+                        className={actionRowClass}
+                      >
+                        Recommended products
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setEditing(true)}
+                        className={actionRowClass}
+                      >
+                        Edit vehicle
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => choose(null)}
+                        className={actionRowClass}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
-
-              {/* Stacked, not side by side as in the reference: that panel is
-                  ~430px and this one is 288px, where the pair collides. */}
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="h-12 rounded-[3px] border border-tl-ink font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-tl-ink transition-colors hover:bg-tl-fog"
-              >
-                Change truck
-              </button>
-              <button
-                type="button"
-                onClick={() => choose(null)}
-                className="text-center font-tl-sans text-[11px] font-medium uppercase tracking-[0.1em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
-              >
-                Shop without a truck
-              </button>
             </div>
           ) : (
             // No title here: the chip this drops out of already says it, and
             // each field labels itself.
             <div className="pt-4">
-              <VehiclePicker current={current} onChoose={choose} />
+              <VehiclePicker
+                current={current}
+                onChoose={choose}
+                onCancel={current ? () => setEditing(false) : undefined}
+              />
             </div>
           )}
         </div>
