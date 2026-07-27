@@ -88,43 +88,58 @@ export function GarageMenu({
           "flex items-center gap-[9px] bg-tl-indigo text-white transition-colors hover:bg-tl-indigo-lift",
           // Full-bleed in the nav: fills the row top to bottom, and follows the
           // condensed height for free instead of needing its own step down.
-          variant === "row" && "h-full px-7",
+          //
+          // min-w rather than a fixed width: without spare room the label has
+          // nothing to centre inside, so the icon and caret cannot reach the
+          // edges — but a long truck name still stretches the chip instead of
+          // being clipped.
+          variant === "row" && "h-full min-w-56 px-7",
           variant === "drawer" && "h-12 w-full rounded-[3px] px-[13px]",
           variant === "inline" && "h-9 rounded-[3px] px-[13px]",
         )}
       >
         <IconGarage
-          className={variant === "drawer" ? "h-[17px] w-[17px]" : "h-4 w-4"}
+          className={clsx(
+            "shrink-0",
+            variant === "drawer" ? "h-[17px] w-[17px]" : "h-4 w-4",
+          )}
         />
-        {current ? (
-          variant === "row" ? (
-            <>
-              <span className="font-tl-sans text-xs font-bold group-data-[condensed]:hidden">
+        {/* In the nav the label takes the middle and centres itself, which
+            leaves the icon pinned left and the caret right. Elsewhere it stays
+            a plain inline label. */}
+        <span
+          className={clsx(variant === "row" && "min-w-0 flex-1 text-center")}
+        >
+          {current ? (
+            variant === "row" ? (
+              <>
+                <span className="font-tl-sans text-xs font-bold group-data-[condensed]:hidden">
+                  {vehicleLabel(current)}
+                </span>
+                <span className="hidden font-tl-sans text-xs font-bold group-data-[condensed]:inline">
+                  {vehicleShortLabel(current)}
+                </span>
+              </>
+            ) : (
+              <span className="font-tl-sans text-[13.5px] font-bold">
                 {vehicleLabel(current)}
               </span>
-              <span className="hidden font-tl-sans text-xs font-bold group-data-[condensed]:inline">
-                {vehicleShortLabel(current)}
-              </span>
-            </>
+            )
           ) : (
-            <span className="font-tl-sans text-[13.5px] font-bold">
-              {vehicleLabel(current)}
+            <span
+              className={clsx(
+                "font-tl-sans font-bold",
+                variant === "drawer" ? "text-[13.5px]" : "text-xs",
+              )}
+            >
+              Add Your Truck
             </span>
-          )
-        ) : (
-          <span
-            className={clsx(
-              "font-tl-sans font-bold",
-              variant === "drawer" ? "text-[13.5px]" : "text-xs",
-            )}
-          >
-            Add Your Truck
-          </span>
-        )}
+          )}
+        </span>
         <span
           aria-hidden
           className={clsx(
-            "text-[9px] opacity-85",
+            "shrink-0 text-[9px] opacity-85",
             variant === "drawer" && "ml-auto",
           )}
         >

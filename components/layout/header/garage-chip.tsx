@@ -34,6 +34,6 @@ export function GarageChipFallback({
   ) : (
     // Full height and square, tracking the row: the real chip is full-bleed in
     // the nav now, so the old 36px rounded pill popped on hydration.
-    <div aria-hidden className="h-full w-48 bg-tl-indigo" />
+    <div aria-hidden className="h-full w-56 bg-tl-indigo" />
   );
 }
