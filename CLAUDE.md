@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A fork of Vercel's Next.js Commerce template: a server-rendered headless Shopify storefront using the Next.js App Router, React Server Components, Server Actions, and `useOptimistic`. Next.js 16 with `cacheComponents`/`useCache` enabled, React 19, Tailwind CSS v4 (PostCSS plugin, no tailwind config file), TypeScript strict mode.
 
+@AGENTS.md
+
 ## Commands
 
 Use npm (`package-lock.json` is current).
@@ -60,7 +62,7 @@ Cart state lives in Shopify, identified by a `cartId` cookie. `components/cart/c
 - `/contact`, `/app`, `/support`, `/quote`, `/the-standard`, `/parts`, `/custom-work`, `/lifestyle`, `/community` — custom code routes. The last four are the L1 nav sections; the rest are ordinary pages (`/the-standard` sits at L2 under Community). All of them **permanently reserve those paths**: a static route always beats the catch-all, so no collection handle or category slug can ever use them.
 - `app/[...path]` — the category URL space (below).
 - `/search/[collection]` — legacy, redirects to the canonical category path.
-- `middleware.ts` — issues the **real** 308s.
+- `proxy.ts` — issues the **real** 308s (the file convention formerly called `middleware.ts`).
 - Shopify CMS pages are never rendered. Every non-category page is a custom code route.
 
 ### The category URL space (`app/[...path]`)
@@ -93,7 +95,7 @@ Collections with no tree position (`gift-cards`, `shop-labor`, `the-lab`) keep r
 
 **Redirects and 404s under `cacheComponents`:**
 
-- `permanentRedirect()` inside a page is **not** a 308 — the route shell is flushed before it is reached, and Next degrades it to a client-side `__next-page-redirect` served with a 200. `export const dynamic` would fix it and is rejected outright by `cacheComponents`. **`middleware.ts` issues the real 308s**, reading `app/api/category-index` (backed by the cached `getCategoryTree()`, so no extra Shopify traffic) and memoizing it for 60s. It falls through to `next()` on any failure — never break rendering from there. Never map a handle to its own flat path: `/lighting` → `/lighting` loops forever, and that is the common shape for a depth-1 category.
+- `permanentRedirect()` inside a page is **not** a 308 — the route shell is flushed before it is reached, and Next degrades it to a client-side `__next-page-redirect` served with a 200. `export const dynamic` would fix it and is rejected outright by `cacheComponents`. **`proxy.ts` issues the real 308s**, reading `app/api/category-index` (backed by the cached `getCategoryTree()`, so no extra Shopify traffic) and memoizing it for 60s. It falls through to `next()` on any failure — never break rendering from there. Never map a handle to its own flat path: `/lighting` → `/lighting` loops forever, and that is the common shape for a depth-1 category.
 - `notFound()` still returns **HTTP 200**, app-wide. `robots: { index: false }` on `app/not-found.tsx` is the mitigation.
 
 `opengraph-image` files cannot exist under a catch-all segment, so category OG cards come from `app/api/og?title=` via `ogImageUrl()` in `lib/utils.ts`.
@@ -122,4 +124,4 @@ The whole design exists so **every page stays cacheable**: vehicle identity live
 - Never run `npm run dev` to verify changes — it doesn't exit. Use `npx tsc --noEmit` and `npm run build`, then `npm start` for manual checks.
 - npm is the package manager. Never run pnpm here — it regenerates `pnpm-lock.yaml` and a stray `pnpm-workspace.yaml`, neither of which belongs in the repo.
 - Before writing any new Storefront GraphQL query or mutation, validate field names against the schema via the shopify-dev-mcp server.
-- `middleware.ts` must never be the reason a page fails to render — every failure path falls through to `NextResponse.next()`.
+- `proxy.ts` must never be the reason a page fails to render — every failure path falls through to `NextResponse.next()`.

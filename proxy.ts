@@ -1,4 +1,4 @@
-import { NEXT_MIDDLEWARE_RESERVED_SEGMENTS } from "lib/constants";
+import { PROXY_RESERVED_SEGMENTS } from "lib/constants";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Real HTTP 308s for the flat → deep category redirect.
@@ -9,11 +9,11 @@ import { NextResponse, type NextRequest } from "next/server";
 // — which crawlers treat far more weakly than a redirect, and which was the
 // whole point of redirecting instead of leaning on a canonical tag.
 // `export const dynamic = "force-dynamic"` would fix it and is rejected outright
-// by `cacheComponents`. Middleware runs before any rendering, so it can.
+// by `cacheComponents`. The proxy runs before any rendering, so it can.
 //
 // The in-page `permanentRedirect()` stays as a fallback: everything here
 // degrades to `NextResponse.next()` on any failure, and then the page still
-// gets the visitor to the right URL, just weakly. Middleware must never be the
+// gets the visitor to the right URL, just weakly. The proxy must never be the
 // reason a page fails to render.
 //
 // Redirects handled:
@@ -53,7 +53,7 @@ async function categoryRedirects(
   return cached?.map ?? null;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, search, origin } = request.nextUrl;
   const segments = pathname.split("/").filter(Boolean);
 
@@ -64,7 +64,7 @@ export async function middleware(request: NextRequest) {
   const isLegacySearch = segments.length === 2 && segments[0] === "search";
   const isFlatShape =
     (segments.length === 1 || segments.length === 4) &&
-    !NEXT_MIDDLEWARE_RESERVED_SEGMENTS.has(segments[0]!);
+    !PROXY_RESERVED_SEGMENTS.has(segments[0]!);
 
   if (!isLegacySearch && !isFlatShape) return NextResponse.next();
 

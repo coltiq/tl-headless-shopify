@@ -8,7 +8,7 @@ import Link from "next/link";
 // is app-wide and predates the fitment work (/product/does-not-exist behaves
 // the same). `noindex` is the mitigation: it keeps these pages out of the
 // index even though the status code says otherwise. Watch Search Console for
-// soft-404s after launch and escalate to a middleware handle-allowlist only if
+// soft-404s after launch and escalate to a proxy handle-allowlist only if
 // they actually show up.
 export const metadata: Metadata = {
   title: "Page not found",

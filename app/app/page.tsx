@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 // each button collapses while its URL is empty, so no dead store link can ship.
 //
 // This is a static code route, so it permanently reserves `/app` the same way
-// the L1 sections do (NEXT_MIDDLEWARE_RESERVED_SEGMENTS in lib/constants.ts).
+// the L1 sections do (PROXY_RESERVED_SEGMENTS in lib/constants.ts).
 // Deliberately a page rather than a direct store link: two platforms cannot
 // share one header slot, and a shopper who has not bought lights yet needs to
 // see what the app *is* before being asked to install anything. It is also the

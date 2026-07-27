@@ -11,7 +11,7 @@ import { permanentRedirect } from "next/navigation";
 // route shell is flushed before permanentRedirect() is reached, so Next
 // degrades this to a client-side `__next-page-redirect` rather than an HTTP
 // 308. `export const dynamic` would fix it but is rejected outright by
-// cacheComponents. A real 308 needs middleware — see
+// cacheComponents. A real 308 needs the proxy — see
 // docs/plans/OPEN-ITEMS.md.
 export default async function LegacyCollectionPage(props: {
   params: Promise<{ collection: string }>;

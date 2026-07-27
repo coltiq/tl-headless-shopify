@@ -492,7 +492,7 @@ either: "Custom Builds" reads as big-money-only and loses the lift-and-bumper
 customer, "Customize" reads as a configurator, and anything containing "Shop"
 reads as a product grid on a storefront. If the label changes, it is a single
 `nav_item.label` edit — but the path is baked into
-`NEXT_MIDDLEWARE_RESERVED_SEGMENTS`, `app/sitemap.ts`, and the route folder.
+`PROXY_RESERVED_SEGMENTS`, `app/sitemap.ts`, and the route folder.
 
 ## 4.3 Category items (L2 and below) — **the Phase 3 migration**
 
@@ -544,7 +544,7 @@ Three rules the walk enforces, worth knowing before authoring:
   `/product` are reserved too**, for the
   same reason — they are static code routes, so no slug or collection handle
   may use them either. The full list is
-  `NEXT_MIDDLEWARE_RESERVED_SEGMENTS` in `lib/constants.ts`.
+  `PROXY_RESERVED_SEGMENTS` in `lib/constants.ts`.
 - **The four L1 handles are reserved forever.** `/parts`, `/custom-work`,
   `/lifestyle`, and `/community` are static code routes and always beat
   the category resolver, so no slug (and no collection handle) can ever use

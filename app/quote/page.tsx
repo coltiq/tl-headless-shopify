@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 // reading it is a shop customer by definition, so it carries none of the
 // ecommerce-support-volume risk that kept the number out of the mobile band.
 //
-// Reserved in NEXT_MIDDLEWARE_RESERVED_SEGMENTS so no collection handle can
+// Reserved in PROXY_RESERVED_SEGMENTS so no collection handle can
 // shadow it.
 export default function QuotePage() {
   return (

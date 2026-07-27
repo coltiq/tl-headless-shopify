@@ -81,7 +81,7 @@ Under `cacheComponents` the route shell is flushed before `notFound()` is
 reached, so Next cannot set the status. This predates the fitment work
 (`/product/does-not-exist` behaves the same).
 
-Middleware can't fix it the way it fixed the redirects: it would have to know
+The proxy can't fix it the way it fixed the redirects: it would have to know
 every valid URL, not just the redirecting ones — a handle allowlist at the edge.
 
 `robots: { index: false }` on `app/not-found.tsx` is the mitigation. **Before
@@ -89,9 +89,9 @@ launch:** watch Search Console for soft-404s, and escalate to the allowlist only
 if they actually show up.
 
 > Resolved 2026-07-25: the flat → deep **redirects** had the same root cause and
-> were degrading to client-side redirects with a 200. `middleware.ts` now issues
+> were degrading to client-side redirects with a 200. `proxy.ts` now issues
 > real 308s. `export const dynamic = "force-dynamic"` is rejected outright by
-> `cacheComponents`, so middleware was the only route.
+> `cacheComponents`, so the proxy was the only route.
 
 ### 2.2 Nothing guards the category tree walk
 
@@ -122,7 +122,7 @@ But it is a public surface the file convention would not have created. The
 alternative, if that ever matters, is dropping per-category cards and letting
 every category inherit the site-wide `app/opengraph-image.tsx`.
 
-### 2.4 Middleware runs on every non-asset request
+### 2.4 The proxy runs on every non-asset request
 
 For the two path shapes that could be a flat collection URL (one segment, or a
 handle plus `make/model/year`) it may block on one internal fetch per instance
@@ -130,7 +130,7 @@ per minute. Nav edits take up to 60s to change redirect behavior; the pages
 themselves are unaffected, since they read the cached tree directly.
 
 **Before launch:** if Vercel Deployment Protection covers production, confirm
-middleware's internal request to `/api/category-index` isn't blocked. It
+the proxy's internal request to `/api/category-index` isn't blocked. It
 degrades safely (falls through to `next()`), but the 308s quietly stop.
 
 ### 2.5 Cascading collection membership — largely solved by native nesting

@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 // social proof to link from product pages, and model-specific search traffic.
 // Distinct from Custom Work's Our Builds, which is the shop's own work.
 //
-// Reserved in NEXT_MIDDLEWARE_RESERVED_SEGMENTS so no collection handle can
+// Reserved in PROXY_RESERVED_SEGMENTS so no collection handle can
 // shadow it.
 const CHILDREN: { title: string; blurb: string; href: string | null }[] = [
   {

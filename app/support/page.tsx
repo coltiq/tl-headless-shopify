@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 // This page is the *hub*: the announcement band's Support link lands here, the
 // header chat popup stays the lightweight in-context path, and the footer
 // carries the same groups as columns. Reserved in
-// NEXT_MIDDLEWARE_RESERVED_SEGMENTS so no collection handle can shadow it.
+// PROXY_RESERVED_SEGMENTS so no collection handle can shadow it.
 const GROUPS: { title: string; articles: string[] }[] = [
   {
     title: "Orders & Shipping",
