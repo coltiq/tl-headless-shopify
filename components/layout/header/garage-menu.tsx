@@ -108,27 +108,34 @@ export function GarageMenu({
             leaves the icon pinned left and the caret right. Elsewhere it stays
             a plain inline label. */}
         <span
-          className={clsx(variant === "row" && "min-w-0 flex-1 text-center")}
+          className={clsx(
+            // leading-none on the wrapper too, not just the labels inside it:
+            // the line box is sized by this element's own strut, so a label
+            // with leading-none still sits in an inflated box without it.
+            "leading-none",
+            variant === "row" &&
+              "flex min-w-0 flex-1 items-center justify-center",
+          )}
         >
           {current ? (
             variant === "row" ? (
               <>
-                <span className="font-tl-sans text-xs font-bold group-data-[condensed]:hidden">
+                <span className="font-tl-sans text-xs font-bold leading-none group-data-[condensed]:hidden">
                   {vehicleLabel(current)}
                 </span>
-                <span className="hidden font-tl-sans text-xs font-bold group-data-[condensed]:inline">
+                <span className="hidden font-tl-sans text-xs font-bold leading-none group-data-[condensed]:inline">
                   {vehicleShortLabel(current)}
                 </span>
               </>
             ) : (
-              <span className="font-tl-sans text-[13.5px] font-bold">
+              <span className="font-tl-sans text-[13.5px] font-bold leading-none">
                 {vehicleLabel(current)}
               </span>
             )
           ) : (
             <span
               className={clsx(
-                "font-tl-sans font-bold",
+                "font-tl-sans font-bold leading-none",
                 variant === "drawer" ? "text-[13.5px]" : "text-xs",
               )}
             >
@@ -136,15 +143,13 @@ export function GarageMenu({
             </span>
           )}
         </span>
-        <span
+        <IconChevronDown
           aria-hidden
           className={clsx(
-            "shrink-0 text-[9px] opacity-85",
+            "h-3.5 w-3.5 shrink-0 opacity-85",
             variant === "drawer" && "ml-auto",
           )}
-        >
-          ▾
-        </span>
+        />
       </button>
 
       {open ? (
