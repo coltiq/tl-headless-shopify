@@ -59,6 +59,22 @@
   }
 }
 
+/* Tailwind v4's Preflight dropped v3's `cursor: pointer` on buttons in favour
+   of the browser default, `cursor: default`. Anchors keep the pointer, so a
+   <button> sitting beside a <Link> — the cart next to the account and help
+   icons in the header — silently stops reading as clickable. Restored here
+   rather than per button, because every button in the app has the same
+   problem: the burger, the cart, the garage menu, quantity steppers.
+
+   `:not(:disabled)` so a disabled control (add-to-cart on a sold-out variant)
+   still says so with its cursor. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 /* In @layer base so per-element utilities (e.g. the search input's
    focus-visible:ring-0) can override the default focus ring. */
 @layer base {
