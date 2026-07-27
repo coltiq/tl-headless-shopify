@@ -34,18 +34,18 @@ export function SearchFieldSkeleton({
     >
       <div
         className={clsx(
-          // Matches the real field, dark-header ground included, so the
-          // Suspense swap causes no flash.
-          "flex items-center rounded-[3px] border-[1.5px] border-tl-ink bg-white",
+          // Matches the real field on both grounds, so the Suspense swap
+          // causes no flash.
+          "flex items-center rounded-[3px] border-[1.5px]",
           variant === "desktop"
-            ? "h-11 gap-[11px] px-[15px] group-data-[condensed]:h-10"
-            : "h-[46px] gap-2.5 px-[13px]",
+            ? "h-11 gap-[11px] border-tl-shell-line bg-tl-shell-deep px-[15px] group-data-[condensed]:h-10"
+            : "h-[46px] gap-2.5 border-tl-ink bg-white px-[13px]",
         )}
       >
         <IconSearch
           className={clsx(
             "h-[15px] w-[15px] shrink-0",
-            variant === "desktop" ? "text-tl-ink" : "text-tl-steel",
+            variant === "desktop" ? "text-white/70" : "text-tl-steel",
           )}
         />
         <span className="truncate font-tl-text text-sm text-tl-steel">
@@ -153,19 +153,20 @@ export function SearchField({
         action="/search"
         onSubmit={() => setOpen(false)}
         className={clsx(
-          // bg-white: the field sits on the dark brand row now, and a
-          // transparent input there is unreadable. The dropdown below it is
-          // white too, so the pair reads as one surface.
-          "flex items-center rounded-[3px] border-[1.5px] border-tl-ink bg-white transition-[height]",
+          "flex items-center rounded-[3px] border-[1.5px] transition-[height]",
+          // Desktop sits on the brand row and takes the nav's darker shade, so
+          // it reads as a well cut into the bar. The drawer variant is inside
+          // the white mobile panel and stays light — same component, opposite
+          // grounds.
           variant === "desktop"
-            ? "h-11 gap-[11px] px-[15px] group-data-[condensed]:h-10"
-            : "h-[46px] gap-2.5 px-[13px]",
+            ? "h-11 gap-[11px] border-tl-shell-line bg-tl-shell-deep px-[15px] group-data-[condensed]:h-10"
+            : "h-[46px] gap-2.5 border-tl-ink bg-white px-[13px]",
         )}
       >
         <IconSearch
           className={clsx(
             "h-[15px] w-[15px] shrink-0",
-            variant === "desktop" ? "text-tl-ink" : "text-tl-steel",
+            variant === "desktop" ? "text-white/70" : "text-tl-steel",
           )}
         />
         <input
@@ -190,7 +191,12 @@ export function SearchField({
           aria-label="Search"
           aria-expanded={showDropdown}
           data-search-input
-          className="min-w-0 flex-1 bg-transparent font-tl-text text-sm text-tl-ink placeholder:text-tl-steel"
+          className={clsx(
+            "min-w-0 flex-1 bg-transparent font-tl-text text-sm",
+            variant === "desktop"
+              ? "text-white placeholder:text-white/45"
+              : "text-tl-ink placeholder:text-tl-steel",
+          )}
         />
       </Form>
 
