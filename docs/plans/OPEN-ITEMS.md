@@ -259,7 +259,7 @@ shop section points at the kits it produced).
 
 `/community` is the brand side, and it is a **container**: Blog, Customer
 Builds, and The Standard to start, with Events and Giveaways when they exist.
-It is **not** where support lives — see 4.6.
+It is **not** where support lives — see 4.7.
 
 Named Community rather than About because it is the only section whose contents
 are expected to grow — About shrinks the moment events land, Journal narrows to
@@ -281,7 +281,7 @@ articles are queryable on the Storefront API, which beats a deploy per post —
 settle that before scaffolding, and name the blog at the same time.
 
 **The L1 set is four.** Custom Work · Parts · Lifestyle · Community. Support
-deliberately gets no bar slot (4.6), and the category rail inside the Parts
+deliberately gets no bar slot (4.7), and the category rail inside the Parts
 panel is why the bar does not need category items on it — promoting categories
 to L1 would consume the rail's level and burn the L1 cap of 8.
 
@@ -303,21 +303,50 @@ cookie or a URL flag carried across links — **plus a visible indicator** that
 fitment is off and a one-click way back. That is a design decision, not a
 patch, which is why the button deletes for now rather than half-working.
 
-### 4.4 Automating `fits-*` tags
+### 4.4 The garage holds one truck
+
+"Add truck" in the garage summary opens the picker and **replaces** what is
+there. It should append: keep several trucks and let the visitor choose which
+one they are browsing with, which is what the panel's own layout already
+implies — a vehicle row with a chevron, and Add sitting separately from Edit.
+
+What it actually touches:
+
+- **The cookie.** `tl_garage` is one `<generation handle>:<year>` pair. It needs
+  a list plus a pointer at the active one, and a cap — three or four — because
+  every request carries it. **Nothing is deployed, so there is no migration to
+  write.** That stops being true at launch.
+- **`resolveGarageCookie`** returns a single `VehicleSelection`; it would return
+  the list and the active one. Every caller of it, and the `actions.ts` server
+  actions, change shape.
+- **Not the URL space.** A URL describes one truck by grammar
+  (`/<category>/<make>/<model>/<year>`), so multiple vehicles is a _storage_
+  feature. The only routing change is which truck `garage-redirect.tsx` picks —
+  the active one.
+- **Not the filtering.** Category pages already filter on one generation's tag;
+  they would keep doing that, for whichever truck is active.
+- **The panel.** The vehicle row's chevron becomes a real list of saved trucks
+  instead of a disclosure, Delete removes one rather than emptying the garage,
+  and the heading's plural finally earns itself.
+
+The UI shape is already close, because it was drawn from a reference built for
+several vehicles. It is the storage layer underneath that assumes one.
+
+### 4.5 Automating `fits-*` tags
 
 Recorded from the Phase 2 decision discussion, not built: a product metafield of
 `vehicle` references plus Shopify Flow (or a bulk script) deriving the tags
 automatically. Better admin UX, and **zero app changes** — tags stay the
 filtering mechanism either way.
 
-### 4.5 Link sweep before launch
+### 4.6 Link sweep before launch
 
 Audit the footer menu (`next-js-frontend-footer-menu`) and every nav `link`
 field. Shopify CMS pages are not rendered, so any `/pages/<handle>` link — or a
 bare `/<handle>` pointing at a Shopify page — 404s. End state: no CMS-page links
 anywhere, every page a custom code route.
 
-### 4.6 Support architecture — decided, not built
+### 4.7 Support architecture — decided, not built
 
 15–20 policy and help pages are coming (shipping, returns, warranty, FAQ,
 fitment help, order status, legal). **Support gets no L1 nav slot.** Three tiers
