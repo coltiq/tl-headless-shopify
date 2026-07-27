@@ -124,22 +124,23 @@ export function GarageMenu({
       {open ? (
         <div
           className={clsx(
-            // min-w-72 (288px), not 64: the fields carry two lines and a
-            // chevron now. 288px is also exactly the drawer variant's width on
-            // a 320px screen given its mx-4 container, so nothing overflows.
-            "absolute top-full z-50 mt-1.5 min-w-72 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
-            variant === "row" && "right-0",
-            variant === "drawer" && "inset-x-0",
-            variant === "inline" && "left-0",
+            "absolute top-full z-50 mt-1.5 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
+            // 320px so "Add truck" and "Shop without truck" sit on one line;
+            // the fields carry two lines and a chevron besides. The drawer
+            // stays at 288px because that is its own width on a 320px screen
+            // given its mx-4 container — anything wider overflows, and the
+            // action row wraps there instead.
+            variant === "row" && "right-0 min-w-80",
+            variant === "drawer" && "inset-x-0 min-w-72",
+            variant === "inline" && "left-0 min-w-80",
           )}
         >
           {current && !editing ? (
             // Settled state, laid out as the reference: heading, label, the
-            // vehicle in a disclosure box, then Add Vehicle beside Shop
-            // Without Vehicle.
+            // truck in a disclosure box, then Add beside Shop Without.
             <div className="flex flex-col gap-4 px-4 pb-5 pt-4">
               <p className="font-tl-sans text-[22px] font-bold uppercase leading-none tracking-[0.01em] text-tl-ink">
-                My vehicles
+                My garage
               </p>
 
               <div className="flex flex-col gap-2">
@@ -188,7 +189,7 @@ export function GarageMenu({
                         onClick={() => setEditing("edit")}
                         className={actionRowClass}
                       >
-                        Edit vehicle
+                        Edit truck
                       </button>
                       <button
                         type="button"
@@ -204,7 +205,7 @@ export function GarageMenu({
 
               {/* Both actions from the reference. With one truck they are not
                   redundant: Add opens an empty picker, Delete inside the box
-                  removes the truck, and Shop Without Vehicle clears it as a
+                  removes the truck, and Shop without truck clears it as a
                   browsing choice rather than a management one. */}
               <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <button
@@ -212,14 +213,14 @@ export function GarageMenu({
                   onClick={() => setEditing("add")}
                   className="h-12 flex-none rounded-[3px] border border-tl-steel px-6 font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-tl-ink transition-colors hover:border-tl-ink hover:bg-tl-fog"
                 >
-                  Add vehicle
+                  Add truck
                 </button>
                 <button
                   type="button"
                   onClick={() => choose(null)}
                   className="font-tl-sans text-xs font-medium uppercase tracking-[0.06em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
                 >
-                  Shop without vehicle
+                  Shop without truck
                 </button>
               </div>
             </div>
@@ -228,7 +229,7 @@ export function GarageMenu({
             // each field labels itself.
             <div className="pt-4">
               <VehiclePicker
-                // "Add vehicle" opens empty; "Edit vehicle" opens on the truck
+                // "Add truck" opens empty; "Edit truck" opens on the truck
                 // that is already set.
                 current={editing === "add" ? null : current}
                 onChoose={choose}
