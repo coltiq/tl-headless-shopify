@@ -30,12 +30,15 @@ export function Wordmark({ className }: { className?: string }) {
         focusable="false"
         // Nudged down because the artwork is not centred in its own viewBox:
         // the box is 79.76 tall but the letterforms end at 63.69, the rest
-        // being three descending legs. Centring the box therefore sits the ink
-        // ~10% of its height high. This corrects about two thirds of that —
-        // the legs do carry some visual weight, so a full correction overshoots
-        // and the wordmark starts to read low. Second tuning knob after the
-        // height; adjust by eye, not by arithmetic.
-        className="h-[0.9em] w-auto translate-y-[0.065em]"
+        // being three descending legs. Centring the box therefore sits the cap
+        // block ~10% of the box height high, and 0.09em is the full correction
+        // — it centres the capitals rather than the bounding box.
+        //
+        // Worth knowing how little room this has: the entire offset is ~2.4px
+        // at desktop size. If the wordmark still reads high, the cause is not
+        // the viewBox and no value here will fix it. Second tuning knob after
+        // the height; adjust by eye, not by arithmetic.
+        className="h-[0.9em] w-auto translate-y-[0.09em]"
       >
         <path d="M126.74.06H4.28L0,16H27L14.17,63.69H33.64L46.41,16h73.34l-3.17,11.81a.3.3,0,0,1-.07.1H62.67L53.09,63.69H72.54l5.31-19.78H96.74L117,79.66h20.34L117.24,44h4.61a12.86,12.86,0,0,0,12.42-9.53l4.88-18.24A12.85,12.85,0,0,0,126.74.06Z" />
         <path d="M206.49.05,193.75,47.63l-.08.09H159.29L172.06.05H152.6L141.25,42.41c-1.64,6.12-.89,11.65,2.11,15.57,2.83,3.68,7.5,5.71,13.15,5.71h33.41c11.35,0,21.07-7.79,24.18-19.38L226,.05Z" />
