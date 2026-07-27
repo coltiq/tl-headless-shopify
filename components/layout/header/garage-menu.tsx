@@ -29,7 +29,10 @@ export function GarageMenu({
   // the app holds a single vehicle. Both reset on close, so reopening always
   // lands on the summary.
   const [editing, setEditing] = useState<null | "edit" | "add">(null);
-  const [expanded, setExpanded] = useState(true);
+  // Closed until the vehicle row is clicked, as in the reference: the
+  // summary's job is to show what is set, and Add truck / Shop without truck
+  // sit below it whether or not this is open.
+  const [expanded, setExpanded] = useState(false);
   const [, startTransition] = useTransition();
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -125,14 +128,15 @@ export function GarageMenu({
         <div
           className={clsx(
             "absolute top-full z-50 mt-1.5 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
-            // 320px so "Add truck" and "Shop without truck" sit on one line;
-            // the fields carry two lines and a chevron besides. The drawer
-            // stays at 288px because that is its own width on a 320px screen
-            // given its mx-4 container — anything wider overflows, and the
-            // action row wraps there instead.
-            variant === "row" && "right-0 min-w-80",
+            // 360px, measured rather than estimated: "Add truck" and "Shop
+            // without truck" need ~264px together, and 320px left only 288px of
+            // content once the gutters were taken off — two pixels short, so the
+            // row wrapped. The drawer stays at 288px because that is its own
+            // width on a 320px screen given its mx-4 container; anything wider
+            // overflows the phone, and the row wraps there by design.
+            variant === "row" && "right-0 min-w-[360px]",
             variant === "drawer" && "inset-x-0 min-w-72",
-            variant === "inline" && "left-0 min-w-80",
+            variant === "inline" && "left-0 min-w-[360px]",
           )}
         >
           {current && !editing ? (
@@ -207,18 +211,18 @@ export function GarageMenu({
                   redundant: Add opens an empty picker, Delete inside the box
                   removes the truck, and Shop without truck clears it as a
                   browsing choice rather than a management one. */}
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
                 <button
                   type="button"
                   onClick={() => setEditing("add")}
-                  className="h-12 flex-none rounded-[3px] border border-tl-steel px-6 font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-tl-ink transition-colors hover:border-tl-ink hover:bg-tl-fog"
+                  className="h-12 flex-none rounded-[3px] border border-tl-steel px-5 font-tl-sans text-xs font-bold uppercase tracking-[0.08em] text-tl-ink transition-colors hover:border-tl-ink hover:bg-tl-fog"
                 >
                   Add truck
                 </button>
                 <button
                   type="button"
                   onClick={() => choose(null)}
-                  className="font-tl-sans text-xs font-medium uppercase tracking-[0.06em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
+                  className="whitespace-nowrap font-tl-sans text-[11px] font-medium uppercase tracking-[0.05em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
                 >
                   Shop without truck
                 </button>
