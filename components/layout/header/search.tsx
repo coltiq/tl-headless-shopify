@@ -113,24 +113,6 @@ export function SearchField({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
-  // Ctrl/⌘ K focuses the field from anywhere (desktop only).
-  useEffect(() => {
-    if (variant !== "desktop") return;
-    const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
-      e.preventDefault();
-      inputRef.current?.focus();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [variant]);
-
-  // SSR renders the generic label; swap in the Mac glyph after hydration.
-  const [shortcut, setShortcut] = useState("Ctrl K");
-  useEffect(() => {
-    if (/Mac|iPhone|iPad/.test(navigator.platform)) setShortcut("⌘K");
-  }, []);
-
   // predictiveSearch takes no tag filter, so garage pre-filtering happens here
   // on the returned set; when nothing fits we fall back to the unfiltered
   // predictions with fitment indicated per result.
@@ -205,14 +187,6 @@ export function SearchField({
           data-search-input
           className="min-w-0 flex-1 bg-transparent font-tl-text text-sm text-tl-ink placeholder:text-tl-steel"
         />
-        {variant === "desktop" ? (
-          <kbd
-            aria-hidden
-            className="rounded-[3px] border border-tl-kbd-border px-1.5 py-0.5 font-tl-mono text-[10px] text-tl-mute-white group-data-[condensed]:hidden"
-          >
-            {showDropdown ? "esc" : shortcut}
-          </kbd>
-        ) : null}
       </Form>
 
       {showDropdown ? (
