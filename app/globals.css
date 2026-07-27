@@ -19,6 +19,15 @@
   --color-tl-ann-dim: #c9cef2;
   --color-tl-kbd-border: #cdd3de;
 
+  /* Dark header shell. Two shades so the bars read as layers: the brand row
+     sits lighter, the nav row darker beneath it. The nav is the darker of the
+     two on purpose — the indigo garage chip has to stay legible against it,
+     and indigo on a light-grey bar goes muddy. Dropdown panels stay white;
+     only the bars are dark. */
+  --color-tl-shell: #20242f;
+  --color-tl-shell-deep: #171a23;
+  --color-tl-shell-line: #2c3140;
+
   --font-tl-sans: var(--font-archivo);
   --font-tl-condensed: var(--font-barlow-condensed);
   --font-tl-mono: var(--font-ibm-plex-mono);

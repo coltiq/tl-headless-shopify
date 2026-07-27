@@ -23,7 +23,7 @@ import { Wordmark } from "./wordmark";
 // (capped at three levels by Shopify). The same tree derives the category URL
 // space, so both handles live in lib/constants.ts.
 const utilityIcon =
-  "grid h-[46px] w-[46px] place-items-center rounded-[3px] text-tl-ink group-data-[condensed]:h-11 group-data-[condensed]:w-11";
+  "grid h-[46px] w-[46px] place-items-center rounded-[3px] text-white transition-colors hover:bg-white/10 group-data-[condensed]:h-11 group-data-[condensed]:w-11";
 
 export async function Header() {
   const [
@@ -65,7 +65,7 @@ export async function Header() {
         ) : null}
 
         {/* Desktop: brand + utility row */}
-        <div className="hidden h-[72px] border-b border-tl-hairline transition-[height] group-data-[condensed]:h-14 md:block">
+        <div className="hidden h-[72px] border-b border-tl-shell-line transition-[height] group-data-[condensed]:h-14 md:block">
           <div className="page-width flex h-full items-center">
             <Wordmark className="text-[27px] group-data-[condensed]:text-[22px]" />
             <Suspense fallback={<SearchFieldSkeleton variant="desktop" />}>
@@ -100,12 +100,12 @@ export async function Header() {
         />
 
         {/* Mobile: brand bar */}
-        <div className="flex h-[60px] items-center gap-2.5 border-b border-tl-hairline px-3 md:hidden">
+        <div className="flex h-[60px] items-center gap-2.5 border-b border-tl-shell-line px-3 md:hidden">
           <Suspense
             fallback={
               <div
                 aria-hidden
-                className="-ml-1.5 grid h-11 w-11 place-items-center text-tl-ink"
+                className="-ml-1.5 grid h-11 w-11 place-items-center text-white"
               >
                 <IconBurger className="h-[13px] w-[19px]" />
               </div>
@@ -127,7 +127,7 @@ export async function Header() {
           <Link
             href="/contact"
             aria-label="Help"
-            className="grid h-11 w-11 place-items-center text-tl-ink"
+            className="grid h-11 w-11 place-items-center text-white"
           >
             <IconHelp className="h-5 w-5" />
           </Link>

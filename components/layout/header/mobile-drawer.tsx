@@ -64,7 +64,7 @@ export function MobileDrawer({
       <button
         onClick={openDrawer}
         aria-label="Open menu"
-        className="-ml-1.5 grid h-11 w-11 place-items-center text-tl-ink md:hidden"
+        className="-ml-1.5 grid h-11 w-11 place-items-center text-white md:hidden"
       >
         <IconBurger className="h-[13px] w-[19px]" />
       </button>

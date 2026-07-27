@@ -49,7 +49,7 @@ export function HeaderScroll({ children }: { children: ReactNode }) {
       data-site-header
       data-condensed={condensed ? "" : undefined}
       data-hidden={hidden ? "" : undefined}
-      className="group fixed inset-x-0 top-0 z-40 bg-white text-tl-ink data-[hidden]:-translate-y-full motion-safe:transition-transform motion-safe:duration-300"
+      className="group fixed inset-x-0 top-0 z-40 bg-tl-shell text-white data-[hidden]:-translate-y-full motion-safe:transition-transform motion-safe:duration-300"
     >
       {children}
     </header>

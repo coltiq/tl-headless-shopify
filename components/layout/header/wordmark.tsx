@@ -21,7 +21,7 @@ export function Wordmark({ className }: { className?: string }) {
       href="/"
       prefetch={true}
       aria-label={SITE_NAME}
-      className={clsx("inline-flex items-center text-tl-ink", className)}
+      className={clsx("inline-flex items-center text-white", className)}
     >
       <svg
         viewBox="0 0 625.16 79.76"

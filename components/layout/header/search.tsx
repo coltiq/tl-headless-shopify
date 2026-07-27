@@ -34,7 +34,9 @@ export function SearchFieldSkeleton({
     >
       <div
         className={clsx(
-          "flex items-center rounded-[3px] border-[1.5px] border-tl-ink",
+          // Matches the real field, dark-header ground included, so the
+          // Suspense swap causes no flash.
+          "flex items-center rounded-[3px] border-[1.5px] border-tl-ink bg-white",
           variant === "desktop"
             ? "h-11 gap-[11px] px-[15px] group-data-[condensed]:h-10"
             : "h-[46px] gap-2.5 px-[13px]",
@@ -151,7 +153,10 @@ export function SearchField({
         action="/search"
         onSubmit={() => setOpen(false)}
         className={clsx(
-          "flex items-center rounded-[3px] border-[1.5px] border-tl-ink transition-[height]",
+          // bg-white: the field sits on the dark brand row now, and a
+          // transparent input there is unreadable. The dropdown below it is
+          // white too, so the pair reads as one surface.
+          "flex items-center rounded-[3px] border-[1.5px] border-tl-ink bg-white transition-[height]",
           variant === "desktop"
             ? "h-11 gap-[11px] px-[15px] group-data-[condensed]:h-10"
             : "h-[46px] gap-2.5 px-[13px]",

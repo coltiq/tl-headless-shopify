@@ -8,7 +8,7 @@ export default function OpenCart({
   quantity?: number;
 }) {
   return (
-    <div className="relative grid h-[46px] w-[46px] place-items-center rounded-[3px] text-tl-ink group-data-[condensed]:h-11 group-data-[condensed]:w-11 max-md:h-11 max-md:w-11">
+    <div className="relative grid h-[46px] w-[46px] place-items-center rounded-[3px] text-white group-data-[condensed]:h-11 group-data-[condensed]:w-11 max-md:h-11 max-md:w-11">
       <svg
         className={clsx("h-5 w-5", className)}
         viewBox="0 0 20 20"

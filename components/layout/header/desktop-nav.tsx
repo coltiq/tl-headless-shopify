@@ -66,7 +66,7 @@ export function DesktopNav({
         if (e.key === "Escape") close();
       }}
     >
-      <div className="h-12 border-b border-tl-hairline transition-[height] group-data-[condensed]:h-11">
+      <div className="h-12 border-b border-tl-shell-line bg-tl-shell-deep transition-[height] group-data-[condensed]:h-11">
         <div className="page-width flex h-full items-center gap-8">
           {items.map((item, index) => {
             const hasPanel = item.items.length > 0;
@@ -95,14 +95,16 @@ export function DesktopNav({
                 }}
                 className={clsx(
                   "relative flex h-full items-center gap-[5px] font-tl-sans text-xs font-semibold uppercase tracking-[0.1em]",
-                  hasPanel ? "text-tl-ink" : "text-tl-steel",
+                  hasPanel ? "text-white" : "text-white/55",
                   open === index &&
-                    "after:absolute after:inset-x-0 after:-bottom-px after:h-[2.5px] after:bg-tl-indigo",
+                    // White, not indigo: the brand blue is barely visible on the dark
+                    // nav, and this marker has one job.
+                    "after:absolute after:inset-x-0 after:-bottom-px after:h-[2.5px] after:bg-white",
                 )}
               >
                 {item.title}
                 {hasPanel ? (
-                  <span aria-hidden className="text-[8px] text-tl-steel">
+                  <span aria-hidden className="text-[8px] text-white/50">
                     ▾
                   </span>
                 ) : null}
