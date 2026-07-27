@@ -17,9 +17,15 @@ export default function OpenCart({
         strokeWidth={1.6}
         aria-hidden="true"
       >
-        <path d="M3 5h3l2 9h8l2-6H7" />
-        <circle cx="9" cy="17" r="1.2" />
-        <circle cx="15" cy="17" r="1.2" />
+        {/* Shifted up 1.4 from where it was drawn. The wheels hung at cy=17
+            with nothing above y=5, putting this glyph's centre at 11.6 while
+            IconHelp sits at 10.0 and IconAccount at 10.4 — so the cart read as
+            ~1.4px low next to them even though all three boxes are identical
+            46px grids. Corrected here rather than with a transform on the
+            element, so every consumer of the icon gets it. */}
+        <path d="M3 3.6h3l2 9h8l2-6H7" />
+        <circle cx="9" cy="15.6" r="1.2" />
+        <circle cx="15" cy="15.6" r="1.2" />
       </svg>
       {/* Screen readers announce count changes; the visual bubble is decorative. */}
       <span aria-live="polite" className="sr-only">
