@@ -32,9 +32,8 @@ export function GarageChipFallback({
   return variant === "drawer" ? (
     <div aria-hidden className="mx-4 mb-4 h-12 rounded-[3px] bg-tl-indigo" />
   ) : (
-    <div
-      aria-hidden
-      className="h-9 w-44 rounded-[3px] bg-tl-indigo group-data-[condensed]:h-8"
-    />
+    // Full height and square, tracking the row: the real chip is full-bleed in
+    // the nav now, so the old 36px rounded pill popped on hydration.
+    <div aria-hidden className="h-full w-44 bg-tl-indigo" />
   );
 }
