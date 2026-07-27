@@ -85,14 +85,13 @@ export function GarageMenu({
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={clsx(
-          "flex items-center gap-[9px] bg-tl-indigo text-white transition-colors hover:bg-tl-indigo-lift",
+          "flex items-center gap-3 bg-tl-indigo text-white transition-colors hover:bg-tl-indigo-lift",
           // Full-bleed in the nav: fills the row top to bottom, and follows the
           // condensed height for free instead of needing its own step down.
           //
-          // min-w rather than a fixed width: without spare room the label has
-          // nothing to centre inside, so the icon and caret cannot reach the
-          // edges — but a long truck name still stretches the chip instead of
-          // being clipped.
+          // min-w rather than a fixed width: it sets the chip's size and gives
+          // the caret's ml-auto slack to push into, while a long truck name
+          // still stretches the chip instead of being clipped.
           variant === "row" && "h-full min-w-56 px-7",
           variant === "drawer" && "h-12 w-full rounded-[3px] px-[13px]",
           variant === "inline" && "h-9 rounded-[3px] px-[13px]",
@@ -101,7 +100,7 @@ export function GarageMenu({
         <IconGarage
           className={clsx(
             "shrink-0",
-            variant === "drawer" ? "h-[17px] w-[17px]" : "h-4 w-4",
+            variant === "drawer" ? "h-[19px] w-[19px]" : "h-[18px] w-[18px]",
           )}
         />
         {/* Sits straight after the icon so the two read as one group; the
