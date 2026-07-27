@@ -55,6 +55,20 @@ export function GarageMenu({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
+  // Keeps the truck in the garage and turns fitment off for this page —
+  // `?all=1`, the same switch the category pages and the search toggle use.
+  //
+  // **Per-URL, not sticky, by design** (CLAUDE.md): a stored "fitment off"
+  // flag would make the garage appear to stop working three clicks later,
+  // with no visible cause. So this widens the page you are on; moving to
+  // another category filters again, and the truck is still set.
+  const shopWithoutTruck = () => {
+    setOpen(false);
+    const url = new URL(window.location.href);
+    url.searchParams.set("all", "1");
+    router.push(`${url.pathname}${url.search}`);
+  };
+
   const choose = (selection: VehicleSelection | null) => {
     setOpen(false);
     startTransition(async () => {
@@ -212,10 +226,9 @@ export function GarageMenu({
                 </div>
               </div>
 
-              {/* Both actions from the reference. With one truck they are not
-                  redundant: Add opens an empty picker, Delete inside the box
-                  removes the truck, and Shop without truck clears it as a
-                  browsing choice rather than a management one. */}
+              {/* Add opens an empty picker. Shop without truck is a browsing
+                  choice — the truck stays in the garage — where Delete inside
+                  the box is the management one that removes it. */}
               <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
                 <button
                   type="button"
@@ -226,7 +239,7 @@ export function GarageMenu({
                 </button>
                 <button
                   type="button"
-                  onClick={() => choose(null)}
+                  onClick={shopWithoutTruck}
                   className="whitespace-nowrap font-tl-sans text-[11px] font-medium uppercase tracking-[0.05em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
                 >
                   Shop without truck
