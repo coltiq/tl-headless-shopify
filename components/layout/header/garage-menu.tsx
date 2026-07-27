@@ -124,7 +124,7 @@ export function GarageMenu({
             <button
               type="button"
               onClick={() => choose(null)}
-              className="flex h-11 w-full items-center border-t border-tl-hairline px-4 text-left font-tl-text text-sm text-tl-steel hover:bg-tl-fog"
+              className="flex h-11 w-full items-center border-t border-tl-hairline px-4 text-left font-tl-sans text-sm text-tl-steel hover:bg-tl-fog"
             >
               Clear vehicle
             </button>

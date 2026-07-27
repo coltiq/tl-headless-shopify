@@ -12,7 +12,21 @@ function titleCase(slug: string): string {
 }
 
 const selectClass =
-  "h-10 w-full rounded-[3px] border border-tl-hairline bg-white px-2 font-tl-text text-sm text-tl-ink focus:bg-tl-fog focus:outline-none disabled:text-tl-mute-white";
+  "h-10 w-full rounded-[3px] border border-tl-hairline bg-white px-2 font-tl-sans text-sm text-tl-ink focus:bg-tl-fog focus:outline-none disabled:text-tl-mute-white";
+
+// `font-tl-sans` throughout the picker, not `font-tl-text`: this panel hangs
+// off the nav bar, which is Archivo, and it was running three families in a
+// 264px box — mono labels, Inter fields, an Archivo button. Inter stays the
+// reading face for the mega panel's links and body copy; controls match the
+// bar they drop out of.
+//
+// The small uppercase mono labels stay — that pattern is used elsewhere in the
+// header (the drawer's "Your account"), so it reads as a deliberate label
+// idiom rather than a fourth font.
+//
+// **`<option>` text is browser-controlled.** The closed select shows Archivo;
+// the popup list uses whatever the OS decides on Windows and some Chrome
+// builds, and nothing in CSS reliably changes that.
 
 // Cascading Year → Make → Model selects. Native <select> on purpose: mobile
 // ergonomics beat a custom listbox here.
@@ -160,7 +174,7 @@ export function VehiclePicker({
           for. Without this a visitor whose truck is missing has no next step. */}
       <Link
         href="/contact"
-        className="text-center font-tl-text text-[11px] text-tl-mute-white underline underline-offset-4 hover:text-tl-ink"
+        className="text-center font-tl-sans text-[11px] text-tl-mute-white underline underline-offset-4 hover:text-tl-ink"
       >
         My truck isn&apos;t listed
       </Link>
