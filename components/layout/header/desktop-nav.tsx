@@ -113,7 +113,7 @@ export function DesktopNav({
               </Link>
             );
           })}
-          <div className="ml-auto">{garage}</div>
+          <div className="ml-auto h-full">{garage}</div>
         </div>
       </div>
 

@@ -72,6 +72,7 @@ export function GarageMenu({
       ref={rootRef}
       className={clsx(
         "relative",
+        variant === "row" && "h-full",
         variant === "drawer" && "mx-4 mb-4",
         variant === "inline" && "w-fit",
       )}
@@ -84,10 +85,12 @@ export function GarageMenu({
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={clsx(
-          "flex items-center gap-[9px] rounded-[3px] bg-tl-indigo px-[13px] text-white transition-colors hover:bg-tl-indigo-lift",
-          variant === "row" && "h-9 group-data-[condensed]:h-8",
-          variant === "drawer" && "h-12 w-full",
-          variant === "inline" && "h-9",
+          "flex items-center gap-[9px] bg-tl-indigo text-white transition-colors hover:bg-tl-indigo-lift",
+          // Full-bleed in the nav: fills the row top to bottom, and follows the
+          // condensed height for free instead of needing its own step down.
+          variant === "row" && "h-full px-5",
+          variant === "drawer" && "h-12 w-full rounded-[3px] px-[13px]",
+          variant === "inline" && "h-9 rounded-[3px] px-[13px]",
         )}
       >
         <IconGarage
@@ -132,7 +135,10 @@ export function GarageMenu({
       {open ? (
         <div
           className={clsx(
-            "absolute top-full z-50 mt-1.5 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
+            "absolute top-full z-50 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
+            // No gap in the nav: the chip meets the bar's bottom edge, so a
+            // floating panel below it would read as detached.
+            variant === "row" ? "rounded-t-none" : "mt-1.5",
             // 360px, measured rather than estimated: "Add truck" and "Shop
             // without truck" need ~264px together, and 320px left only 288px of
             // content once the gutters were taken off — two pixels short, so the
