@@ -494,6 +494,37 @@ reads as a product grid on a storefront. If the label changes, it is a single
 `nav_item.label` edit — but the path is baked into
 `PROXY_RESERVED_SEGMENTS`, `app/sitemap.ts`, and the route folder.
 
+### L2 items that point at code routes
+
+Not every L2 is a category. Community and Custom Work are shallow sections whose
+children are custom pages, and those are authored the opposite way to Part 4.3:
+**set `link`, and leave `slug` and `collection` empty.** A node with no slug
+produces no category node and no URL of its own, so the menu falls back to
+`link` — which is what keeps nav position and path independent here.
+
+| Parent      | Label           | `link`                         | Route status                                  |
+| ----------- | --------------- | ------------------------------ | --------------------------------------------- |
+| Community   | Blog            | —                              | No route yet; needs a content source decision |
+| Community   | Customer Builds | —                              | No route yet                                  |
+| Community   | The Standard    | `/the-standard`                | Title-only placeholder, built                 |
+| Custom Work | Our Services    | `/custom-work/services`        | Spec'd, not built                             |
+| Custom Work | Our Builds      | `/custom-work/builds`          | Spec'd, not built                             |
+| Custom Work | Inside the Shop | `/custom-work/inside-the-shop` | Spec'd, not built                             |
+
+**Write a `description` on every one of these.** Both sections are shallow — no
+L2 has children — so the mega panel renders flat, and the description is the
+only copy in the panel. Blank means a bare title. See "How a section's depth
+changes its panel" in Part 1.1.
+
+**Custom Work's children nest under the section** (`/custom-work/services`, not
+`/our-services`). That is not a contradiction of "L1 contributes no segment":
+that rule governs **derived** category paths, and these are hand-typed `link`
+values on code routes. Full spec in `docs/plans/custom-work.md`.
+
+**Adding children to any of these L2s changes the panel for all of them** — the
+layout flips from flat to the rail, and the siblings' descriptions stop showing
+until each row is hovered. Deliberate; see `docs/plans/custom-work.md` §5.
+
 ## 4.3 Category items (L2 and below) — **the Phase 3 migration**
 
 **Fill in `slug` (the URL segment) and `collection` (the reference), and clear

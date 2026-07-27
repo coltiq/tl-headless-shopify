@@ -23,6 +23,7 @@ Requires env vars from `.env.example` in `.env.local`: `SHOPIFY_STORE_DOMAIN`, `
 
 - `docs/shopify-setup.md` — the complete Shopify admin checklist in dependency order: metaobject/metafield definitions, webhooks, collections, nav entries, vehicle entries, product tagging, storefront filters. Authoritative for anything that has to exist in the admin, including the full webhook reference (Part 9).
 - `docs/plans/OPEN-ITEMS.md` — every red flag, accepted limit, and deferred piece of work still outstanding. Read before touching routing, SEO, or fitment. The shipped plans it came from (garage Phase 1/2, category URLs Phase 3) were folded into this file and deleted.
+- `docs/plans/custom-work.md` — the `/custom-work` section spec: its three L2 code routes, why they nest under the section path, and why the section is capped at two nav levels. Nothing in it is built yet.
 
 ## Imports
 

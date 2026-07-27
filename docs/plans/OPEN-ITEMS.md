@@ -250,12 +250,26 @@ simply unread until then.
 `/community` and `/the-standard` are scaffolds. Real pages come after the
 backend work.
 
-`/custom-work` is the one with a shape already decided: it is the shop side, so
-it gets **no ecommerce furniture** — no product grid, no cart, no filters, no
-garage bounce. Hero, process, gallery, inquiry. Planned children are Our Builds,
-The Process, Inside The Shop, Start Your Build, and it should cross-link with
-the retail side both ways (kit pages point at the shop that designed them; the
-shop section points at the kits it produced).
+`/custom-work` is **fully spec'd in `docs/plans/custom-work.md`** — URLs, page
+outlines, nav entries, content source, and the depth decision. It is the shop
+side, so it gets **no ecommerce furniture** — no product grid, no cart, no
+filters, no garage bounce. It should cross-link with the retail side both ways
+(kit pages point at the shop that designed them; the shop section points at the
+kits it produced).
+
+The child set narrowed from four to three: **Our Services**
+(`/custom-work/services`), **Our Builds** (`/custom-work/builds`), **Inside the
+Shop** (`/custom-work/inside-the-shop`). The Process folded into Our Services as
+a section; Start Your Build is `/quote`, reached by CTA rather than given a nav
+slot. Children nest under the section path, which does not conflict with "L1
+contributes no segment" — that rule governs derived category paths, not
+hand-typed `link` values on code routes.
+
+**The section is capped at two levels.** No L3 nav entries under any of the
+three: a child on any one of them flips the mega panel from flat to the rail and
+demotes the other two from visible cards to hover-to-reveal rows. Per-service and
+per-build **pages** stay available — URL depth costs nothing and needs no nav
+change. Reasoning and the `links-row` escape hatch are in the spec, §5.
 
 `/community` is the brand side, and it is a **container**: Blog, Customer
 Builds, and The Standard to start, with Events and Giveaways when they exist.
