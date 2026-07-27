@@ -259,7 +259,7 @@ shop section points at the kits it produced).
 
 `/community` is the brand side, and it is a **container**: Blog, Customer
 Builds, and The Standard to start, with Events and Giveaways when they exist.
-It is **not** where support lives — see 4.5.
+It is **not** where support lives — see 4.6.
 
 Named Community rather than About because it is the only section whose contents
 are expected to grow — About shrinks the moment events land, Journal narrows to
@@ -281,25 +281,43 @@ articles are queryable on the Storefront API, which beats a deploy per post —
 settle that before scaffolding, and name the blog at the same time.
 
 **The L1 set is four.** Custom Work · Parts · Lifestyle · Community. Support
-deliberately gets no bar slot (4.5), and the category rail inside the Parts
+deliberately gets no bar slot (4.6), and the category rail inside the Parts
 panel is why the bar does not need category items on it — promoting categories
 to L1 would consume the rail's level and burn the L1 cap of 8.
 
-### 4.3 Automating `fits-*` tags
+### 4.3 "Shop without truck" deletes the truck
+
+In the garage panel it calls the same clear as **Delete**, so a visitor who
+wants to browse everything for a moment loses the truck they entered.
+
+The mechanism for the right behaviour already exists — `?all=1`, which the
+category pages and the search toggle both use — but it is **per-URL and
+deliberately not sticky** (`CLAUDE.md`): a stored "fitment off" flag would make
+the garage appear to stop working three clicks later with nothing on screen
+explaining why. So wiring the button to `?all=1` only widens the page you are
+standing on, which is arguably worse than deleting because it looks like it
+worked and then quietly stops.
+
+Doing it properly means a browsing mode that survives navigation — a second
+cookie or a URL flag carried across links — **plus a visible indicator** that
+fitment is off and a one-click way back. That is a design decision, not a
+patch, which is why the button deletes for now rather than half-working.
+
+### 4.4 Automating `fits-*` tags
 
 Recorded from the Phase 2 decision discussion, not built: a product metafield of
 `vehicle` references plus Shopify Flow (or a bulk script) deriving the tags
 automatically. Better admin UX, and **zero app changes** — tags stay the
 filtering mechanism either way.
 
-### 4.4 Link sweep before launch
+### 4.5 Link sweep before launch
 
 Audit the footer menu (`next-js-frontend-footer-menu`) and every nav `link`
 field. Shopify CMS pages are not rendered, so any `/pages/<handle>` link — or a
 bare `/<handle>` pointing at a Shopify page — 404s. End state: no CMS-page links
 anywhere, every page a custom code route.
 
-### 4.5 Support architecture — decided, not built
+### 4.6 Support architecture — decided, not built
 
 15–20 policy and help pages are coming (shipping, returns, warranty, FAQ,
 fitment help, order status, legal). **Support gets no L1 nav slot.** Three tiers
