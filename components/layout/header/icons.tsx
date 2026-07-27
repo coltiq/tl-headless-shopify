@@ -35,6 +35,33 @@ export function IconAccount({ className }: IconProps) {
   );
 }
 
+// The header's support affordance. A question mark promises *answers* —
+// FAQ, policies, a form — where a speech bubble promises a person on the other
+// end of it. Swap to IconChat the day live chat actually ships; the icon
+// changing is a fair signal that the capability changed.
+//
+// Round caps here where the rest of the set takes the default: the dot is a
+// zero-length stroke, which renders as nothing with butt caps.
+export function IconHelp({ className }: IconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="10" cy="10" r="7.5" />
+      <path d="M8.23 6.27c.98-.85 2.56-.85 3.54 0 .98.85.98 2.24 0 3.09-.17.15-.36.27-.56.37-.62.3-1.21.83-1.21 1.52v.63" />
+      <path d="M10 14.4v.01" />
+    </svg>
+  );
+}
+
+// Kept for when live chat ships — see IconHelp.
 export function IconChat({ className }: IconProps) {
   return (
     <svg

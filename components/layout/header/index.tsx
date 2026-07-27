@@ -10,7 +10,7 @@ import { AnnouncementBar, MobileAnnouncementBar } from "./announcement-bar";
 import { DesktopNav } from "./desktop-nav";
 import { GarageChip, GarageChipFallback } from "./garage-chip";
 import { HeaderScroll } from "./header-scroll";
-import { IconAccount, IconChat } from "./icons";
+import { IconAccount, IconHelp } from "./icons";
 import { IconBurger } from "./icons";
 import { MobileDrawer } from "./mobile-drawer";
 import { MobileLinksBand } from "./mobile-links";
@@ -79,12 +79,8 @@ export async function Header() {
               >
                 <IconAccount className="h-5 w-5" />
               </a>
-              <Link
-                href="/contact"
-                aria-label="Contact"
-                className={utilityIcon}
-              >
-                <IconChat className="h-5 w-5" />
+              <Link href="/contact" aria-label="Help" className={utilityIcon}>
+                <IconHelp className="h-5 w-5" />
               </Link>
               <Suspense fallback={<OpenCart />}>
                 <CartModal />
@@ -130,10 +126,10 @@ export async function Header() {
           <span className="ml-auto" />
           <Link
             href="/contact"
-            aria-label="Contact"
+            aria-label="Help"
             className="grid h-11 w-11 place-items-center text-tl-ink"
           >
-            <IconChat className="h-5 w-5" />
+            <IconHelp className="h-5 w-5" />
           </Link>
           <Suspense fallback={<OpenCart />}>
             <CartModal primary={false} />

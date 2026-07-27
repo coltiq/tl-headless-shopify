@@ -10,7 +10,7 @@ import { SHOP_PHONE_DISPLAY, SHOP_PHONE_HREF } from "lib/constants";
 import {
   IconAccount,
   IconBurger,
-  IconChat,
+  IconHelp,
   IconClose,
   IconPhone,
 } from "./icons";
@@ -174,7 +174,7 @@ export function MobileDrawer({
                     onClick={closeDrawer}
                     className="flex h-12 items-center gap-[11px] px-4 font-tl-text text-[13.5px]"
                   >
-                    <IconChat className="h-[17px] w-[17px]" />
+                    <IconHelp className="h-[17px] w-[17px]" />
                     Contact support
                   </Link>
 
