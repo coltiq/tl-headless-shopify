@@ -92,7 +92,7 @@ export function GarageMenu({
           // min-w rather than a fixed width: it sets the chip's size and gives
           // the caret's ml-auto slack to push into, while a long truck name
           // still stretches the chip instead of being clipped.
-          variant === "row" && "h-full min-w-56 px-7",
+          variant === "row" && "h-full min-w-60 px-7",
           variant === "drawer" && "h-12 w-full rounded-[3px] px-[13px]",
           variant === "inline" && "h-9 rounded-[3px] px-[13px]",
         )}
@@ -100,7 +100,7 @@ export function GarageMenu({
         <IconGarage
           className={clsx(
             "shrink-0",
-            variant === "drawer" ? "h-[19px] w-[19px]" : "h-[18px] w-[18px]",
+            variant === "drawer" ? "h-[21px] w-[21px]" : "h-5 w-5",
           )}
         />
         {/* Sits straight after the icon so the two read as one group; the
