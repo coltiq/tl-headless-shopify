@@ -40,7 +40,7 @@ function MobileBarLink({ link }: { link: AnnouncementBarLink }) {
     </>
   );
   const className =
-    "-my-[5px] flex w-full max-w-[190px] items-center justify-center gap-[7px] px-3 py-[5px] font-tl-sans text-[11px] font-bold uppercase tracking-[0.1em] text-white";
+    "-my-[5px] flex w-full max-w-[190px] items-center justify-center gap-[7px] px-3 py-[5px] font-tl-sans text-[11px] font-bold tracking-[0.04em] text-white";
 
   return link.url.startsWith("/") ? (
     <Link href={link.url} className={className}>

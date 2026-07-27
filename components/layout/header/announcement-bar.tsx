@@ -14,11 +14,10 @@ import { AnnouncementRotator } from "./announcement-rotator";
 // white, on both breakpoints. It previously mixed the body font, a mono
 // readout, and two text colours.
 //
-// Size and weight answer to role rather than being uniform: the announcement
-// is sentence-case 11px, the uppercase links are 10px semibold, because
-// uppercase carries full cap-height on every letter and outweighs matched
-// sentence-case badly. Tracking follows the same logic — 0.1em on the links,
-// 0.09em on the number, none on the announcement.
+// Everything sits at 11px. Labels render in the case they were authored in —
+// nothing here uppercases text on the author's behalf. Weight carries the
+// hierarchy instead: semibold on the links, regular on the announcement and
+// the number.
 //
 // The right slot holds the shop's phone number, from lib/constants.ts rather
 // than admin: it's business data, not editorial copy, and it changes about
@@ -90,12 +89,12 @@ function BarLink({ link }: { link: AnnouncementBarLink }) {
       {link.label}
     </>
   );
-  // 10px semibold, not 11px bold: uppercase carries full cap-height on every
-  // letter, so at a matched pixel size it reads noticeably larger than the
-  // sentence-case announcement beside it. Mobile keeps 11px bold — there the
-  // links are a standalone band with nothing to balance against.
+  // The label renders exactly as authored — no `uppercase`. Forcing case in CSS
+  // takes the decision away from whoever writes the entry, and "GET A QUOTE"
+  // beside a sentence-case announcement was the reason this line needed
+  // shrinking in the first place.
   const className =
-    "flex items-center gap-[9px] font-tl-sans text-[10px] font-semibold uppercase tracking-[0.1em] text-white";
+    "flex items-center gap-[9px] font-tl-sans text-[11px] font-semibold tracking-[0.04em] text-white";
 
   return link.url.startsWith("/") ? (
     <Link href={link.url} className={className}>

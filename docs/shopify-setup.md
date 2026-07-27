@@ -243,7 +243,7 @@ band beneath the brand bar.
 
 | Field key   | Type             | Create it? | Notes                                                                             |
 | ----------- | ---------------- | ---------- | --------------------------------------------------------------------------------- |
-| `label`     | Single line text | **Yes**    | Link text. Rendered uppercase                                                     |
+| `label`     | Single line text | **Yes**    | Link text, rendered in the case you type it — capitalise it here if you want caps |
 | `url`       | Single line text | **Yes**    | **Not the URL type** — see below. Required; a link with no destination is dropped |
 | `icon_text` | Single line text | **Yes**    | An exact Heroicons name. **Preferred over `icon`** — see below                    |
 | `icon`      | File             | **Yes**    | Optional fallback for custom art; the link renders without either                 |
