@@ -3,7 +3,6 @@
 import clsx from "clsx";
 import { useVehicles } from "components/vehicles-context";
 import type { VehicleGeneration, VehicleSelection } from "lib/fitment";
-import Link from "next/link";
 import { useState } from "react";
 import { IconChevronDown } from "./icons";
 
@@ -45,7 +44,7 @@ function Field({
   return (
     <label
       className={clsx(
-        "relative flex h-[54px] items-center gap-2 rounded-[3px] border bg-white px-3.5 focus-within:border-tl-indigo",
+        "relative flex h-[60px] items-center gap-2 rounded-[3px] border bg-white px-3.5 focus-within:border-tl-indigo",
         disabled ? "border-tl-hairline" : "border-tl-ink",
       )}
     >
@@ -55,7 +54,7 @@ function Field({
         </span>
         <span
           className={clsx(
-            "truncate font-tl-sans text-[15px] font-bold uppercase leading-none tracking-[0.02em]",
+            "truncate font-tl-sans text-base font-bold uppercase leading-none tracking-[0.02em]",
             disabled ? "text-tl-mute-white" : "text-tl-ink",
           )}
         >
@@ -208,45 +207,27 @@ export function VehiclePicker({
         onClick={() =>
           resolved && year !== null && onChoose({ gen: resolved, year })
         }
-        className="mt-0.5 h-12 rounded-[3px] bg-tl-indigo font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-white transition-colors hover:bg-tl-indigo-lift disabled:bg-tl-hairline disabled:text-tl-mute-white"
+        className="mt-0.5 h-[52px] rounded-[3px] bg-tl-indigo font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-white transition-colors hover:bg-tl-indigo-lift disabled:bg-tl-hairline disabled:text-tl-mute-white"
       >
         {current ? "Update my truck" : "Add my truck"}
       </button>
 
-      {/* One slot, three jobs, decided by where the visitor came from and how
-          far they have got. Editing an existing truck, the useful action is
-          backing out; mid-selection it is starting again; from empty it is the
-          escape hatch — the vehicle list only covers generations we stock for,
-          and without it a visitor whose truck is missing has no next step.
-          Stacking all three would put a pile of links under one button. */}
-      {onCancel ? (
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-center font-tl-sans text-[11px] font-medium uppercase tracking-[0.1em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
-        >
-          Cancel
-        </button>
-      ) : dirty ? (
-        <button
-          type="button"
-          onClick={() => {
-            setYear(null);
-            setMake(null);
-            setModel(null);
-          }}
-          className="text-center font-tl-sans text-[11px] font-medium uppercase tracking-[0.1em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
-        >
-          Start over
-        </button>
-      ) : (
-        <Link
-          href="/contact"
-          className="text-center font-tl-sans text-[11px] font-medium uppercase tracking-[0.1em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
-        >
-          My truck isn&apos;t listed
-        </Link>
-      )}
+      {/* Start over, as in the reference — always present, not swapped out for
+          anything. Cancel replaces it only when the picker was reached from
+          the summary, where there is a state to go back to. */}
+      <button
+        type="button"
+        disabled={!onCancel && !dirty}
+        onClick={() => {
+          if (onCancel) return onCancel();
+          setYear(null);
+          setMake(null);
+          setModel(null);
+        }}
+        className="text-center font-tl-sans text-[11px] font-medium uppercase tracking-[0.1em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo disabled:text-tl-mute-white disabled:no-underline"
+      >
+        {onCancel ? "Cancel" : "Start over"}
+      </button>
     </div>
   );
 }

@@ -24,17 +24,18 @@ export function GarageMenu({
   variant: "row" | "drawer" | "inline";
 }) {
   const [open, setOpen] = useState(false);
-  // The panel has two faces: a summary when a truck is already set, and the
-  // picker. `editing` is the way from the first to the second, and it resets
-  // on close so reopening always lands on the summary.
-  const [editing, setEditing] = useState(false);
+  // null = the summary. "edit" seeds the picker from the current truck, "add"
+  // starts it empty — the one real difference between those two actions when
+  // the app holds a single vehicle. Both reset on close, so reopening always
+  // lands on the summary.
+  const [editing, setEditing] = useState<null | "edit" | "add">(null);
   const [expanded, setExpanded] = useState(true);
   const [, startTransition] = useTransition();
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open) setEditing(false);
+    if (!open) setEditing(null);
   }, [open]);
 
   useEffect(() => {
@@ -133,16 +134,16 @@ export function GarageMenu({
           )}
         >
           {current && !editing ? (
-            // Settled state. Someone who already has a truck set is opening
-            // this to check it, swap it, or turn it off — not to fill in three
-            // selects again, which is what they were shown before.
-            <div className="flex flex-col gap-3.5 px-4 pb-4 pt-4">
-              <p className="font-tl-sans text-lg font-bold uppercase leading-none tracking-[0.02em] text-tl-ink">
-                My truck
+            // Settled state, laid out as the reference: heading, label, the
+            // vehicle in a disclosure box, then Add Vehicle beside Shop
+            // Without Vehicle.
+            <div className="flex flex-col gap-4 px-4 pb-5 pt-4">
+              <p className="font-tl-sans text-[22px] font-bold uppercase leading-none tracking-[0.01em] text-tl-ink">
+                My vehicles
               </p>
 
               <div className="flex flex-col gap-2">
-                <p className="font-tl-sans text-[11px] font-bold uppercase tracking-[0.1em] text-tl-ink">
+                <p className="font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-tl-ink">
                   Currently shopping for:
                 </p>
                 <div className="rounded-[3px] border border-tl-hairline">
@@ -150,24 +151,25 @@ export function GarageMenu({
                     type="button"
                     aria-expanded={expanded}
                     onClick={() => setExpanded((v) => !v)}
-                    className="flex h-[54px] w-full items-center gap-3 px-3.5 text-left"
+                    className="flex h-[60px] w-full items-center gap-3 px-3.5 text-left"
                   >
                     <IconGarage className="h-5 w-5 shrink-0 text-tl-indigo" />
-                    <span className="truncate font-tl-sans text-[15px] font-bold uppercase tracking-[0.02em] text-tl-ink">
+                    <span className="truncate font-tl-sans text-base font-bold uppercase tracking-[0.02em] text-tl-ink">
                       {vehicleLabel(current)}
                     </span>
+                    {/* The reference's hairline between label and chevron. */}
+                    <span
+                      aria-hidden
+                      className="ml-auto h-5 w-px shrink-0 bg-tl-hairline"
+                    />
                     <IconChevronDown
                       className={clsx(
-                        "ml-auto h-4 w-4 shrink-0 text-tl-steel transition-transform",
+                        "h-4 w-4 shrink-0 text-tl-steel transition-transform",
                         expanded && "rotate-180",
                       )}
                     />
                   </button>
 
-                  {/* Open by default. The reference collapses because it also
-                      carries Add Vehicle and Shop Without Vehicle outside the
-                      box; with one truck those collapse into Edit and Delete,
-                      so a shut box would be a panel with nothing to do in it. */}
                   {expanded ? (
                     <div className="flex flex-col border-t border-tl-hairline py-1.5">
                       {/* /search with a truck set already filters to what fits
@@ -183,7 +185,7 @@ export function GarageMenu({
                       </Link>
                       <button
                         type="button"
-                        onClick={() => setEditing(true)}
+                        onClick={() => setEditing("edit")}
                         className={actionRowClass}
                       >
                         Edit vehicle
@@ -199,15 +201,38 @@ export function GarageMenu({
                   ) : null}
                 </div>
               </div>
+
+              {/* Both actions from the reference. With one truck they are not
+                  redundant: Add opens an empty picker, Delete inside the box
+                  removes the truck, and Shop Without Vehicle clears it as a
+                  browsing choice rather than a management one. */}
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+                <button
+                  type="button"
+                  onClick={() => setEditing("add")}
+                  className="h-12 flex-none rounded-[3px] border border-tl-steel px-6 font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-tl-ink transition-colors hover:border-tl-ink hover:bg-tl-fog"
+                >
+                  Add vehicle
+                </button>
+                <button
+                  type="button"
+                  onClick={() => choose(null)}
+                  className="font-tl-sans text-xs font-medium uppercase tracking-[0.06em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
+                >
+                  Shop without vehicle
+                </button>
+              </div>
             </div>
           ) : (
             // No title here: the chip this drops out of already says it, and
             // each field labels itself.
             <div className="pt-4">
               <VehiclePicker
-                current={current}
+                // "Add vehicle" opens empty; "Edit vehicle" opens on the truck
+                // that is already set.
+                current={editing === "add" ? null : current}
                 onChoose={choose}
-                onCancel={current ? () => setEditing(false) : undefined}
+                onCancel={current ? () => setEditing(null) : undefined}
               />
             </div>
           )}
