@@ -1,9 +1,11 @@
 "use client";
 
+import clsx from "clsx";
 import { useVehicles } from "components/vehicles-context";
 import type { VehicleGeneration, VehicleSelection } from "lib/fitment";
 import Link from "next/link";
 import { useState } from "react";
+import { IconChevronDown } from "./icons";
 
 // Slugs seed the dropdowns; the full display name lives in `label`, so
 // capitalizing here is purely cosmetic ("ford" → "Ford").
@@ -11,22 +13,68 @@ function titleCase(slug: string): string {
   return slug.charAt(0).toUpperCase() + slug.slice(1);
 }
 
-const selectClass =
-  "h-10 w-full rounded-[3px] border border-tl-hairline bg-white px-2 font-tl-sans text-sm text-tl-ink focus:bg-tl-fog focus:outline-none disabled:text-tl-mute-white";
-
-// `font-tl-sans` throughout the picker, not `font-tl-text`: this panel hangs
-// off the nav bar, which is Archivo, and it was running three families in a
-// 264px box — mono labels, Inter fields, an Archivo button. Inter stays the
-// reading face for the mega panel's links and body copy; controls match the
-// bar they drop out of.
+// One field: the label sits *inside* the box above the value, so an empty
+// field reads as a sentence — "Select / Year" — and a filled one keeps its
+// name visible instead of trading it for the answer.
 //
-// The small uppercase mono labels stay — that pattern is used elsewhere in the
-// header (the drawer's "Your account"), so it reads as a deliberate label
-// idiom rather than a fourth font.
+// The native <select> is still the control, stretched over the whole box at
+// zero opacity. That keeps the OS picker on mobile, keyboard behaviour, and
+// form semantics — none of which a custom listbox gives back for free — while
+// letting the box carry two lines of type that a bare <select> cannot.
 //
-// **`<option>` text is browser-controlled.** The closed select shows Archivo;
-// the popup list uses whatever the OS decides on Windows and some Chrome
-// builds, and nothing in CSS reliably changes that.
+// Type is Archivo and IBM Plex Mono, matching the bar this panel drops out of.
+// **`<option>` text is browser-controlled**: the popup list uses whatever the
+// OS decides on Windows and some Chrome builds, and no CSS reliably overrides
+// it — which is part of why the field's own text is drawn rather than relying
+// on the select's rendering.
+function Field({
+  name,
+  value,
+  display,
+  disabled,
+  onChange,
+  children,
+}: {
+  name: string;
+  value: string;
+  display: string | null;
+  disabled: boolean;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <label
+      className={clsx(
+        "relative flex h-[54px] items-center gap-2 rounded-[3px] border bg-white px-3.5 focus-within:border-tl-indigo",
+        disabled ? "border-tl-hairline" : "border-tl-ink",
+      )}
+    >
+      <span className="flex min-w-0 flex-col gap-[3px]">
+        <span className="font-tl-mono text-[9px] uppercase leading-none tracking-[0.14em] text-tl-mute-white">
+          {display ? name : "Select"}
+        </span>
+        <span
+          className={clsx(
+            "truncate font-tl-sans text-[15px] font-bold uppercase leading-none tracking-[0.02em]",
+            disabled ? "text-tl-mute-white" : "text-tl-ink",
+          )}
+        >
+          {display ?? name}
+        </span>
+      </span>
+      <IconChevronDown className="ml-auto h-4 w-4 shrink-0 text-tl-steel" />
+      <select
+        aria-label={name}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+      >
+        {children}
+      </select>
+    </label>
+  );
+}
 
 // Cascading Year → Make → Model selects. Native <select> on purpose: mobile
 // ergonomics beat a custom listbox here.
@@ -93,71 +141,62 @@ export function VehiclePicker({
             gen.make === make && gen.model === model && covers(gen, year),
         );
 
+  const dirty = year !== null || make !== null || model !== null;
+
   return (
-    <div className="flex flex-col gap-2 px-4 pb-3">
-      <label className="flex flex-col gap-1">
-        <span className="font-tl-mono text-[9px] uppercase tracking-[0.14em] text-tl-mute-white">
-          Year
-        </span>
-        <select
-          className={selectClass}
-          value={year ?? ""}
-          onChange={(e) => {
-            // Changing an upstream select invalidates everything downstream.
-            setYear(e.target.value ? Number(e.target.value) : null);
-            setMake(null);
-            setModel(null);
-          }}
-        >
-          <option value="">Select year</option>
-          {years.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
-      </label>
+    <div className="flex flex-col gap-2.5 px-4 pb-4">
+      <Field
+        name="Year"
+        value={year?.toString() ?? ""}
+        display={year?.toString() ?? null}
+        disabled={false}
+        onChange={(v) => {
+          // Changing an upstream field invalidates everything downstream.
+          setYear(v ? Number(v) : null);
+          setMake(null);
+          setModel(null);
+        }}
+      >
+        <option value="">Select year</option>
+        {years.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </Field>
 
-      <label className="flex flex-col gap-1">
-        <span className="font-tl-mono text-[9px] uppercase tracking-[0.14em] text-tl-mute-white">
-          Make
-        </span>
-        <select
-          className={selectClass}
-          value={make ?? ""}
-          disabled={year === null}
-          onChange={(e) => {
-            setMake(e.target.value || null);
-            setModel(null);
-          }}
-        >
-          <option value="">Select make</option>
-          {makes.map((m) => (
-            <option key={m} value={m}>
-              {titleCase(m)}
-            </option>
-          ))}
-        </select>
-      </label>
+      <Field
+        name="Make"
+        value={make ?? ""}
+        display={make ? titleCase(make) : null}
+        disabled={year === null}
+        onChange={(v) => {
+          setMake(v || null);
+          setModel(null);
+        }}
+      >
+        <option value="">Select make</option>
+        {makes.map((m) => (
+          <option key={m} value={m}>
+            {titleCase(m)}
+          </option>
+        ))}
+      </Field>
 
-      <label className="flex flex-col gap-1">
-        <span className="font-tl-mono text-[9px] uppercase tracking-[0.14em] text-tl-mute-white">
-          Model
-        </span>
-        <select
-          className={selectClass}
-          value={model ?? ""}
-          disabled={make === null}
-          onChange={(e) => setModel(e.target.value || null)}
-        >
-          <option value="">Select model</option>
-          {models.map((m) => (
-            <option key={m} value={m}>
-              {titleCase(m)}
-            </option>
-          ))}
-        </select>
-      </label>
+      <Field
+        name="Model"
+        value={model ?? ""}
+        display={model ? titleCase(model) : null}
+        disabled={make === null}
+        onChange={(v) => setModel(v || null)}
+      >
+        <option value="">Select model</option>
+        {models.map((m) => (
+          <option key={m} value={m}>
+            {titleCase(m)}
+          </option>
+        ))}
+      </Field>
 
       <button
         type="button"
@@ -165,19 +204,36 @@ export function VehiclePicker({
         onClick={() =>
           resolved && year !== null && onChoose({ gen: resolved, year })
         }
-        className="mt-1 h-10 rounded-[3px] bg-tl-indigo font-tl-sans text-xs font-bold text-white transition-colors hover:bg-tl-indigo-lift disabled:bg-tl-hairline disabled:text-tl-mute-white"
+        className="mt-0.5 h-12 rounded-[3px] bg-tl-indigo font-tl-sans text-xs font-bold uppercase tracking-[0.1em] text-white transition-colors hover:bg-tl-indigo-lift disabled:bg-tl-hairline disabled:text-tl-mute-white"
       >
-        {current ? "Update truck" : "Add my truck"}
+        {current ? "Update my truck" : "Add my truck"}
       </button>
 
-      {/* Escape hatch: the vehicle list only covers the generations we stock
-          for. Without this a visitor whose truck is missing has no next step. */}
-      <Link
-        href="/contact"
-        className="text-center font-tl-sans text-[11px] text-tl-mute-white underline underline-offset-4 hover:text-tl-ink"
-      >
-        My truck isn&apos;t listed
-      </Link>
+      {/* One slot, two jobs, decided by whether there is anything to undo.
+          Mid-selection the useful action is starting again; from empty it is
+          the escape hatch — the vehicle list only covers generations we stock
+          for, and without it a visitor whose truck is missing has no next
+          step. Showing both would put two links under one button. */}
+      {dirty ? (
+        <button
+          type="button"
+          onClick={() => {
+            setYear(null);
+            setMake(null);
+            setModel(null);
+          }}
+          className="text-center font-tl-sans text-[11px] font-medium uppercase tracking-[0.1em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
+        >
+          Start over
+        </button>
+      ) : (
+        <Link
+          href="/contact"
+          className="text-center font-tl-sans text-[11px] font-medium uppercase tracking-[0.1em] text-tl-ink underline underline-offset-4 hover:text-tl-indigo"
+        >
+          My truck isn&apos;t listed
+        </Link>
+      )}
     </div>
   );
 }

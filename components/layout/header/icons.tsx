@@ -61,6 +61,21 @@ export function IconHelp({ className }: IconProps) {
   );
 }
 
+export function IconChevronDown({ className }: IconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      aria-hidden="true"
+    >
+      <path d="M4.5 7.5l5.5 5.5 5.5-5.5" />
+    </svg>
+  );
+}
+
 // Kept for when live chat ships — see IconHelp.
 export function IconChat({ className }: IconProps) {
   return (

@@ -110,16 +110,20 @@ export function GarageMenu({
       {open ? (
         <div
           className={clsx(
-            "absolute top-full z-50 mt-1.5 min-w-64 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
+            // min-w-72 (288px), not 64: the fields carry two lines and a
+            // chevron now. 288px is also exactly the drawer variant's width on
+            // a 320px screen given its mx-4 container, so nothing overflows.
+            "absolute top-full z-50 mt-1.5 min-w-72 overflow-hidden rounded-[3px] border border-tl-hairline bg-white shadow-[0_18px_40px_-16px_rgba(15,20,48,0.35)]",
             variant === "row" && "right-0",
             variant === "drawer" && "inset-x-0",
             variant === "inline" && "left-0",
           )}
         >
-          <p className="px-4 pb-1.5 pt-3 font-tl-mono text-[9px] uppercase tracking-[0.14em] text-tl-mute-white">
-            Your truck
-          </p>
-          <VehiclePicker current={current} onChoose={choose} />
+          {/* No title here: the chip this drops out of already says it, and
+              each field labels itself. */}
+          <div className="pt-4">
+            <VehiclePicker current={current} onChoose={choose} />
+          </div>
           {current ? (
             <button
               type="button"
