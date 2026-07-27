@@ -104,19 +104,12 @@ export function GarageMenu({
             variant === "drawer" ? "h-[17px] w-[17px]" : "h-4 w-4",
           )}
         />
-        {/* In the nav the label takes the middle and centres itself, which
-            leaves the icon pinned left and the caret right. Elsewhere it stays
-            a plain inline label. */}
-        <span
-          className={clsx(
-            // leading-none on the wrapper too, not just the labels inside it:
-            // the line box is sized by this element's own strut, so a label
-            // with leading-none still sits in an inflated box without it.
-            "leading-none",
-            variant === "row" &&
-              "flex min-w-0 flex-1 items-center justify-center",
-          )}
-        >
+        {/* Sits straight after the icon so the two read as one group; the
+            caret takes the far edge on its own. A flex box rather than an
+            inline span, and leading-none on it as well as on the labels
+            inside: the line box is sized by this element's own strut, so a
+            label with leading-none still sits in an inflated box without it. */}
+        <span className="flex min-w-0 items-center leading-none">
           {current ? (
             variant === "row" ? (
               <>
@@ -143,12 +136,12 @@ export function GarageMenu({
             </span>
           )}
         </span>
+        {/* ml-auto everywhere: it claims whatever slack the variant has, which
+            is the row's min-width and the drawer's full width, and does
+            nothing in the content-sized inline pill. */}
         <IconChevronDown
           aria-hidden
-          className={clsx(
-            "h-3.5 w-3.5 shrink-0 opacity-85",
-            variant === "drawer" && "ml-auto",
-          )}
+          className="ml-auto h-3.5 w-3.5 shrink-0 opacity-85"
         />
       </button>
 
