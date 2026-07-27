@@ -108,7 +108,7 @@ export function GarageMenu({
             inline span, and leading-none on it as well as on the labels
             inside: the line box is sized by this element's own strut, so a
             label with leading-none still sits in an inflated box without it. */}
-        <span className="flex min-w-0 items-center leading-none">
+        <span className="flex min-w-0 items-center uppercase leading-none tracking-[0.08em]">
           {current ? (
             variant === "row" ? (
               <>
