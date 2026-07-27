@@ -88,7 +88,7 @@ export function GarageMenu({
           "flex items-center gap-[9px] bg-tl-indigo text-white transition-colors hover:bg-tl-indigo-lift",
           // Full-bleed in the nav: fills the row top to bottom, and follows the
           // condensed height for free instead of needing its own step down.
-          variant === "row" && "h-full px-5",
+          variant === "row" && "h-full px-7",
           variant === "drawer" && "h-12 w-full rounded-[3px] px-[13px]",
           variant === "inline" && "h-9 rounded-[3px] px-[13px]",
         )}
