@@ -38,7 +38,12 @@ export function GarageMenu({
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open) setEditing(null);
+    if (!open) {
+      setEditing(null);
+      // Without this the disclosure stays open across closes: expand it once,
+      // shut the panel, reopen, and it is still down.
+      setExpanded(false);
+    }
   }, [open]);
 
   useEffect(() => {
@@ -211,7 +216,7 @@ export function GarageMenu({
                   redundant: Add opens an empty picker, Delete inside the box
                   removes the truck, and Shop without truck clears it as a
                   browsing choice rather than a management one. */}
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
                 <button
                   type="button"
                   onClick={() => setEditing("add")}
