@@ -194,7 +194,7 @@ function MegaPanel({
       {/* No gutter padding here: the fog rail runs to the page-width boundary
           while its items carry the gutter, keeping text aligned with the nav. */}
       <div className="mx-auto grid max-w-(--container-page) grid-cols-[262px_1fr]">
-        <div className="border-r border-tl-hairline bg-tl-fog py-5">
+        <div className="border-r border-tl-shell-line bg-tl-shell-deep py-5">
           {railItems.map((railItem, index) => {
             const isActive = index === rail;
             return (
@@ -205,9 +205,9 @@ function MegaPanel({
                 onMouseEnter={() => onRailChange(index)}
                 onFocus={() => onRailChange(index)}
                 className={clsx(
-                  "flex h-11 items-center px-(--spacing-gutter) font-tl-text text-sm text-tl-ink",
+                  "flex h-11 items-center px-(--spacing-gutter) font-tl-text text-sm text-white",
                   isActive
-                    ? "bg-white font-semibold shadow-[inset_3px_0_0_var(--color-tl-indigo)]"
+                    ? "bg-tl-shell font-semibold shadow-[inset_3px_0_0_#fff]"
                     : "font-medium",
                 )}
               >
@@ -216,7 +216,7 @@ function MegaPanel({
                   aria-hidden
                   className={clsx(
                     "ml-auto text-[11px]",
-                    isActive ? "text-tl-indigo" : "text-tl-mute",
+                    isActive ? "text-white" : "text-white/45",
                   )}
                 >
                   {isActive ? "→" : "›"}
@@ -242,14 +242,14 @@ function MegaPanel({
                           fallback) renders as the familiar flat column. */}
                       {group.items.length > 0 ? (
                         group.path === "#" ? (
-                          <span className="font-tl-text text-sm font-semibold text-tl-ink">
+                          <span className="font-tl-text text-sm font-semibold text-white">
                             {group.title}
                           </span>
                         ) : (
                           <Link
                             href={group.path}
                             prefetch={true}
-                            className="font-tl-text text-sm font-semibold text-tl-ink"
+                            className="font-tl-text text-sm font-semibold text-white"
                           >
                             {group.title}
                           </Link>
@@ -258,7 +258,7 @@ function MegaPanel({
                         <Link
                           href={group.path}
                           prefetch={true}
-                          className="font-tl-text text-sm text-tl-ink"
+                          className="font-tl-text text-sm text-white/75 transition-colors hover:text-white"
                         >
                           {group.title}
                         </Link>
@@ -270,7 +270,7 @@ function MegaPanel({
                               <Link
                                 href={link.path}
                                 prefetch={true}
-                                className="font-tl-text text-sm text-tl-ink"
+                                className="font-tl-text text-sm text-white/75 transition-colors hover:text-white"
                               >
                                 {link.title}
                               </Link>
@@ -289,18 +289,18 @@ function MegaPanel({
             // contents and restructure the panel under the cursor. It gets a
             // body of its own instead of the empty-section message.
             <div className="max-w-[46ch]">
-              <p className="font-tl-text text-sm font-semibold text-tl-ink">
+              <p className="font-tl-text text-sm font-semibold text-white">
                 {active.title}
               </p>
               {active.description ? (
-                <p className="mt-2 font-tl-text text-sm text-tl-steel">
+                <p className="mt-2 font-tl-text text-sm text-white/70">
                   {active.description}
                 </p>
               ) : null}
               <Link
                 href={active.path}
                 prefetch={true}
-                className="mt-4 inline-flex items-center gap-[7px] font-tl-text text-xs font-medium text-tl-indigo"
+                className="mt-4 inline-flex items-center gap-[7px] font-tl-text text-xs font-medium text-white"
               >
                 Visit {active.title}
                 <span aria-hidden>→</span>
@@ -309,7 +309,7 @@ function MegaPanel({
           ) : (
             // Only reachable when every level-2 item is styled "links-row",
             // leaving no rail at all.
-            <p className="font-tl-text text-sm text-tl-mute-white">
+            <p className="font-tl-text text-sm text-white/45">
               More {item.title.toLowerCase()} coming soon.
             </p>
           )}
@@ -322,9 +322,20 @@ function MegaPanel({
   );
 }
 
+// The panel takes the header's palette, not the page's: `tl-shell` for the
+// body so it reads as coming forward from the darker nav row above it, and
+// `tl-shell-deep` for the rail and the cards, which are the recessed surfaces —
+// the same relationship white-on-fog had in the light version.
+//
+// Accents go white rather than indigo. The brand blue is only a few steps off
+// these greys and vanishes against them; it survives as a fill (the primary
+// button, the panel's bottom rule) but not as a hairline or a small glyph.
+//
+// Hovers are white overlays rather than new tokens, so they compose on
+// whichever dark ground they land on.
 function PanelShell({ children }: { children: ReactNode }) {
   return (
-    <div className="absolute inset-x-0 top-full z-50 border-b-[2.5px] border-tl-indigo bg-white shadow-[0_26px_60px_-20px_rgba(15,20,48,0.45)]">
+    <div className="absolute inset-x-0 top-full z-50 border-b-[2.5px] border-tl-indigo bg-tl-shell shadow-[0_26px_60px_-20px_rgba(0,0,0,0.55)]">
       {children}
     </div>
   );
@@ -353,24 +364,24 @@ function FlatCard({ item, compact }: { item: MenuItem; compact?: boolean }) {
       href={item.path}
       prefetch={true}
       className={clsx(
-        "group/card flex flex-col rounded-[3px] border border-tl-hairline bg-tl-fog p-5 transition-colors hover:border-tl-ink hover:bg-white",
+        "group/card flex flex-col rounded-[3px] border border-tl-shell-line bg-tl-shell-deep p-5 transition-colors hover:border-white/30 hover:bg-white/[0.06]",
         // Stacked beside a feature card they no longer need the minimum height
         // that keeps them even across a row.
         !compact && "min-h-[104px]",
       )}
     >
-      <span className="font-tl-sans text-sm font-bold uppercase tracking-[0.06em] text-tl-ink">
+      <span className="font-tl-sans text-sm font-bold uppercase tracking-[0.06em] text-white">
         {item.title}
       </span>
       {item.description ? (
-        <span className="mt-2 font-tl-text text-sm leading-snug text-tl-steel">
+        <span className="mt-2 font-tl-text text-sm leading-snug text-white/70">
           {item.description}
         </span>
       ) : null}
       {!compact ? (
         <span
           aria-hidden
-          className="mt-auto pt-3 font-tl-sans text-xs font-semibold text-tl-indigo opacity-0 transition-opacity group-hover/card:opacity-100"
+          className="mt-auto pt-3 font-tl-sans text-xs font-semibold text-white opacity-0 transition-opacity group-hover/card:opacity-100"
         >
           View →
         </span>
@@ -442,7 +453,7 @@ function FeatureCard({ item }: { item: MenuItem }) {
 // statement — a city, a number, hours — not a list of unrelated items.
 function ProofRow({ items }: { items: MenuItem[] }) {
   return (
-    <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 font-tl-mono text-[10px] uppercase tracking-[0.12em] text-tl-mute-white">
+    <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 font-tl-mono text-[10px] uppercase tracking-[0.12em] text-white/45">
       {items.map((entry, index) => (
         <Fragment key={`${entry.title}-${index}`}>
           {index > 0 ? <span aria-hidden>·</span> : null}
@@ -469,13 +480,13 @@ function ProofRow({ items }: { items: MenuItem[] }) {
 // off-site financing application lands, and prefetching those is wrong.
 function LinksRow({ links }: { links: MenuItem[] }) {
   return (
-    <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-tl-hairline pt-6">
+    <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-tl-shell-line pt-6">
       {links.map((link, index) => {
         if (link.path.startsWith("tel:")) {
           return (
             <span
               key={`${link.title}-${index}`}
-              className="inline-flex h-10 items-center font-tl-sans text-xs font-bold uppercase tracking-[0.08em] text-tl-steel"
+              className="inline-flex h-10 items-center font-tl-sans text-xs font-bold uppercase tracking-[0.08em] text-white/60"
             >
               {link.title}
             </span>
@@ -485,7 +496,7 @@ function LinksRow({ links }: { links: MenuItem[] }) {
           "inline-flex h-10 items-center rounded-[3px] px-5 font-tl-sans text-xs font-bold uppercase tracking-[0.08em] transition-colors",
           index === 0
             ? "bg-tl-indigo text-white hover:bg-tl-indigo-lift"
-            : "border border-tl-hairline text-tl-ink hover:border-tl-ink hover:bg-tl-fog",
+            : "border border-white/25 text-white hover:border-white hover:bg-white/[0.08]",
         );
         return link.path.startsWith("/") ? (
           <Link
