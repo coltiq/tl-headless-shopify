@@ -343,20 +343,43 @@ function FlatItems({ items }: { items: MenuItem[] }) {
   );
 }
 
+// next/link only for in-app paths. The links row is where a CTA strip lands —
+// "Get a quote", a tel: number, an off-site financing application — and
+// prefetching a tel: URL is meaningless at best. Same branch the announcement
+// band uses for the same reason.
 function LinksRow({ links }: { links: MenuItem[] }) {
+  const className =
+    "flex items-center gap-[7px] font-tl-text text-xs font-medium text-tl-indigo";
+
   return (
     <div className="mt-[26px] flex flex-wrap gap-[30px] border-t border-tl-hairline pt-5">
-      {links.map((link, linkIndex) => (
-        <Link
-          key={`${link.title}-${linkIndex}`}
-          href={link.path}
-          prefetch={true}
-          className="flex items-center gap-[7px] font-tl-text text-xs font-medium text-tl-indigo"
-        >
-          <span aria-hidden>◆</span>
-          {link.title}
-        </Link>
-      ))}
+      {links.map((link, linkIndex) => {
+        const content = (
+          <>
+            <span aria-hidden>◆</span>
+            {link.title}
+          </>
+        );
+        return link.path.startsWith("/") ? (
+          <Link
+            key={`${link.title}-${linkIndex}`}
+            href={link.path}
+            prefetch={true}
+            className={className}
+          >
+            {content}
+          </Link>
+        ) : (
+          <a
+            key={`${link.title}-${linkIndex}`}
+            href={link.path}
+            className={className}
+            rel="noopener noreferrer"
+          >
+            {content}
+          </a>
+        );
+      })}
     </div>
   );
 }
