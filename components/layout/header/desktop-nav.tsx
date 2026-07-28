@@ -370,11 +370,15 @@ function FlatCard({ item, compact }: { item: MenuItem; compact?: boolean }) {
         !compact && "min-h-[104px]",
       )}
     >
-      <span className="font-tl-sans text-sm font-bold uppercase tracking-[0.06em] text-white">
+      {/* 18px against the description's 13px. Both sat at 14px, so the title
+          was carrying the hierarchy on weight and case alone — not enough for
+          the element that is actually the link. Tracking eases off as the size
+          grows; uppercase needs less of it the bigger it gets. */}
+      <span className="font-tl-sans text-lg font-bold uppercase leading-none tracking-[0.02em] text-white">
         {item.title}
       </span>
       {item.description ? (
-        <span className="mt-2 font-tl-text text-sm leading-snug text-white/70">
+        <span className="mt-2.5 font-tl-text text-[13px] leading-snug text-white/65">
           {item.description}
         </span>
       ) : null}
