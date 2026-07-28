@@ -306,30 +306,38 @@ function PanelShell({ children }: { children: ReactNode }) {
   );
 }
 
-// The flat layout: level-2 items as the content itself.
+// The flat layout: level-2 items as the content itself, as cards.
 //
-// Tracks cap at 280px rather than taking 1fr. With 1fr, auto-fit stretched
-// three items across the full container and left them stranded at opposite
-// ends of a very wide panel; capped, they sit together at the left and the
-// leftover space reads as margin instead of gaps.
+// Bare headings and a line of copy left the panel reading as empty however
+// they were arranged — spread across the container they looked marooned,
+// clustered at one end they left the other half dead. The problem was that
+// text alone has no visual container in a full-bleed white band. Cards give
+// the content edges, so filling the width now looks deliberate.
 function FlatItems({ items }: { items: MenuItem[] }) {
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,280px))] gap-x-10 gap-y-[30px]">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
       {items.map((child) => (
-        <div key={child.title}>
-          <Link
-            href={child.path}
-            prefetch={true}
-            className="font-tl-text text-sm font-semibold text-tl-ink"
-          >
+        <Link
+          key={child.title}
+          href={child.path}
+          prefetch={true}
+          className="group/card flex min-h-[104px] flex-col rounded-[3px] border border-tl-hairline bg-tl-fog p-5 transition-colors hover:border-tl-ink hover:bg-white"
+        >
+          <span className="font-tl-sans text-sm font-bold uppercase tracking-[0.06em] text-tl-ink">
             {child.title}
-          </Link>
+          </span>
           {child.description ? (
-            <p className="mt-[7px] max-w-[34ch] font-tl-text text-sm text-tl-steel">
+            <span className="mt-2 font-tl-text text-sm leading-snug text-tl-steel">
               {child.description}
-            </p>
+            </span>
           ) : null}
-        </div>
+          <span
+            aria-hidden
+            className="mt-auto pt-3 font-tl-sans text-xs font-semibold text-tl-indigo opacity-0 transition-opacity group-hover/card:opacity-100"
+          >
+            View →
+          </span>
+        </Link>
       ))}
     </div>
   );
