@@ -409,9 +409,11 @@ function FeatureCard({ item }: { item: MenuItem }) {
         className="absolute inset-0 bg-gradient-to-t from-tl-ink via-tl-ink/60 to-tl-ink/10"
       />
       <div className="relative">
-        <span className="font-tl-mono text-[10px] uppercase tracking-[0.14em] text-white/75">
-          Featured
-        </span>
+        {item.kicker ? (
+          <span className="font-tl-mono text-[10px] uppercase tracking-[0.14em] text-white/75">
+            {item.kicker}
+          </span>
+        ) : null}
         <p className="mt-2 font-tl-sans text-[22px] font-bold uppercase leading-none tracking-[0.01em]">
           {item.title}
         </p>
@@ -420,8 +422,11 @@ function FeatureCard({ item }: { item: MenuItem }) {
             {item.description}
           </p>
         ) : null}
+        {/* Fixed wording on purpose. Per-card CTA text is a third field for
+            one line that has to work under any title, and "see the build"
+            under Inside the Shop is exactly how those drift wrong. */}
         <span className="mt-4 inline-block font-tl-sans text-xs font-bold uppercase tracking-[0.08em]">
-          See it →
+          View →
         </span>
       </div>
     </Link>

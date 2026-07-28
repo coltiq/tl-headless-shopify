@@ -48,6 +48,9 @@ const navImage = (node: ShopifyNavItem) => {
 const navDescription = (node: ShopifyNavItem) =>
   node.description?.value?.trim() || undefined;
 
+const navKicker = (node: ShopifyNavItem) =>
+  node.kicker?.value?.trim() || undefined;
+
 // Walks one level of the tree below `parentPath`, appending every category it
 // finds to `out` and returning the menu items plus the category paths that
 // belong to `parentPath` directly.
@@ -128,6 +131,7 @@ function walkNavLevel(
       path: path ?? (node.link?.value ? linkToPath(node.link.value) : "#"),
       style: navStyle(node),
       description: navDescription(node),
+      kicker: navKicker(node),
       image: navImage(node),
       items: child.items,
     });
@@ -196,6 +200,7 @@ export function buildNavProjection(
       path: node.link?.value ? linkToPath(node.link.value) : "#",
       style: navStyle(node),
       description: navDescription(node),
+      kicker: navKicker(node),
       image: navImage(node),
       items: child.items,
     });

@@ -94,6 +94,7 @@ the item is dropped or the whole nav falls back.
 | `children`    | Metaobject reference → Nav item, **list**         | **Yes**      | Self-reference. List order is display order                                                                                   |
 | `style`       | Single line text, presets below                   | **Yes**      | Moves an L2 item out of the cards and renders it elsewhere in the panel — see "Panel styles"                                  |
 | `description` | Single line text                                  | **Yes**      | One line of copy, shown only by the mega panel's flat layout and by a childless rail item — see below. Optional everywhere    |
+| `kicker`      | Single line text                                  | **Yes**      | Only read by a `feature` item — the small label above its title ("Latest build"). Optional; absent renders no kicker          |
 | `image`       | File                                              | **Yes**      | Only read by a `feature` item, as the panel's photograph. Optional; without it the feature card renders dark                  |
 | `slug`        | Single line text                                  | **Yes**      | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                               |
 | `collection`  | Collection reference                              | **Yes**      | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                         |
@@ -128,9 +129,19 @@ phone button there is a control that does nothing when clicked. The number
 still shows. The same entry is tappable in the mobile drawer, which is where a
 call can actually happen — so author it once and both behave correctly.
 
-Only one `feature` per section. Give it an `image` and a `description`; without
-the image the card still renders, dark, so the section ships before the
-photograph exists.
+Only one `feature` per section. Everything on that card comes from the entry:
+
+| On the card       | Field                                                     |
+| ----------------- | --------------------------------------------------------- |
+| Photograph        | `image` — absent, the card renders dark and still works   |
+| Small label above | `kicker` — "Latest build", "New". Absent, nothing renders |
+| Title             | `label`                                                   |
+| Body copy         | `description`                                             |
+| Destination       | `link`                                                    |
+
+The "View →" at the foot is **fixed in code**, not a field. A per-card CTA
+string is one more thing to keep consistent across every section, and it only
+takes one "See the build" under Inside the Shop for the set to read as sloppy.
 
 ### How a section's depth changes its panel
 

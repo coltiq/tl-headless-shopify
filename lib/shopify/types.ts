@@ -68,6 +68,9 @@ export type MenuItem = {
   // panel's flat layout and by a childless rail item's body. Optional
   // throughout: without it those layouts still render the title alone.
   description?: string;
+  // The small label above a feature card's title — "Latest build", "New".
+  // Only read there; absent renders no kicker rather than inventing one.
+  kicker?: string;
   // From the nav_item `image` field. Only read by the feature card today.
   image?: {
     url: string;
@@ -330,6 +333,7 @@ export type ShopifyNavItem = {
   link: Maybe<{ value: string }>;
   style: Maybe<{ value: string }>;
   description: Maybe<{ value: string }>;
+  kicker: Maybe<{ value: string }>;
   image: Maybe<{
     reference: Maybe<{
       image: Maybe<{
