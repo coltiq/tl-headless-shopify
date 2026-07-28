@@ -306,11 +306,15 @@ function PanelShell({ children }: { children: ReactNode }) {
   );
 }
 
-// The flat layout: level-2 items as the content itself. Auto-fit rather than a
-// fixed column count so three items and six both look deliberate.
+// The flat layout: level-2 items as the content itself.
+//
+// Tracks cap at 280px rather than taking 1fr. With 1fr, auto-fit stretched
+// three items across the full container and left them stranded at opposite
+// ends of a very wide panel; capped, they sit together at the left and the
+// leftover space reads as margin instead of gaps.
 function FlatItems({ items }: { items: MenuItem[] }) {
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-x-10 gap-y-[30px]">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,280px))] gap-x-10 gap-y-[30px]">
       {items.map((child) => (
         <div key={child.title}>
           <Link
