@@ -12,8 +12,9 @@ export const metadata: Metadata = {
 
 // TODO: scaffold. Outline in docs/plans/custom-work.md §3.
 //
-// "The Process" lives here as the How it works section rather than getting its
-// own page — that is why the section has three children and not four.
+// **Purely the offer** — what we will do to someone's truck. How the shop runs
+// is Inside the Shop's job, told against the space it happens in. Keeping the
+// two apart is what stops the pages converging.
 export default function ServicesPage() {
   return (
     <>
@@ -30,9 +31,6 @@ export default function ServicesPage() {
             bumpers and armour, wheels and tyres, audio, wiring and electrical,
             full builds. One line of copy each. */}
         <Section title="What we do" />
-
-        {/* TODO: quote → scope → schedule → build → handoff. */}
-        <Section title="How it works" />
 
         <Section title="What it costs">
           <p className="mt-4 max-w-xl font-tl-text text-tl-steel">

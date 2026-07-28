@@ -103,11 +103,13 @@ throughout — `page-width`, `font-tl-sans` / `font-tl-text`, `text-tl-ink` /
 2. **What we do.** Grouped service list — lighting installs, lift & leveling,
    bumpers & armor, wheels & tires, audio, wiring & electrical, full builds — one
    line of copy each.
-3. **How it works.** The engagement sequence: quote → scope → schedule → build →
-   handoff. This is where "The Process" went.
-4. **What it costs.** How quoting works, honestly — then link to
+3. **What it costs.** How quoting works, honestly — then link to
    `/custom-work/pricing`, which carries the numbers.
-5. CTA → `/quote`.
+4. CTA → `/quote`.
+
+This page is **purely the offer** — what you will do to someone's truck.
+How the shop runs lives on Inside the Shop; keeping the two apart is what stops
+them converging.
 
 ### `/custom-work/builds`
 
@@ -154,12 +156,14 @@ parts customer it also applies to. Reserved in `PROXY_RESERVED_SEGMENTS`.
 ### `/custom-work/inside-the-shop`
 
 1. Hero.
-2. **The place.** Bays, equipment, photo-led.
-3. **The people.** Team.
-4. **How a truck moves through the shop.** Spatial, not commercial — the
-   commercial sequence lives in Services.
-5. **Feed slot.** Reserved; renders nothing until the content source is settled.
-6. CTA → `/quote`.
+2. **The place.** One bay today, photo-led; the retail area joins it when built.
+3. **How the shop operates.** Design → build → delivery. **The process lives
+   here, not on Services** — told visually, against the space it happens in,
+   rather than as a commercial sequence.
+4. **Feed slot.** Reserved; renders nothing until the content source is settled.
+5. CTA → `/quote`.
+
+No team section. The people belong to the brand story, not the shop tour.
 
 ---
 

@@ -5,14 +5,16 @@ import { QuoteCta } from "../_components/quote-cta";
 
 export const metadata: Metadata = {
   title: "Inside the Shop",
-  description: "The bays, the tools, and the people running them.",
+  description: "The shop, and how a truck moves from design to delivery.",
 };
 
 // TODO: scaffold. Outline in docs/plans/custom-work.md §3.
 //
-// This page is spatial — where the work happens. The commercial sequence
-// (quote → scope → schedule → build → handoff) belongs on Services, and
-// splitting them is what keeps the two pages from converging.
+// The shop and how it operates. **The process lives here** — design, build,
+// delivery — told visually against the space it happens in, rather than as a
+// commercial sequence on Services. Services stays purely the offer.
+//
+// No team section: the people belong to the brand story, not the shop tour.
 export default function InsideTheShopPage() {
   return (
     <>
@@ -21,12 +23,11 @@ export default function InsideTheShopPage() {
           Inside the shop
         </h1>
         <p className="mt-5 max-w-xl font-tl-text text-lg text-tl-steel">
-          The bays, the tools, and the people running them.
+          The shop, and how a truck moves from design to delivery.
         </p>
 
-        {/* TODO: the place — bays and equipment, photo-led. */}
-        {/* TODO: the people — the team. */}
-        {/* TODO: how a truck moves through the shop, spatially. */}
+        {/* TODO: the place — one bay today, photo-led; retail area when built. */}
+        {/* TODO: how the shop operates — design, build, delivery. */}
         {/* TODO: feed slot — reserved, renders nothing until the content
             source is settled. */}
 
