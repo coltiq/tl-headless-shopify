@@ -75,6 +75,7 @@ export const PROXY_RESERVED_SEGMENTS = new Set([
   "app",
   "support",
   "quote",
+  "financing",
   "search",
   "product",
 ]);

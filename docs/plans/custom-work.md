@@ -136,17 +136,18 @@ Offers stay off this page. A pricing page leading with discounts reads as a
 sale, which fights the standard the shop sells on; the announcement rotator is
 the home for those.
 
-### `/custom-work/financing` — added after the spec
+### `/financing` — added after the spec, and **not** under this section
 
-The links row's other button. Nested rather than at `/financing` because this is
-**build** financing — a five-figure job over months. Instalments on a $200 light
-bar are a checkout feature. If it ever covers both, move it to the root and
-reserve the segment.
+The links row's other button, at the root because one product covers both
+halves of the business: the same method finances a five-figure build and a
+parts order. Nested under Custom Work it would have been invisible to every
+parts customer it also applies to. Reserved in `PROXY_RESERVED_SEGMENTS`.
 
 1. Hero.
 2. **Who the lender is and what the terms are.** A financing page that will not
    name a rate reads as a page hiding one.
-3. **A worked example** against a real build total.
+3. **Two worked examples** — a build total and a parts order. One, and the page
+   silently reads as build-only again.
 4. **What applying involves**, and whether it touches credit.
 5. CTA → `/quote`.
 
