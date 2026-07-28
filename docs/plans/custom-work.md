@@ -105,8 +105,8 @@ throughout — `page-width`, `font-tl-sans` / `font-tl-text`, `text-tl-ink` /
    line of copy each.
 3. **How it works.** The engagement sequence: quote → scope → schedule → build →
    handoff. This is where "The Process" went.
-4. **What it costs.** How quoting works, honestly. Optional link to the
-   out-of-tree `shop-labor` collection.
+4. **What it costs.** How quoting works, honestly — then link to
+   `/custom-work/pricing`, which carries the numbers.
 5. CTA → `/quote`.
 
 ### `/custom-work/builds`
@@ -116,6 +116,39 @@ throughout — `page-width`, `font-tl-sans` / `font-tl-text`, `text-tl-ink` /
 3. **A sentence distinguishing this from Community's Customer Builds**, linking
    there. Without it the two read as the same page (§7).
 4. CTA → `/quote`.
+
+### `/custom-work/pricing` — added after the spec
+
+Not one of the three L2s: a page reached from the links row's third button and
+from Services, for the visitor who wants a number before they will ask for one.
+
+1. Hero.
+2. **The chart.** Per service a **range and a typical figure**, never a bare
+   floor — "from $800" anchors someone at $800 and makes the $2,400 quote feel
+   like a switch.
+3. **What moves the number**, one line per service. This is where the expertise
+   shows, and it pre-empts the call a bare table generates.
+4. **The labour rate**, published.
+5. **One or two real builds with their totals.**
+6. CTA → `/quote`.
+
+Offers stay off this page. A pricing page leading with discounts reads as a
+sale, which fights the standard the shop sells on; the announcement rotator is
+the home for those.
+
+### `/custom-work/financing` — added after the spec
+
+The links row's other button. Nested rather than at `/financing` because this is
+**build** financing — a five-figure job over months. Instalments on a $200 light
+bar are a checkout feature. If it ever covers both, move it to the root and
+reserve the segment.
+
+1. Hero.
+2. **Who the lender is and what the terms are.** A financing page that will not
+   name a rate reads as a page hiding one.
+3. **A worked example** against a real build total.
+4. **What applying involves**, and whether it touches credit.
+5. CTA → `/quote`.
 
 ### `/custom-work/inside-the-shop`
 

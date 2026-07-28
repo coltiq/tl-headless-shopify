@@ -552,9 +552,13 @@ produces no category node and no URL of its own, so the menu falls back to
 | Community   | Blog            | —                              | No route yet; needs a content source decision |
 | Community   | Customer Builds | —                              | No route yet                                  |
 | Community   | The Standard    | `/the-standard`                | Title-only placeholder, built                 |
-| Custom Work | Our Services    | `/custom-work/services`        | Spec'd, not built                             |
-| Custom Work | Our Builds      | `/custom-work/builds`          | Spec'd, not built                             |
-| Custom Work | Inside the Shop | `/custom-work/inside-the-shop` | Spec'd, not built                             |
+| Custom Work | Our Services    | `/custom-work/services`        | Scaffolded                                    |
+| Custom Work | Our Builds      | `/custom-work/builds`          | Scaffolded                                    |
+| Custom Work | Inside the Shop | `/custom-work/inside-the-shop` | Scaffolded                                    |
+
+Custom Work's `links-row` children point at `/quote`, `/custom-work/financing`
+and `/custom-work/pricing` — all scaffolded. Those two are **not** L2 nav
+entries: a fourth card would flip the panel from flat to the rail.
 
 **Write a `description` on every one of these.** Both sections are shallow — no
 L2 has children — so the mega panel renders flat, and the description is the
