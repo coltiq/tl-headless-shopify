@@ -446,13 +446,28 @@ function ProofRow({ items }: { items: MenuItem[] }) {
 // filled; the rest are outlined — so authoring order decides the hierarchy,
 // with no new field to set.
 //
-// next/link only for in-app paths: this row is where a tel: number and an
-// off-site financing application land, and prefetching a tel: URL is
-// meaningless at best.
+// **A tel: entry renders as text, not a button.** This panel is desktop-only
+// (`hidden md:block`), and nobody taps a number on a desktop — an interactive
+// phone button there is a control that does nothing when clicked. The number
+// still shows, because seeing it is the point. The same entry is tappable in
+// the mobile drawer, which is where a call can actually happen.
+//
+// next/link only for in-app paths otherwise: this row is also where an
+// off-site financing application lands, and prefetching those is wrong.
 function LinksRow({ links }: { links: MenuItem[] }) {
   return (
     <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-tl-hairline pt-6">
       {links.map((link, index) => {
+        if (link.path.startsWith("tel:")) {
+          return (
+            <span
+              key={`${link.title}-${index}`}
+              className="inline-flex h-10 items-center font-tl-sans text-xs font-bold uppercase tracking-[0.08em] text-tl-steel"
+            >
+              {link.title}
+            </span>
+          );
+        }
         const className = clsx(
           "inline-flex h-10 items-center rounded-[3px] px-5 font-tl-sans text-xs font-bold uppercase tracking-[0.08em] transition-colors",
           index === 0

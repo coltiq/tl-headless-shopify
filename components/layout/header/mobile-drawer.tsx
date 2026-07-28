@@ -251,7 +251,7 @@ function DrawerPanel({
                   ›
                 </span>
               </button>
-            ) : (
+            ) : child.path.startsWith("/") ? (
               <Link
                 href={child.path}
                 prefetch={true}
@@ -266,6 +266,24 @@ function DrawerPanel({
                   ›
                 </span>
               </Link>
+            ) : (
+              // tel:, mailto:, off-site. This is the one place a phone number
+              // in the nav should actually ring, so it stays interactive here
+              // while the desktop panel renders it as text.
+              <a
+                href={child.path}
+                onClick={onNavigate}
+                rel="noopener noreferrer"
+                className={clsx(drawerRowClass, "text-tl-steel")}
+              >
+                {child.title}
+                <span
+                  aria-hidden
+                  className="ml-auto text-base text-tl-mute-white"
+                >
+                  ›
+                </span>
+              </a>
             )}
           </li>
         ))}

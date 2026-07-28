@@ -119,9 +119,14 @@ sees, then hang the real entries off it as children.
 
 **The first child of a `links-row` is the primary button** and renders filled;
 the rest are outlined. Authoring order sets the hierarchy — put "Get a quote"
-first. Entries may point anywhere: `/quote`, `tel:+12055399794`, an off-site
-financing application. A `proof` child needs no `link` at all, since it renders
-as text.
+first. Entries may point anywhere: `/quote`, an off-site financing application.
+A `proof` child needs no `link` at all, since it renders as text.
+
+**A `tel:` entry renders as plain text in the panel, not a button.** The mega
+panel is desktop-only and nobody taps a number on a desktop, so an interactive
+phone button there is a control that does nothing when clicked. The number
+still shows. The same entry is tappable in the mobile drawer, which is where a
+call can actually happen — so author it once and both behave correctly.
 
 Only one `feature` per section. Give it an `image` and a `description`; without
 the image the card still renders, dark, so the section ships before the
