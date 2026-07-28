@@ -204,6 +204,22 @@ export function MobileDrawer({
 // A drilled-in submenu: back row, a "View all" link to the item's own page
 // (tapping a row drills in, so this is how the item's destination stays
 // reachable), then its children — branches drill deeper, leaves navigate.
+//
+// The panel styles are desktop concepts, so the drawer has to unpick them or
+// they leak through as nonsense rows — a menu entry called "Panel links" that
+// drills into three more:
+//
+//   links-row  its children are real destinations (Get a quote, Financing, a
+//              tel: number), so they get flattened up into the list
+//   proof      claims with no destination — dropped; the drawer carries its
+//              own call row and needs no city and hours in a menu
+//   feature    an ordinary destination that happens to be styled on desktop
+const drawerRows = (item: MenuItem): MenuItem[] =>
+  item.items.flatMap((child) => {
+    if (child.style === "proof") return [];
+    if (child.style === "links-row") return child.items;
+    return [child];
+  });
 function DrawerPanel({
   item,
   parentTitle,
@@ -236,7 +252,7 @@ function DrawerPanel({
         </Link>
       ) : null}
       <ul>
-        {item.items.map((child, index) => (
+        {drawerRows(item).map((child, index) => (
           <li key={`${child.title}-${index}`}>
             {child.items.length ? (
               <button
