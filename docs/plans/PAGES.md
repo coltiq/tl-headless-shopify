@@ -17,14 +17,13 @@ and content go. **built** = done.
 
 ## 1. Header
 
-| Page        | Route        | State    | Notes                                                                                                                                                                                                                                                                                                       |
-| ----------- | ------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Homepage    | `/`          | stub     | Still the template's carousel + three-item grid, and both collections it wants (`hidden-homepage-carousel`, `hidden-homepage-featured-items`) are missing — see OPEN-ITEMS 1.5. Reachable from the wordmark on every page                                                                                   |
-| Get a quote | `/quote`     | scaffold | The questionnaire itself is the work. **Question one is the scope split** — full build vs install — or the broad CTA sends install customers into the wrong form                                                                                                                                            |
-| Support hub | `/support`   | scaffold | Groups are laid out; the articles under them are text, not links, until they exist                                                                                                                                                                                                                          |
-| Contact     | `/contact`   | stub     | Template placeholder. The support popup enhances it rather than replacing it, so it has to work on its own                                                                                                                                                                                                  |
-| The app     | `/app`       | scaffold | The lighting control app. Needs its real name, screenshots, feature list, and the two store URLs in `lib/constants.ts`. **Nothing links to it** — the bar's two slots went to Get A Quote and Support, so its way in is product pages for app-controlled lighting, the support popup, and a card in the box |
-| Financing   | `/financing` | scaffold | At the root because one product covers builds and parts orders. Needs the lender, real terms, and **two worked examples** — a build and a parts order                                                                                                                                                       |
+| Page        | Route        | State    | Notes                                                                                                                                                                                                                     |
+| ----------- | ------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Homepage    | `/`          | stub     | Still the template's carousel + three-item grid, and both collections it wants (`hidden-homepage-carousel`, `hidden-homepage-featured-items`) are missing — see OPEN-ITEMS 1.5. Reachable from the wordmark on every page |
+| Get a quote | `/quote`     | scaffold | The questionnaire itself is the work. **Question one is the scope split** — full build vs install — or the broad CTA sends install customers into the wrong form                                                          |
+| Support hub | `/support`   | scaffold | Groups are laid out; the articles under them are text, not links, until they exist                                                                                                                                        |
+| Contact     | `/contact`   | stub     | Template placeholder. The support popup enhances it rather than replacing it, so it has to work on its own                                                                                                                |
+| Financing   | `/financing` | scaffold | At the root because one product covers builds and parts orders. Needs the lender, real terms, and **two worked examples** — a build and a parts order                                                                     |
 
 **Not a page, but header work:**
 
@@ -32,11 +31,6 @@ and content go. **built** = done.
   link to `/support`. The number lives in it, front and centre, because the
   announcement band hides under `group-data-[condensed]` and the popup becomes
   the only phone affordance once the header shrinks. OPEN-ITEMS 4.6.
-
-The footer is deliberately not on this list. It is a real dependency for the
-support pages — still the stock template rendering one flat `<ul>` — but it is
-not fleshed out yet, and this file is the queue in the order things are ready
-to be built. It lives in OPEN-ITEMS 4.6 until then.
 
 ---
 
@@ -71,7 +65,23 @@ cannot be pasted into a support reply.
 
 ---
 
-## 4. Decisions that block pages
+## 4. Not in the queue yet
+
+Real work, deliberately held back — this file is the queue in the order things
+are ready to build, and neither of these is. Here so they are not mistaken for
+oversights.
+
+- **The footer.** Still the stock template rendering one flat `<ul>`. A genuine
+  dependency for the support pages, so it returns to the queue when they do.
+  OPEN-ITEMS 4.6 carries the shape it needs.
+- **`/app`.** Scaffolded and building, but **nothing links to it** — the
+  announcement bar's two slots went to Get A Quote and Support. Its entry
+  points are product pages for app-controlled lighting, the support popup, and
+  a card in the box, none of which exist yet. It joins the queue when one does.
+
+---
+
+## 5. Decisions that block pages
 
 - **The blog's content source.** Shopify articles are queryable on the
   Storefront API, which beats a deploy per post. Settles Community's blog
