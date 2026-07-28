@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { MenuItem } from "lib/shopify/types";
 import Link from "next/link";
-import { ReactNode, useRef, useState } from "react";
+import { Fragment, ReactNode, useRef, useState } from "react";
 
 // Distributes level-3 groups across the panel columns without reordering:
 // authored order is preserved by cutting to the next column once a group's
@@ -428,13 +428,21 @@ function FeatureCard({ item }: { item: MenuItem }) {
   );
 }
 
-// Claims, not navigation — so plain text, at the very foot, below the buttons
-// rather than beside them.
+// Facts, not navigation — so plain text, at the very foot, below the buttons
+// rather than beside them. `link` is ignored entirely, which is what lets a
+// phone number sit here without becoming a control nobody can use on a
+// desktop.
+//
+// Separated by middots rather than spacing alone: this line reads as one
+// statement — a city, a number, hours — not a list of unrelated items.
 function ProofRow({ items }: { items: MenuItem[] }) {
   return (
-    <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 font-tl-mono text-[10px] uppercase tracking-[0.12em] text-tl-mute-white">
+    <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 font-tl-mono text-[10px] uppercase tracking-[0.12em] text-tl-mute-white">
       {items.map((entry, index) => (
-        <span key={`${entry.title}-${index}`}>{entry.title}</span>
+        <Fragment key={`${entry.title}-${index}`}>
+          {index > 0 ? <span aria-hidden>·</span> : null}
+          <span>{entry.title}</span>
+        </Fragment>
       ))}
     </div>
   );
