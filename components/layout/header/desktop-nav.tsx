@@ -422,11 +422,11 @@ function FeatureCard({ item }: { item: MenuItem }) {
             {item.description}
           </p>
         ) : null}
-        {/* Fixed wording on purpose. Per-card CTA text is a third field for
-            one line that has to work under any title, and "see the build"
-            under Inside the Shop is exactly how those drift wrong. */}
+        {/* Blank falls back to "View", which works under any title. Set it
+            when the card deserves better wording — "See the build" — and
+            leave it alone otherwise. */}
         <span className="mt-4 inline-block font-tl-sans text-xs font-bold uppercase tracking-[0.08em]">
-          View →
+          {item.cta ?? "View"} →
         </span>
       </div>
     </Link>

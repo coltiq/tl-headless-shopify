@@ -71,6 +71,9 @@ export type MenuItem = {
   // The small label above a feature card's title — "Latest build", "New".
   // Only read there; absent renders no kicker rather than inventing one.
   kicker?: string;
+  // The feature card's call to action. Blank falls back to "View" — the
+  // wording still has to work under whatever title it sits below.
+  cta?: string;
   // From the nav_item `image` field. Only read by the feature card today.
   image?: {
     url: string;
@@ -334,6 +337,7 @@ export type ShopifyNavItem = {
   style: Maybe<{ value: string }>;
   description: Maybe<{ value: string }>;
   kicker: Maybe<{ value: string }>;
+  cta: Maybe<{ value: string }>;
   image: Maybe<{
     reference: Maybe<{
       image: Maybe<{

@@ -74,6 +74,9 @@ export const getNavMenuQuery = /* GraphQL */ `
     kicker: field(key: "kicker") {
       value
     }
+    cta: field(key: "cta") {
+      value
+    }
     image: field(key: "image") {
       reference {
         ... on MediaImage {

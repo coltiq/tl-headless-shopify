@@ -138,10 +138,12 @@ Only one `feature` per section. Everything on that card comes from the entry:
 | Title             | `label`                                                   |
 | Body copy         | `description`                                             |
 | Destination       | `link`                                                    |
+| Call to action    | `cta` — blank falls back to "View"                        |
 
-The "View →" at the foot is **fixed in code**, not a field. A per-card CTA
-string is one more thing to keep consistent across every section, and it only
-takes one "See the build" under Inside the Shop for the set to read as sloppy.
+**Write the `cta` without an arrow** — the app adds "→". And it has to read
+correctly under that card's own title: "See the build" is right under a truck
+and wrong under Inside the Shop, which is why blank gives you "View" rather
+than nothing.
 
 ### How a section's depth changes its panel
 
