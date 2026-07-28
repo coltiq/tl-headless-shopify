@@ -58,14 +58,23 @@ export type Menu = {
 export type MenuItem = {
   title: string;
   path: string;
-  // "links-row" pulls a level-2 item out of the mega panel rail and renders
-  // its children as the links row beneath the rule (set via the nav_item
-  // metaobject's `style` field).
-  style?: "links-row";
+  // Pulls a level-2 item out of the cards/rail and renders it somewhere else
+  // in the panel, set via the nav_item metaobject's `style` field:
+  // "links-row" renders its children as buttons beneath the rule, "proof" as
+  // a muted strip at the foot, "feature" promotes the item itself to the
+  // panel's image card.
+  style?: "links-row" | "feature" | "proof";
   // One line of copy from the nav_item `description` field, shown by the mega
   // panel's flat layout and by a childless rail item's body. Optional
   // throughout: without it those layouts still render the title alone.
   description?: string;
+  // From the nav_item `image` field. Only read by the feature card today.
+  image?: {
+    url: string;
+    width: number;
+    height: number;
+    altText: string | null;
+  };
   items: MenuItem[];
 };
 
@@ -321,6 +330,16 @@ export type ShopifyNavItem = {
   link: Maybe<{ value: string }>;
   style: Maybe<{ value: string }>;
   description: Maybe<{ value: string }>;
+  image: Maybe<{
+    reference: Maybe<{
+      image: Maybe<{
+        url: string;
+        width: number;
+        height: number;
+        altText: Maybe<string>;
+      }>;
+    }>;
+  }>;
   // Category fields. `slug` is one URL segment; the path is built from tree
   // position. `collection.reference` is `{}` rather than null when the
   // reference points at something that isn't a Collection.

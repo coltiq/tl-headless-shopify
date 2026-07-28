@@ -92,13 +92,40 @@ the item is dropped or the whole nav falls back.
 | `label`       | Single line text                                  | **Yes**      | Display name; set as the definition's display name field. **Display only** — never used to build a URL                        |
 | `link`        | Single line text                                  | **Yes**      | Plain text on purpose: the URL field type only accepts absolute URLs, but the nav needs relative paths. Empty = heading       |
 | `children`    | Metaobject reference → Nav item, **list**         | **Yes**      | Self-reference. List order is display order                                                                                   |
-| `style`       | Single line text, preset `default` / `links-row`  | **Yes**      | `links-row` on an L2 item moves it out of the mega panel rail; its children render as the links row at the panel's foot       |
+| `style`       | Single line text, presets below                   | **Yes**      | Moves an L2 item out of the cards and renders it elsewhere in the panel — see "Panel styles"                                  |
 | `description` | Single line text                                  | **Yes**      | One line of copy, shown only by the mega panel's flat layout and by a childless rail item — see below. Optional everywhere    |
+| `image`       | File                                              | **Yes**      | Only read by a `feature` item, as the panel's photograph. Optional; without it the feature card renders dark                  |
 | `slug`        | Single line text                                  | **Yes**      | URL segment. Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Empty on L1 and on heading-only nodes                               |
 | `collection`  | Collection reference                              | **Yes**      | **Explicit** — the app never infers a collection from the slug, because the two are allowed to differ                         |
 | `layout`      | Single line text, preset `grid` / `landing`       | Skip for now | Read if present, but only `grid` renders — a node set to `landing` still shows the grid. Absent → `grid`                      |
 | `show_grid`   | True/false                                        | Skip for now | Read if present, but unread until `landing` renders differently. Absent → true                                                |
 | `sections`    | Metaobject reference → Category section, **list** | Skip for now | Not in the query at all, and it can't be created before the `category_section` definition that Part 1.5 says not to build yet |
+
+### Panel styles
+
+`style` presets to create: `default`, `links-row`, `feature`, `proof`. Three of
+them turn an L2 item into panel furniture rather than a card.
+
+| `style`     | What the item becomes                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `default`   | A card in the panel (or a rail item in a deep section). The normal case                                       |
+| `links-row` | A **holder**: its own label never renders, and its **children** become the button row under the rule          |
+| `proof`     | A holder as well: its children render as a muted line of claims at the very foot. Text, not links             |
+| `feature`   | The item itself, promoted to the large image card on the right. The other cards stack down the left beside it |
+
+**`links-row` and `proof` hold children; `feature` is the item.** That trips
+people up: for the first two you create a container entry whose label nobody
+sees, then hang the real entries off it as children.
+
+**The first child of a `links-row` is the primary button** and renders filled;
+the rest are outlined. Authoring order sets the hierarchy — put "Get a quote"
+first. Entries may point anywhere: `/quote`, `tel:+12055399794`, an off-site
+financing application. A `proof` child needs no `link` at all, since it renders
+as text.
+
+Only one `feature` per section. Give it an `image` and a `description`; without
+the image the card still renders, dark, so the section ships before the
+photograph exists.
 
 ### How a section's depth changes its panel
 

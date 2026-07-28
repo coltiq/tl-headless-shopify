@@ -23,8 +23,24 @@ export function joinCategoryPath(parentPath: string, slug: string): string {
   return `${parentPath}/${slug}`;
 }
 
-const navStyle = (node: ShopifyNavItem) =>
-  node.style?.value === "links-row" ? ("links-row" as const) : undefined;
+// Anything the panel doesn't recognise falls through to a normal card, which
+// is the right failure for a typo in an admin preset.
+const NAV_STYLES = ["links-row", "feature", "proof"] as const;
+type NavStyle = (typeof NAV_STYLES)[number];
+
+const navStyle = (node: ShopifyNavItem): NavStyle | undefined =>
+  NAV_STYLES.find((style) => style === node.style?.value);
+
+const navImage = (node: ShopifyNavItem) => {
+  const image = node.image?.reference?.image;
+  if (!image) return undefined;
+  return {
+    url: image.url,
+    width: image.width,
+    height: image.height,
+    altText: image.altText ?? null,
+  };
+};
 
 // Blank and whitespace-only both mean "not written yet" — the panel layouts
 // that use it check for presence, so an empty string would render an empty
@@ -112,6 +128,7 @@ function walkNavLevel(
       path: path ?? (node.link?.value ? linkToPath(node.link.value) : "#"),
       style: navStyle(node),
       description: navDescription(node),
+      image: navImage(node),
       items: child.items,
     });
 
@@ -179,6 +196,7 @@ export function buildNavProjection(
       path: node.link?.value ? linkToPath(node.link.value) : "#",
       style: navStyle(node),
       description: navDescription(node),
+      image: navImage(node),
       items: child.items,
     });
   }

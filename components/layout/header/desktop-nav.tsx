@@ -138,7 +138,15 @@ function MegaPanel({
   const linksRow = item.items
     .filter((child) => child.style === "links-row")
     .flatMap((child) => child.items);
-  const railItems = item.items.filter((child) => child.style !== "links-row");
+  // Same mechanic as links-row: the container is a holder, its children are the
+  // content. Rendered as plain text, not links — it is a claim, not navigation.
+  const proof = item.items
+    .filter((child) => child.style === "proof")
+    .flatMap((child) => child.items);
+  const feature = item.items.find((child) => child.style === "feature");
+  const railItems = item.items.filter(
+    (child) => !child.style || child.style === "feature",
+  );
   const active = railItems[Math.min(rail, Math.max(railItems.length - 1, 0))];
   const columns = active ? distributeGroups(active.items, 3) : [];
 
@@ -156,11 +164,26 @@ function MegaPanel({
   );
 
   if (!hasAnyChildren && railItems.length > 0) {
+    const cards = feature
+      ? railItems.filter((child) => child !== feature)
+      : railItems;
     return (
       <PanelShell>
         <div className="mx-auto max-w-(--container-page) px-(--spacing-gutter) pb-[34px] pt-[30px]">
-          <FlatItems items={railItems} />
+          {feature ? (
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+              <div className="grid content-start gap-3">
+                {cards.map((child) => (
+                  <FlatCard key={child.title} item={child} compact />
+                ))}
+              </div>
+              <FeatureCard item={feature} />
+            </div>
+          ) : (
+            <FlatItems items={cards} />
+          )}
           {linksRow.length > 0 ? <LinksRow links={linksRow} /> : null}
+          {proof.length > 0 ? <ProofRow items={proof} /> : null}
         </div>
       </PanelShell>
     );
@@ -292,6 +315,7 @@ function MegaPanel({
           )}
 
           {linksRow.length > 0 ? <LinksRow links={linksRow} /> : null}
+          {proof.length > 0 ? <ProofRow items={proof} /> : null}
         </div>
       </div>
     </PanelShell>
@@ -317,66 +341,141 @@ function FlatItems({ items }: { items: MenuItem[] }) {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
       {items.map((child) => (
-        <Link
-          key={child.title}
-          href={child.path}
-          prefetch={true}
-          className="group/card flex min-h-[104px] flex-col rounded-[3px] border border-tl-hairline bg-tl-fog p-5 transition-colors hover:border-tl-ink hover:bg-white"
-        >
-          <span className="font-tl-sans text-sm font-bold uppercase tracking-[0.06em] text-tl-ink">
-            {child.title}
-          </span>
-          {child.description ? (
-            <span className="mt-2 font-tl-text text-sm leading-snug text-tl-steel">
-              {child.description}
-            </span>
-          ) : null}
-          <span
-            aria-hidden
-            className="mt-auto pt-3 font-tl-sans text-xs font-semibold text-tl-indigo opacity-0 transition-opacity group-hover/card:opacity-100"
-          >
-            View →
-          </span>
-        </Link>
+        <FlatCard key={child.title} item={child} />
       ))}
     </div>
   );
 }
 
-// next/link only for in-app paths. The links row is where a CTA strip lands —
-// "Get a quote", a tel: number, an off-site financing application — and
-// prefetching a tel: URL is meaningless at best. Same branch the announcement
-// band uses for the same reason.
-function LinksRow({ links }: { links: MenuItem[] }) {
-  const className =
-    "flex items-center gap-[7px] font-tl-text text-xs font-medium text-tl-indigo";
-
+function FlatCard({ item, compact }: { item: MenuItem; compact?: boolean }) {
   return (
-    <div className="mt-[26px] flex flex-wrap gap-[30px] border-t border-tl-hairline pt-5">
-      {links.map((link, linkIndex) => {
-        const content = (
-          <>
-            <span aria-hidden>◆</span>
-            {link.title}
-          </>
+    <Link
+      href={item.path}
+      prefetch={true}
+      className={clsx(
+        "group/card flex flex-col rounded-[3px] border border-tl-hairline bg-tl-fog p-5 transition-colors hover:border-tl-ink hover:bg-white",
+        // Stacked beside a feature card they no longer need the minimum height
+        // that keeps them even across a row.
+        !compact && "min-h-[104px]",
+      )}
+    >
+      <span className="font-tl-sans text-sm font-bold uppercase tracking-[0.06em] text-tl-ink">
+        {item.title}
+      </span>
+      {item.description ? (
+        <span className="mt-2 font-tl-text text-sm leading-snug text-tl-steel">
+          {item.description}
+        </span>
+      ) : null}
+      {!compact ? (
+        <span
+          aria-hidden
+          className="mt-auto pt-3 font-tl-sans text-xs font-semibold text-tl-indigo opacity-0 transition-opacity group-hover/card:opacity-100"
+        >
+          View →
+        </span>
+      ) : null}
+    </Link>
+  );
+}
+
+// The panel's one changing thing. Text sits over the image rather than under
+// it, so the card reads as a photograph rather than a photograph with a
+// caption bolted on.
+//
+// Degrades to a dark card when no image is set, so the section ships before
+// the photograph exists — the same rule the rest of the nav follows for
+// missing admin data.
+function FeatureCard({ item }: { item: MenuItem }) {
+  return (
+    <Link
+      href={item.path}
+      prefetch={true}
+      className="group/feature relative flex min-h-[260px] flex-col justify-end overflow-hidden rounded-[3px] bg-tl-ink p-6 text-white"
+    >
+      {item.image ? (
+        // A plain <img>: Shopify serves these already sized, and the panel only
+        // renders on hover, where next/image's placeholder machinery buys
+        // nothing.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.image.url}
+          alt={item.image.altText ?? ""}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover/feature:scale-[1.03]"
+        />
+      ) : null}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-tl-ink via-tl-ink/60 to-tl-ink/10"
+      />
+      <div className="relative">
+        <span className="font-tl-mono text-[10px] uppercase tracking-[0.14em] text-white/75">
+          Featured
+        </span>
+        <p className="mt-2 font-tl-sans text-[22px] font-bold uppercase leading-none tracking-[0.01em]">
+          {item.title}
+        </p>
+        {item.description ? (
+          <p className="mt-2.5 max-w-[42ch] font-tl-text text-sm text-white/80">
+            {item.description}
+          </p>
+        ) : null}
+        <span className="mt-4 inline-block font-tl-sans text-xs font-bold uppercase tracking-[0.08em]">
+          See it →
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+// Claims, not navigation — so plain text, at the very foot, below the buttons
+// rather than beside them.
+function ProofRow({ items }: { items: MenuItem[] }) {
+  return (
+    <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 font-tl-mono text-[10px] uppercase tracking-[0.12em] text-tl-mute-white">
+      {items.map((entry, index) => (
+        <span key={`${entry.title}-${index}`}>{entry.title}</span>
+      ))}
+    </div>
+  );
+}
+
+// Buttons, not a line of coloured words. A ◆ and indigo text read as
+// decoration, which left the one part of the panel that asks for the sale
+// looking like a caption. **The first entry is the primary** and renders
+// filled; the rest are outlined — so authoring order decides the hierarchy,
+// with no new field to set.
+//
+// next/link only for in-app paths: this row is where a tel: number and an
+// off-site financing application land, and prefetching a tel: URL is
+// meaningless at best.
+function LinksRow({ links }: { links: MenuItem[] }) {
+  return (
+    <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-tl-hairline pt-6">
+      {links.map((link, index) => {
+        const className = clsx(
+          "inline-flex h-10 items-center rounded-[3px] px-5 font-tl-sans text-xs font-bold uppercase tracking-[0.08em] transition-colors",
+          index === 0
+            ? "bg-tl-indigo text-white hover:bg-tl-indigo-lift"
+            : "border border-tl-hairline text-tl-ink hover:border-tl-ink hover:bg-tl-fog",
         );
         return link.path.startsWith("/") ? (
           <Link
-            key={`${link.title}-${linkIndex}`}
+            key={`${link.title}-${index}`}
             href={link.path}
             prefetch={true}
             className={className}
           >
-            {content}
+            {link.title}
           </Link>
         ) : (
           <a
-            key={`${link.title}-${linkIndex}`}
+            key={`${link.title}-${index}`}
             href={link.path}
             className={className}
             rel="noopener noreferrer"
           >
-            {content}
+            {link.title}
           </a>
         );
       })}

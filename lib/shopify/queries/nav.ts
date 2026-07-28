@@ -71,6 +71,18 @@ export const getNavMenuQuery = /* GraphQL */ `
     description: field(key: "description") {
       value
     }
+    image: field(key: "image") {
+      reference {
+        ... on MediaImage {
+          image {
+            url
+            width
+            height
+            altText
+          }
+        }
+      }
+    }
     slug: field(key: "slug") {
       value
     }
