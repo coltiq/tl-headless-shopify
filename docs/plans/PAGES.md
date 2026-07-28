@@ -17,14 +17,14 @@ and content go. **built** = done.
 
 ## 1. Header
 
-| Page        | Route        | State    | Notes                                                                                                                                                                                                                     |
-| ----------- | ------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Homepage    | `/`          | stub     | Still the template's carousel + three-item grid, and both collections it wants (`hidden-homepage-carousel`, `hidden-homepage-featured-items`) are missing — see OPEN-ITEMS 1.5. Reachable from the wordmark on every page |
-| Get a quote | `/quote`     | scaffold | The questionnaire itself is the work. **Question one is the scope split** — full build vs install — or the broad CTA sends install customers into the wrong form                                                          |
-| Support hub | `/support`   | scaffold | Groups are laid out; the articles under them are text, not links, until they exist                                                                                                                                        |
-| Contact     | `/contact`   | stub     | Template placeholder. The support popup enhances it rather than replacing it, so it has to work on its own                                                                                                                |
-| The app     | `/app`       | scaffold | Needs the app's real name, screenshots, feature list, and the two store URLs in `lib/constants.ts`. **Currently linked from nowhere** — the announcement bar carries Get A Quote and Support instead                      |
-| Financing   | `/financing` | scaffold | At the root because one product covers builds and parts orders. Needs the lender, real terms, and **two worked examples** — a build and a parts order                                                                     |
+| Page        | Route        | State    | Notes                                                                                                                                                                                                                                                                                                       |
+| ----------- | ------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Homepage    | `/`          | stub     | Still the template's carousel + three-item grid, and both collections it wants (`hidden-homepage-carousel`, `hidden-homepage-featured-items`) are missing — see OPEN-ITEMS 1.5. Reachable from the wordmark on every page                                                                                   |
+| Get a quote | `/quote`     | scaffold | The questionnaire itself is the work. **Question one is the scope split** — full build vs install — or the broad CTA sends install customers into the wrong form                                                                                                                                            |
+| Support hub | `/support`   | scaffold | Groups are laid out; the articles under them are text, not links, until they exist                                                                                                                                                                                                                          |
+| Contact     | `/contact`   | stub     | Template placeholder. The support popup enhances it rather than replacing it, so it has to work on its own                                                                                                                                                                                                  |
+| The app     | `/app`       | scaffold | The lighting control app. Needs its real name, screenshots, feature list, and the two store URLs in `lib/constants.ts`. **Nothing links to it** — the bar's two slots went to Get A Quote and Support, so its way in is product pages for app-controlled lighting, the support popup, and a card in the box |
+| Financing   | `/financing` | scaffold | At the root because one product covers builds and parts orders. Needs the lender, real terms, and **two worked examples** — a build and a parts order                                                                                                                                                       |
 
 **Not a page, but header work:**
 
@@ -32,9 +32,11 @@ and content go. **built** = done.
   link to `/support`. The number lives in it, front and centre, because the
   announcement band hides under `group-data-[condensed]` and the popup becomes
   the only phone affordance once the header shrinks. OPEN-ITEMS 4.6.
-- **The footer** — still the stock Vercel template rendering one flat `<ul>`.
-  Everything in the support plan depends on it: four grouped columns plus a
-  muted legal row.
+
+The footer is deliberately not on this list. It is a real dependency for the
+support pages — still the stock template rendering one flat `<ul>` — but it is
+not fleshed out yet, and this file is the queue in the order things are ready
+to be built. It lives in OPEN-ITEMS 4.6 until then.
 
 ---
 
