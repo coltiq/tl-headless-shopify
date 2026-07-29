@@ -288,7 +288,13 @@ articles, and a place name makes company philosophy read as furniture. It is
 also the only heading under which The Standard fits: "what we stand for" reads
 as the terms of belonging rather than corporate boilerplate.
 
-**Customer Builds is the child that has to ship.** With nothing but a blog
+**Customer Builds is now the section's largest piece, not its thinnest.** 100+
+trucks exist from install work — the body of work against Our Builds'
+highlight reel. Full spec in `docs/plans/community.md`; the one thing that
+cannot be deferred is the **vehicle reference on every entry**, because
+retrofitting it onto a hundred published rows is a job nobody does.
+
+Originally recorded as the child that had to ship: With nothing but a blog
 behind it the section name over-promises, and customer trucks are free content,
 social proof to link from product pages, and model-specific search traffic.
 Distinct from Custom Work's Our Builds, which is the shop's own work.

@@ -83,10 +83,14 @@ oversights.
 
 ## 5. Decisions that block pages
 
-- **The Manual's content source.** Shopify articles are queryable on the
-  Storefront API. Less pressing than it was for a blog — a reference section
-  publishes monthly, not weekly, so hand-built routes are affordable. Our
-  Builds still needs the same call.
+- **The content source, now forced by Customer Builds.** 100+ entries rules
+  out hand-built routes. A metaobject fits better than articles — the fields
+  are structured, and a `vehicle` reference is the type the garage already
+  uses. Whichever is chosen covers The Manual and Our Builds too.
+  `community.md` §3.3.
+- **Customer Builds submissions.** The Storefront API cannot write metaobjects,
+  so self-serve upload needs an Admin API token and a moderation queue. Start
+  manual. `community.md` §4.
 - **Whether builds get their own pages.** `/custom-work/builds/<slug>` costs no
   nav change and no reservation. Worth it once a build has a page's worth of
   photos and story behind it.
