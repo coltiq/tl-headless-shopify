@@ -28,11 +28,13 @@ export const metadata: Metadata = {
 // shadow it.
 const CHILDREN: { title: string; blurb: string; href: string | null }[] = [
   {
-    title: "Blog",
-    blurb: "Build breakdowns, product deep dives, and what we're working on.",
-    // TODO: needs a content source decision before a route exists — Shopify
-    // articles are queryable on the Storefront API, which would beat a deploy
-    // per post. Gets its own name at that point.
+    title: "The Manual",
+    blurb:
+      "How things work — suspension, wiring, lifts, and what we learned building them.",
+    // TODO: no route yet. Reference rather than a blog: explainers, product
+    // research, electrical basics. Written to be looked up and updated in
+    // place, so it never carries a stale dateline the way a blog does — which
+    // is also why the per-post deploy cost of hand-built routes barely bites.
     href: null,
   },
   {

@@ -83,9 +83,10 @@ oversights.
 
 ## 5. Decisions that block pages
 
-- **The blog's content source.** Shopify articles are queryable on the
-  Storefront API, which beats a deploy per post. Settles Community's blog
-  **and** Our Builds, which needs the same mechanism.
+- **The Manual's content source.** Shopify articles are queryable on the
+  Storefront API. Less pressing than it was for a blog — a reference section
+  publishes monthly, not weekly, so hand-built routes are affordable. Our
+  Builds still needs the same call.
 - **Whether builds get their own pages.** `/custom-work/builds/<slug>` costs no
   nav change and no reservation. Worth it once a build has a page's worth of
   photos and story behind it.

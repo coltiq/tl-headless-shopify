@@ -271,8 +271,15 @@ demotes the other two from visible cards to hover-to-reveal rows. Per-service an
 per-build **pages** stay available — URL depth costs nothing and needs no nav
 change. Reasoning and the `links-row` escape hatch are in the spec, §5.
 
-`/community` is the brand side, and it is a **container**: Blog, Customer
+`/community` is the brand side, and it is a **container**: The Manual, Customer
 Builds, and The Standard to start, with Events and Giveaways when they exist.
+
+**The Manual is reference, not a blog** — explainers, product research,
+electrical basics, suspension. Written to be looked up and updated in place, so
+it never carries the stale dateline that makes a neglected blog worse than no
+blog. The genuinely time-stamped content the shop produces has homes already:
+launches in the announcement rotator, trucks in Our Builds and Customer Builds,
+events as their own child when they exist.
 It is **not** where support lives — see 4.7.
 
 Named Community rather than About because it is the only section whose contents

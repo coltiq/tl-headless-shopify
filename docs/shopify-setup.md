@@ -547,14 +547,14 @@ children are custom pages, and those are authored the opposite way to Part 4.3:
 produces no category node and no URL of its own, so the menu falls back to
 `link` — which is what keeps nav position and path independent here.
 
-| Parent      | Label           | `link`                         | Route status                                  |
-| ----------- | --------------- | ------------------------------ | --------------------------------------------- |
-| Community   | Blog            | —                              | No route yet; needs a content source decision |
-| Community   | Customer Builds | —                              | No route yet                                  |
-| Community   | The Standard    | `/the-standard`                | Title-only placeholder, built                 |
-| Custom Work | Our Services    | `/custom-work/services`        | Scaffolded                                    |
-| Custom Work | Our Builds      | `/custom-work/builds`          | Scaffolded                                    |
-| Custom Work | Inside the Shop | `/custom-work/inside-the-shop` | Scaffolded                                    |
+| Parent      | Label           | `link`                         | Route status                        |
+| ----------- | --------------- | ------------------------------ | ----------------------------------- |
+| Community   | The Manual      | —                              | No route yet. Reference, not a blog |
+| Community   | Customer Builds | —                              | No route yet                        |
+| Community   | The Standard    | `/the-standard`                | Title-only placeholder, built       |
+| Custom Work | Our Services    | `/custom-work/services`        | Scaffolded                          |
+| Custom Work | Our Builds      | `/custom-work/builds`          | Scaffolded                          |
+| Custom Work | Inside the Shop | `/custom-work/inside-the-shop` | Scaffolded                          |
 
 Custom Work's `links-row` children point at `/quote`, `/financing` and
 `/custom-work/pricing` — all scaffolded. Those two are **not** L2 nav
