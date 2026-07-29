@@ -1,9 +1,9 @@
 # Pages to build
 
 The running list of pages that need real content and design, and what state
-each one is in. **Scope: the header and the Custom Work section.** Parts,
-Lifestyle and Community are not settled yet, so neither they nor their children
-are counted here — add them when they are.
+each one is in. **Scope: the header, Custom Work, and
+Community.** Parts and Lifestyle are not settled yet, so neither they nor their
+children are counted here — add them when they are.
 
 Architecture lives in `CLAUDE.md`, admin setup in `docs/shopify-setup.md`,
 outstanding risks in `OPEN-ITEMS.md`, the Custom Work spec in `custom-work.md`.
@@ -46,7 +46,21 @@ and content go. **built** = done.
 
 ---
 
-## 3. Behind the support hub
+## 3. Community
+
+Spec: `community.md`. Nothing here has a route except The Standard.
+
+| Page              | Route           | State    | Notes                                                                                                                                                     |
+| ----------------- | --------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Section landing   | `/community`    | scaffold | Three children as cards; copy is in                                                                                                                       |
+| The Manual        | —               | none     | Reference, not a blog. Needs the content source before articles have anywhere to live                                                                     |
+| Customer Builds   | —               | none     | 100+ entries already exist. **Every one carries a vehicle reference from day one** — retrofitting it later never happens (`community.md` §3.2)            |
+| Submit your build | —               | none     | The form behind Customer Builds. Vehicle captured with the garage's picker, a rights checkbox, and a queue — **not** a live write path. `community.md` §4 |
+| The Standard      | `/the-standard` | stub     | Title-only placeholder from its days as an L1                                                                                                             |
+
+---
+
+## 4. Behind the support hub
 
 Not scheduled, but it is the largest single block of writing on this list and
 it is easy to under-count at "the support page". Roughly fifteen to twenty
@@ -65,7 +79,7 @@ cannot be pasted into a support reply.
 
 ---
 
-## 4. Not in the queue yet
+## 5. Not in the queue yet
 
 Real work, deliberately held back — this file is the queue in the order things
 are ready to build, and neither of these is. Here so they are not mistaken for
@@ -81,7 +95,7 @@ oversights.
 
 ---
 
-## 5. Decisions that block pages
+## 6. Decisions that block pages
 
 - **The content source, now forced by Customer Builds.** 100+ entries rules
   out hand-built routes. A metaobject fits better than articles — the fields
