@@ -244,7 +244,7 @@ simply unread until then.
   fitment filter as the grid** — otherwise a landing page quietly becomes the
   one place that shows parts that don't fit.
 
-### 4.2 The four L1 sections are title-only stubs
+### 4.2 The L1 sections are title-only stubs
 
 `/parts`, `/custom-work`, `/lifestyle` render a heading and nothing else;
 `/community` and `/the-standard` are scaffolds. Real pages come after the
@@ -271,8 +271,9 @@ demotes the other two from visible cards to hover-to-reveal rows. Per-service an
 per-build **pages** stay available — URL depth costs nothing and needs no nav
 change. Reasoning and the `links-row` escape hatch are in the spec, §5.
 
-`/community` is the brand side, and it is a **container**: The Manual, Customer
-Builds, and The Standard to start, with Events and Giveaways when they exist.
+`/community` is the brand side, and it is a **container**: Customer Builds and
+The Standard, with Events and Giveaways when they exist. The Manual left for
+its own L1.
 
 **The Manual is reference, not a blog** — explainers, product research,
 electrical basics, suspension. Written to be looked up and updated in place, so
@@ -307,7 +308,11 @@ link, so nav position and path are independent here.
 articles are queryable on the Storefront API, which beats a deploy per post —
 settle that before scaffolding, and name the blog at the same time.
 
-**The L1 set is four.** Custom Work · Parts · Lifestyle · Community. Support
+**The L1 set is five.** Custom Work · Parts · Lifestyle · Community · The
+Manual. The Manual was a Community child until it was clear it did not belong
+there — reference and expertise against a section about people — and until the
+point that it is the section most likely to bring strangers to the site at all,
+which is a poor thing to bury two clicks down. Support
 deliberately gets no bar slot (4.7), and the category rail inside the Parts
 panel is why the bar does not need category items on it — promoting categories
 to L1 would consume the rail's level and burn the L1 cap of 8.

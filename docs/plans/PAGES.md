@@ -60,7 +60,18 @@ Spec: `community.md`. Nothing here has a route except The Standard.
 
 ---
 
-## 4. Behind the support hub
+## 4. The Manual
+
+Spec: `the-manual.md`. An L1 of its own now, not a Community child.
+
+| Page            | Route                | State    | Notes                                                                                                                    |
+| --------------- | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Section landing | `/the-manual`        | scaffold | Index grouped by topic, never by date — that is what stops it looking abandoned between articles                         |
+| Articles        | `/the-manual/<slug>` | none     | Blocked on the content source. Each one answers its question in the first paragraph and links the products it implicates |
+
+---
+
+## 5. Behind the support hub
 
 Not scheduled, but it is the largest single block of writing on this list and
 it is easy to under-count at "the support page". Roughly fifteen to twenty
@@ -79,7 +90,7 @@ cannot be pasted into a support reply.
 
 ---
 
-## 5. Not in the queue yet
+## 6. Not in the queue yet
 
 Real work, deliberately held back — this file is the queue in the order things
 are ready to build, and neither of these is. Here so they are not mistaken for
@@ -95,7 +106,7 @@ oversights.
 
 ---
 
-## 6. Decisions that block pages
+## 7. Decisions that block pages
 
 - **The content source, now forced by Customer Builds.** 100+ entries rules
   out hand-built routes. A metaobject fits better than articles — the fields

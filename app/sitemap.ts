@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
 
 // Static code routes with no Shopify content behind them. Every one of these
 // permanently claims its path — a static route always beats the [...path]
-// catch-all, so no collection can ever use those handles. The four L1 nav
-// sections are the last four; the rest are ordinary pages.
+// catch-all, so no collection can ever use those handles. The five L1 nav
+// sections are the last five; the rest are ordinary pages.
 const STATIC_ROUTES = [
   "",
   "/search",
@@ -29,6 +29,7 @@ const STATIC_ROUTES = [
   "/custom-work/pricing",
   "/lifestyle",
   "/community",
+  "/the-manual",
   "/the-standard",
 ];
 

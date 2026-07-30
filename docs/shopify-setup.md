@@ -513,7 +513,7 @@ Create one **root** entry with handle **`main-nav`** (label "Main nav", no
 link). The app looks this handle up — it must match exactly. The root's
 `children` are the L1 nav bar items.
 
-## 4.2 The four L1 sections
+## 4.2 The five L1 sections
 
 L1 items **group the menu and contribute nothing to any URL**. They are
 standalone destinations backed by custom code routes, which is why their links
@@ -525,6 +525,7 @@ don't look like category paths:
 | Parts       | `/parts`       | Title-only placeholder, built |
 | Lifestyle   | `/lifestyle`   | Title-only placeholder, built |
 | Community   | `/community`   | Scaffolded                    |
+| The Manual  | `/the-manual`  | Scaffolded                    |
 
 Because these are code routes, **a collection can never use those four
 handles** — a static route always beats the category resolver.
@@ -617,7 +618,7 @@ Three rules the walk enforces, worth knowing before authoring:
 - **A slug may never be four digits.** `/lighting/2021` would collide with the
   vehicle year segment. Four-digit slugs are dropped with a console error.
 - Slugs must be unique among siblings — and, because L1 contributes no segment,
-  also across the four L1 sections at the first level. Two sections both
+  also across the five L1 sections at the first level. Two sections both
   holding a `lighting` child produce one `/lighting`; the second is dropped
   with an error.
 - **`/contact`, `/app`, `/support`, `/quote`, `/the-standard`, `/search`, and
@@ -625,8 +626,9 @@ Three rules the walk enforces, worth knowing before authoring:
   same reason — they are static code routes, so no slug or collection handle
   may use them either. The full list is
   `PROXY_RESERVED_SEGMENTS` in `lib/constants.ts`.
-- **The four L1 handles are reserved forever.** `/parts`, `/custom-work`,
-  `/lifestyle`, and `/community` are static code routes and always beat
+- **The five L1 handles are reserved forever.** `/parts`, `/custom-work`,
+  `/lifestyle`, `/community`, and `/the-manual` are static code routes and
+  always beat
   the category resolver, so no slug (and no collection handle) can ever use
   them.
 

@@ -61,13 +61,14 @@ export const HEADER_MENU_HANDLE = "main-menu-v2";
 export const NAV_LEVEL_CAPS = { l1: 8, l2: 12, l3: 12, l4: 16 } as const;
 
 // Static code routes that always beat the [...path] catch-all, so the proxy
-// must never treat their first segment as a collection handle. The four L1 nav
+// must never treat their first segment as a collection handle. The five L1 nav
 // sections are in here permanently — see docs/shopify-setup.md Part 4.2.
 export const PROXY_RESERVED_SEGMENTS = new Set([
   "parts",
   "custom-work",
   "lifestyle",
   "community",
+  "the-manual",
   // No longer an L1 section — it sits at L2 under Community — but still a
   // static code route, so the segment stays reserved.
   "the-standard",

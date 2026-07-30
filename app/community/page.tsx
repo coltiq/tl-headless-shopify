@@ -19,24 +19,18 @@ export const metadata: Metadata = {
 // this heading "what we stand for" reads as the terms of belonging rather than
 // corporate boilerplate.
 //
-// **Customer Builds is the one that has to ship.** Without user content behind
-// it the section name over-promises, and customer trucks are also free content,
-// social proof to link from product pages, and model-specific search traffic.
-// Distinct from Custom Work's Our Builds, which is the shop's own work.
+// **Customer Builds carries the section.** 100+ trucks already exist from
+// install work — the body of work against Custom Work's highlight reel. It is
+// also what makes the name true: without user content, Community is a
+// container of brand pages.
+//
+// Two children is thin for the flat panel. The fix is already built — give
+// Customer Builds the `feature` style and the panel renders one card down the
+// left against a photographed truck on the right. Spec: docs/plans/community.md.
 //
 // Reserved in PROXY_RESERVED_SEGMENTS so no collection handle can
 // shadow it.
 const CHILDREN: { title: string; blurb: string; href: string | null }[] = [
-  {
-    title: "The Manual",
-    blurb:
-      "How things work — suspension, wiring, lifts, and what we learned building them.",
-    // TODO: no route yet. Reference rather than a blog: explainers, product
-    // research, electrical basics. Written to be looked up and updated in
-    // place, so it never carries a stale dateline the way a blog does — which
-    // is also why the per-post deploy cost of hand-built routes barely bites.
-    href: null,
-  },
   {
     title: "Customer Builds",
     blurb: "Trucks you built, running our parts.",

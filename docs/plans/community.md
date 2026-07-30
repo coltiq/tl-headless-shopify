@@ -18,9 +18,17 @@ rather than corporate boilerplate.
 
 | Child               | Route           | State                  |
 | ------------------- | --------------- | ---------------------- |
-| **The Manual**      | —               | No route yet           |
 | **Customer Builds** | —               | No route yet           |
 | **The Standard**    | `/the-standard` | Title-only placeholder |
+
+The Manual left for its own L1 (`the-manual.md`): reference and expertise
+against a section about people, and the section most likely to bring strangers
+to the site — a poor thing to bury two clicks down.
+
+**Two children is thin for a flat panel**, and the fix is already built: give
+Customer Builds the `feature` style so the panel renders two cards down the
+left against a photographed truck on the right. That layout wants exactly this
+shape.
 
 Deferred until they exist: **Events**, **Giveaways**. Both were considered and
 neither has anything behind it yet.
@@ -32,30 +40,7 @@ Same constraint as Custom Work, same reasoning (`custom-work.md` §5).
 
 ---
 
-## 2. The Manual — reference, not a blog
-
-Explainers, product research, electrical basics, suspension and lift teardowns,
-what we learned building our own parts.
-
-**It is a manual because the content improves with age.** An explainer on lift
-versus levelling is as useful in three years and accumulates rankings the whole
-time; you update it in place. A blog is the format that decays, and a neglected
-one advertises the neglect with a dateline — "last post: March" sitting on the
-page is worse than never having started.
-
-The genuinely time-stamped content the shop produces already has homes:
-launches in the announcement rotator, trucks in Our Builds and Customer Builds,
-events as their own child when they exist. So there is no blog, and nothing is
-missing.
-
-**For SEO the section name barely matters** — arrivals land on the article from
-search, not via the nav. Put the keywords in the article's own title and path
-(`/the-manual/rock-light-wiring-basics`) and name the section for the people
-already on the site.
-
----
-
-## 3. Customer Builds
+## 2. Customer Builds
 
 **Not the thin child — the one with the most material on the site.** 100+
 trucks already exist from install work: jobs that are real and photographable
@@ -71,14 +56,14 @@ That gives a cleaner split than "ours versus theirs":
 The name survives the fact that the shop did the installing: in truck culture
 "my build" is whatever is on your truck, whoever turned the wrenches.
 
-### 3.1 The entry format has to be cheap
+### 2.1 The entry format has to be cheap
 
 At a hundred entries a write-up each will never happen — twelve will get
 published and the rest never will. Per build: **a photo, the truck, the parts,
 one line.** Anything heavier is a format that guarantees the page stays a tenth
 full.
 
-### 3.2 Every entry carries a vehicle reference — from day one
+### 2.2 Every entry carries a vehicle reference — from day one
 
 **This is the one thing that must not be deferred.** An entry needs the
 generation it belongs to (or make/model/year, resolved the same way the garage
@@ -96,11 +81,11 @@ Nothing has to read it at first. It unlocks, in rough order of effort:
   matching that generation on category pages or the grid — the fitment system
   paying off somewhere other than filtering products.
 
-### 3.3 Content source
+### 2.3 Content source
 
 100+ entries settles a question that was open for The Manual: **nobody
 hand-codes a hundred routes.** This needs a metaobject definition or Shopify
-articles, and whichever is chosen covers The Manual too.
+articles, and whichever is chosen covers The Manual too (`the-manual.md` §5).
 
 A metaobject is the better fit — the fields are structured (vehicle reference,
 parts, photo) rather than a body of prose, and a `vehicle` metaobject reference
@@ -108,12 +93,12 @@ is exactly the field type the garage already uses.
 
 ---
 
-## 4. Submissions
+## 3. Submissions
 
 Customers uploading their own trucks. **Not built, and it is a bigger job than
 it looks.**
 
-### 4.1 The constraint that shapes it
+### 3.1 The constraint that shapes it
 
 **The Storefront API cannot write metaobjects.** It is read-only for them, and
 this app holds a Storefront token and nothing else (Part 0). Publishing a
@@ -123,7 +108,7 @@ submission therefore needs either:
   secret, a new write surface, and rate limits to think about; or
 - an **off-site form** (or email) that lands in a queue a human works through.
 
-### 4.2 What it needs regardless of route
+### 3.2 What it needs regardless of route
 
 - **Moderation.** Public upload with no review means spam and worse, on a page
   whose whole job is making the brand look good. Nothing publishes unreviewed.
@@ -134,7 +119,7 @@ submission therefore needs either:
 - **The vehicle**, captured at submission. Reuse the garage's picker rather
   than a free-text field, or the whole benefit of §3.2 is lost to typos.
 
-### 4.3 Start manual
+### 3.3 Start manual
 
 A form that queues — email, or a form service — with staff publishing the
 entry, is the right first version. Submissions will trickle where the existing
@@ -146,7 +131,7 @@ Build the self-serve pipeline when the queue is genuinely the bottleneck.
 
 ---
 
-## 5. The Standard
+## 4. The Standard
 
 The bar the shop holds itself to — why the wiring is clean, why it costs what
 it costs. Company philosophy, values, and the people.
