@@ -78,7 +78,7 @@ URLs are free to change while nothing is deployed or indexed (OPEN-ITEMS §2.6,
 ## 3. Page outlines
 
 Voice: plain, declarative, second person, sentence case, em-dashes carrying the
-rhythm. Match `app/community/page.tsx` and `app/quote/page.tsx`. Design system
+rhythm. Match `app/customer-builds/page.tsx` and `app/quote/page.tsx`. Design system
 throughout — `page-width`, `font-tl-sans` / `font-tl-text`, `text-tl-ink` /
 `text-tl-steel` — not the stock Tailwind the current stub still uses.
 
@@ -172,7 +172,7 @@ No team section. The people belong to the brand story, not the shop tour.
 **Decide the shape now, ship hardcoded, build the metaobject later.**
 
 The index launches with a `BUILDS` array in the route file, exactly like
-`CHILDREN` in `app/community/page.tsx`. That means a deploy per build — fine at
+`CHILDREN` in `app/customer-builds/page.tsx`. That means a deploy per build — fine at
 three to six, wrong at thirty. **Per-build detail pages wait for the
 metaobject.**
 

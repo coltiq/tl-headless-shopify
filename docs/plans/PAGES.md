@@ -1,8 +1,8 @@
 # Pages to build
 
 The running list of pages that need real content and design, and what state
-each one is in. **Scope: the header, Custom Work, and
-Community.** Parts and Lifestyle are not settled yet, so neither they nor their
+each one is in. **Scope: the header, Custom Work, Customer
+Builds, and The Manual.** Parts and Lifestyle are not settled yet, so neither they nor their
 children are counted here — add them when they are.
 
 Architecture lives in `CLAUDE.md`, admin setup in `docs/shopify-setup.md`,
@@ -46,19 +46,19 @@ and content go. **built** = done.
 
 ---
 
-## 3. Community
+## 3. Customer Builds
 
-Spec: `community.md`. Nothing here has a route except The Standard.
+Spec: `customer-builds.md`. One page, not a section — the grid, the feed and
+the submit CTA together, which is why the L1 has no dropdown.
 
-| Page              | Route           | State    | Notes                                                                                                                                                     |
-| ----------------- | --------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Section landing   | `/community`    | scaffold | Three children as cards; copy is in                                                                                                                       |
-| The Manual        | —               | none     | Reference, not a blog. Needs the content source before articles have anywhere to live                                                                     |
-| Customer Builds   | —               | none     | 100+ entries already exist. **Every one carries a vehicle reference from day one** — retrofitting it later never happens (`community.md` §3.2)            |
-| Submit your build | —               | none     | The form behind Customer Builds. Vehicle captured with the garage's picker, a rights checkbox, and a queue — **not** a live write path. `community.md` §4 |
-| The Standard      | `/the-standard` | stub     | Title-only placeholder from its days as an L1                                                                                                             |
+| Page        | Route              | State    | Notes                                                                                                                                                                             |
+| ----------- | ------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The page    | `/customer-builds` | scaffold | 100+ entries exist. **Every one carries a vehicle reference from day one** — filtering, model-specific search and "builds like yours" all need it, and retrofitting never happens |
+| Submission  | —                  | none     | A CTA on the page rather than its own nav entry. Vehicle picked with the garage's picker, a rights checkbox, and a queue — **not** a live write path                              |
+| Social feed | —                  | none     | On the page, not in the dropdown. Needs a fallback for when the API is down                                                                                                       |
 
----
+The Standard (`/the-standard`, stub) is now a **footer page** with no nav
+entry, so it is not counted as section work.
 
 ## 4. The Manual
 
@@ -112,10 +112,10 @@ oversights.
   out hand-built routes. A metaobject fits better than articles — the fields
   are structured, and a `vehicle` reference is the type the garage already
   uses. Whichever is chosen covers The Manual and Our Builds too.
-  `community.md` §3.3.
+  `customer-builds.md` §2.3.
 - **Customer Builds submissions.** The Storefront API cannot write metaobjects,
   so self-serve upload needs an Admin API token and a moderation queue. Start
-  manual. `community.md` §4.
+  manual. `customer-builds.md` §3.
 - **Whether builds get their own pages.** `/custom-work/builds/<slug>` costs no
   nav change and no reservation. Worth it once a build has a page's worth of
   photos and story behind it.

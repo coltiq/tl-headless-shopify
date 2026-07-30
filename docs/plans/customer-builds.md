@@ -1,56 +1,47 @@
-# Community — section spec
+# Customer Builds — spec
 
-The brand side. A **container**, not a page with a menu: its children are what
-justify the nav slot, and the section is named for what it grows into rather
-than what it holds today.
+Trucks the shop has worked on. 100+ already exist from install work: real,
+photographable, and not showcase pieces.
 
-Nothing in here is built. `/community` is a scaffold, `/the-standard` a
-title-only placeholder, and the other two children have no routes yet.
-
-Why "Community" and not "About" is in `OPEN-ITEMS.md` §4.2 and not repeated
-here. The short version: it is the only section whose contents are expected to
-grow, and the only heading under which The Standard reads as terms of belonging
-rather than corporate boilerplate.
+Scaffolded at `/customer-builds`. Nothing in it is built.
 
 ---
 
-## 1. The children
+## 1. An L1, and one page rather than a section
 
-| Child               | Route           | State                  |
-| ------------------- | --------------- | ---------------------- |
-| **Customer Builds** | —               | No route yet           |
-| **The Standard**    | `/the-standard` | Title-only placeholder |
+It was a child of a **Community** container until a look at the segment showed
+nobody wraps this:
 
-The Manual left for its own L1 (`the-manual.md`): reference and expertise
-against a section about people, and the section most likely to bring strangers
-to the site — a poor thing to bury two clicks down.
+- **Custom Offsets** — nav is Shop · Add My Truck · Search Gallery · Brands ·
+  Resources. The gallery _and_ the submission CTA are both top level.
+- **Rough Country** — surfaces Customer Builds directly.
+- **Krietz Customs**, the closest analogue as a custom shop — Build Your
+  Vehicle · Gallery · Financing · All Services · Tools & Resources · Shop
+  Apparel · Contact. Gallery is top level; there is no community section.
+- **Offroad Alliance** — community handled entirely through event recaps and an
+  Instagram feed on the homepage.
 
-**Two children is thin for a flat panel**, and the fix is already built: give
-Customer Builds the `feature` style so the panel renders two cards down the
-left against a photographed truck on the right. That layout wants exactly this
-shape.
+The gallery is the draw, so it goes in the bar. Community as a container was
+also failing on its own terms: it had one strong child and two invented to
+justify the wrapper.
 
-Deferred until they exist: **Events**, **Giveaways**. Both were considered and
-neither has anything behind it yet.
+**One page, not a section.** The grid, the social feed and the submit CTA live
+here, so the L1 has no children and renders as a plain link with no dropdown.
+It graduates to a container the day the grid outgrows sharing a page.
 
-Adding a fourth child is free — the panel's flat layout wraps. Adding a
-**grandchild** is not: a child on any one of these flips the mega panel from
-flat to the rail and demotes the others from cards to hover-to-reveal rows.
-Same constraint as Custom Work, same reasoning (`custom-work.md` §5).
+**Community is not dead, it is early.** The name earns its keep once
+Ambassadors or Events is real — both are patterns in the segment — at which
+point this becomes a child of it again.
 
 ---
 
-## 2. Customer Builds
+## 2. The content
 
-**Not the thin child — the one with the most material on the site.** 100+
-trucks already exist from install work: jobs that are real and photographable
-but not showcase pieces.
-
-That gives a cleaner split than "ours versus theirs":
+A cleaner split than "ours versus theirs":
 
 - **Our Builds** (`/custom-work/builds`) — the highlight reel. Curated,
   start-to-finish projects the shop leads with.
-- **Customer Builds** (here) — the body of work. Volume, variety, and every
+- **Customer Builds** (`/customer-builds`) — the body of work. Volume, variety, and every
   truck that left with our parts on it.
 
 The name survives the fact that the shop did the installing: in truck culture
@@ -133,9 +124,13 @@ Build the self-serve pipeline when the queue is genuinely the bottleneck.
 
 ## 4. The Standard
 
-The bar the shop holds itself to — why the wiring is clean, why it costs what
-it costs. Company philosophy, values, and the people.
+**Not in this section, and not in the nav.** It is company philosophy, which is
+footer territory on almost every store, and it was the odd item in a list about
+trucks and people.
 
-Already has its route from the days it was an L1. Its URL does not move now
-that it sits at L2: a node with an explicit `link` and no `slug` falls back to
-the link, so nav position and path are independent here.
+`/the-standard` stays a real page and a reserved segment; it loses only its nav
+entry.
+
+Worth remembering when it gets written: the argument does its hardest work
+**on the Custom Work landing**, where someone is deciding whether to trust the
+shop with a truck. The footer page can be the full version.

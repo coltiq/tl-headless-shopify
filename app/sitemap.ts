@@ -28,7 +28,7 @@ const STATIC_ROUTES = [
   "/custom-work/inside-the-shop",
   "/custom-work/pricing",
   "/lifestyle",
-  "/community",
+  "/customer-builds",
   "/the-manual",
   "/the-standard",
 ];

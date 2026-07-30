@@ -33,7 +33,7 @@ export default function BuildsPage() {
             These are ours, built in our bays. For trucks you built running our
             parts, see{" "}
             <Link
-              href="/community"
+              href="/customer-builds"
               className="text-tl-ink underline underline-offset-4"
             >
               customer builds

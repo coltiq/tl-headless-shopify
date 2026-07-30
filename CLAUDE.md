@@ -25,7 +25,7 @@ Requires env vars from `.env.example` in `.env.local`: `SHOPIFY_STORE_DOMAIN`, `
 - `docs/plans/OPEN-ITEMS.md` — every red flag, accepted limit, and deferred piece of work still outstanding. Read before touching routing, SEO, or fitment. The shipped plans it came from (garage Phase 1/2, category URLs Phase 3) were folded into this file and deleted.
 - `docs/plans/PAGES.md` — the build queue: every page still to be written, what state it is in, and the decisions blocking the rest. Scoped to the header and Custom Work until the other L1s settle.
 - `docs/plans/the-manual.md` — the `/the-manual` section spec: why it is an L1 rather than a Community child, article URLs, and the topic-category question. Nothing in it is built yet.
-- `docs/plans/community.md` — the `/community` section spec: Customer Builds and its vehicle reference, submissions, The Standard. Nothing in it is built yet.
+- `docs/plans/customer-builds.md` — the `/customer-builds` spec: one page rather than a section, the vehicle reference every entry carries, submissions, and why Community was dropped as a container. Nothing in it is built yet.
 - `docs/plans/custom-work.md` — the `/custom-work` section spec: its three L2 code routes, why they nest under the section path, and why the section is capped at two nav levels. Nothing in it is built yet.
 
 ## Imports
@@ -63,7 +63,7 @@ Cart state lives in Shopify, identified by a `cartId` cookie. `components/cart/c
 ### Routes (`app/`)
 
 - `/` — homepage; `/product/[handle]` — product detail; `/search` — text search with sort options from `lib/constants.ts` (`sorting`).
-- `/contact`, `/app`, `/support`, `/quote`, `/financing`, `/the-standard`, `/parts`, `/custom-work`, `/lifestyle`, `/community`, `/the-manual` — custom code routes. The last five are the L1 nav sections; the rest are ordinary pages (`/the-standard` sits at L2 under Community). All of them **permanently reserve those paths**: a static route always beats the catch-all, so no collection handle or category slug can ever use them.
+- `/contact`, `/app`, `/support`, `/quote`, `/financing`, `/the-standard`, `/parts`, `/custom-work`, `/lifestyle`, `/customer-builds`, `/the-manual` — custom code routes. The last five are the L1 nav sections; the rest are ordinary pages (`/the-standard` is a footer page, not in the nav). All of them **permanently reserve those paths**: a static route always beats the catch-all, so no collection handle or category slug can ever use them.
 - `/custom-work/{services,builds,inside-the-shop,pricing}` — the section's own pages. Nested under the section, which is **not** a contradiction of "L1 contributes no segment": that rule governs derived category paths, and these are hand-typed `link` values on static routes. No new reservation needed — `proxy.ts` only inspects `segments[0]`, and only for 1- and 4-segment shapes. Spec: `docs/plans/custom-work.md`.
 - `app/[...path]` — the category URL space (below).
 - `/search/[collection]` — legacy, redirects to the canonical category path.

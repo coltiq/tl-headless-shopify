@@ -88,6 +88,6 @@ Topic pages can exist as URLs without being nav entries — the same distinction
 ## 5. Content source
 
 Shared with Customer Builds, and decided by that section's volume: a metaobject
-rather than hand-built routes (`community.md` §3.3). An article needs a title,
+rather than hand-built routes (`customer-builds.md` §2.3). An article needs a title,
 slug, body, topic, and a hero image; nothing about that is special enough to
 justify a second mechanism.

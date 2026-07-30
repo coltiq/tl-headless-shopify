@@ -67,10 +67,10 @@ export const PROXY_RESERVED_SEGMENTS = new Set([
   "parts",
   "custom-work",
   "lifestyle",
-  "community",
+  "customer-builds",
   "the-manual",
-  // No longer an L1 section — it sits at L2 under Community — but still a
-  // static code route, so the segment stays reserved.
+  // Not in the nav at all — a footer page — but still a static code route,
+  // so the segment stays reserved.
   "the-standard",
   "contact",
   "app",

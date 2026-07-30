@@ -519,13 +519,13 @@ L1 items **group the menu and contribute nothing to any URL**. They are
 standalone destinations backed by custom code routes, which is why their links
 don't look like category paths:
 
-| Label       | `link`         | Route status                  |
-| ----------- | -------------- | ----------------------------- |
-| Custom Work | `/custom-work` | Title-only placeholder, built |
-| Parts       | `/parts`       | Title-only placeholder, built |
-| Lifestyle   | `/lifestyle`   | Title-only placeholder, built |
-| Community   | `/community`   | Scaffolded                    |
-| The Manual  | `/the-manual`  | Scaffolded                    |
+| Label           | `link`             | Route status                  |
+| --------------- | ------------------ | ----------------------------- |
+| Custom Work     | `/custom-work`     | Title-only placeholder, built |
+| Parts           | `/parts`           | Title-only placeholder, built |
+| Lifestyle       | `/lifestyle`       | Title-only placeholder, built |
+| Customer Builds | `/customer-builds` | Scaffolded                    |
+| The Manual      | `/the-manual`      | Scaffolded                    |
 
 Because these are code routes, **a collection can never use those four
 handles** — a static route always beats the category resolver.
@@ -627,8 +627,8 @@ Three rules the walk enforces, worth knowing before authoring:
   may use them either. The full list is
   `PROXY_RESERVED_SEGMENTS` in `lib/constants.ts`.
 - **The five L1 handles are reserved forever.** `/parts`, `/custom-work`,
-  `/lifestyle`, `/community`, and `/the-manual` are static code routes and
-  always beat
+  `/lifestyle`, `/customer-builds`, and `/the-manual` are static code routes
+  and always beat
   the category resolver, so no slug (and no collection handle) can ever use
   them.
 

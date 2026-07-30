@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 // the neglect, a manual just looks like reference.
 //
 // Articles live at /the-manual/<slug> and need the content source settled
-// before any of them exist (community.md §3.3 — a metaobject, shared with
+// before any of them exist (customer-builds.md §2.3 — a metaobject, shared with
 // Customer Builds).
 export default function TheManualPage() {
   return (

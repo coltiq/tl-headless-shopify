@@ -247,7 +247,7 @@ simply unread until then.
 ### 4.2 The L1 sections are title-only stubs
 
 `/parts`, `/custom-work`, `/lifestyle` render a heading and nothing else;
-`/community` and `/the-standard` are scaffolds. Real pages come after the
+`/customer-builds` and `/the-standard` are scaffolds. Real pages come after the
 backend work.
 
 `/custom-work` is **fully spec'd in `docs/plans/custom-work.md`** — URLs, page
@@ -271,45 +271,26 @@ demotes the other two from visible cards to hover-to-reveal rows. Per-service an
 per-build **pages** stay available — URL depth costs nothing and needs no nav
 change. Reasoning and the `links-row` escape hatch are in the spec, §5.
 
-`/community` is the brand side, and it is a **container**: Customer Builds and
-The Standard, with Events and Giveaways when they exist. The Manual left for
-its own L1.
+`/customer-builds` is one page, not a section: the grid, the social feed and
+the submit CTA together, so the L1 has no children and no dropdown. It was a
+child of a **Community** container until a scan of the segment found nobody
+wraps this — Custom Offsets, Rough Country and Krietz Customs all put the
+gallery at top level. Community returns as a name when Ambassadors or Events is
+real. Full spec in `docs/plans/customer-builds.md`; the thing that cannot be
+deferred is the **vehicle reference on every entry**, because retrofitting it
+onto a hundred published rows is a job nobody does.
 
-**The Manual is reference, not a blog** — explainers, product research,
-electrical basics, suspension. Written to be looked up and updated in place, so
-it never carries the stale dateline that makes a neglected blog worse than no
-blog. The genuinely time-stamped content the shop produces has homes already:
-launches in the announcement rotator, trucks in Our Builds and Customer Builds,
-events as their own child when they exist.
-It is **not** where support lives — see 4.7.
-
-Named Community rather than About because it is the only section whose contents
-are expected to grow — About shrinks the moment events land, Journal narrows to
-articles, and a place name makes company philosophy read as furniture. It is
-also the only heading under which The Standard fits: "what we stand for" reads
-as the terms of belonging rather than corporate boilerplate.
-
-**Customer Builds is now the section's largest piece, not its thinnest.** 100+
-trucks exist from install work — the body of work against Our Builds'
-highlight reel. Full spec in `docs/plans/community.md`; the one thing that
-cannot be deferred is the **vehicle reference on every entry**, because
-retrofitting it onto a hundred published rows is a job nobody does.
-
-Originally recorded as the child that had to ship: With nothing but a blog
-behind it the section name over-promises, and customer trucks are free content,
-social proof to link from product pages, and model-specific search traffic.
-Distinct from Custom Work's Our Builds, which is the shop's own work.
-
-`/the-standard` is now an **L2 under Community**, not an L1 section. Its URL
-does not move: an L2 with an explicit `link` and no `slug` falls back to the
-link, so nav position and path are independent here.
+`/the-standard` has **no nav entry at all** now — company philosophy is footer
+territory. It stays a real page and a reserved segment. The argument itself
+does its hardest work on the Custom Work landing, where the trust decision
+happens.
 
 **The blog needs a content-source decision before it gets a route.** Shopify
 articles are queryable on the Storefront API, which beats a deploy per post —
 settle that before scaffolding, and name the blog at the same time.
 
-**The L1 set is five.** Custom Work · Parts · Lifestyle · Community · The
-Manual. The Manual was a Community child until it was clear it did not belong
+**The L1 set is five.** Custom Work · Parts · Lifestyle · Customer Builds ·
+The Manual. The Manual was a Community child until it was clear it did not belong
 there — reference and expertise against a section about people — and until the
 point that it is the section most likely to bring strangers to the site at all,
 which is a poor thing to bury two clicks down. Support
