@@ -24,6 +24,7 @@ Requires env vars from `.env.example` in `.env.local`: `SHOPIFY_STORE_DOMAIN`, `
 - `docs/shopify-setup.md` — the complete Shopify admin checklist in dependency order: metaobject/metafield definitions, webhooks, collections, nav entries, vehicle entries, product tagging, storefront filters. Authoritative for anything that has to exist in the admin, including the full webhook reference (Part 9).
 - `docs/plans/OPEN-ITEMS.md` — every red flag, accepted limit, and deferred piece of work still outstanding. Read before touching routing, SEO, or fitment. The shipped plans it came from (garage Phase 1/2, category URLs Phase 3) were folded into this file and deleted.
 - `docs/plans/custom-work.md` — the `/custom-work` section spec: its three L2 code routes, why they nest under the section path, and why the section is capped at two nav levels. Nothing in it is built yet.
+- `docs/plans/community.md` — the Community re-cut: the blog promoted to a new L1 (**The Manual**), The Standard demoted to no nav slot, and Community reduced to people-side content. Also nothing built yet.
 
 ## Imports
 
@@ -60,7 +61,7 @@ Cart state lives in Shopify, identified by a `cartId` cookie. `components/cart/c
 ### Routes (`app/`)
 
 - `/` — homepage; `/product/[handle]` — product detail; `/search` — text search with sort options from `lib/constants.ts` (`sorting`).
-- `/contact`, `/app`, `/support`, `/quote`, `/the-standard`, `/parts`, `/custom-work`, `/lifestyle`, `/community` — custom code routes. The last four are the L1 nav sections; the rest are ordinary pages (`/the-standard` sits at L2 under Community). All of them **permanently reserve those paths**: a static route always beats the catch-all, so no collection handle or category slug can ever use them.
+- `/contact`, `/app`, `/support`, `/quote`, `/the-standard`, `/parts`, `/custom-work`, `/lifestyle`, `/community` — custom code routes. `/parts`, `/custom-work`, `/lifestyle` and `/community` are L1 nav sections; the rest are ordinary pages. `/the-standard` has **no nav entry at all** — it is linked contextually (`docs/plans/community.md` §4). All of them **permanently reserve those paths**: a static route always beats the catch-all, so no collection handle or category slug can ever use them. A fifth L1, **The Manual** (`/the-manual`), is spec'd but not built.
 - `app/[...path]` — the category URL space (below).
 - `/search/[collection]` — legacy, redirects to the canonical category path.
 - `proxy.ts` — issues the **real** 308s (the file convention formerly called `middleware.ts`).
@@ -70,7 +71,7 @@ Cart state lives in Shopify, identified by a `cartId` cookie. `components/cart/c
 
 **Category paths are derived from `nav_item` tree position.** An author types one `slug` per item; the app builds the path. Re-parenting an item in admin moves its URL, so the menu and the URL space cannot disagree — the previous design let them drift, and five of seven live nav links 404'd as a result.
 
-- **L1 is a section, not a segment.** The four nav-bar items group the menu and contribute nothing to any URL. `/lighting` is valid; `/parts/lighting` never exists. L1's own `link` points at its code route.
+- **L1 is a section, not a segment.** The nav-bar items group the menu and contribute nothing to any URL. `/lighting` is valid; `/parts/lighting` never exists. L1's own `link` points at its code route.
 - **A node with no slug is a heading** — it contributes no segment and its children attach to _its_ parent's path. Headings never appear in a URL or a breadcrumb.
 - **A node with an invalid or duplicate slug is dropped along with its subtree**, with a `console.error`. The menu entry stays so the breakage is visible.
 - **Slug rules (binding):** `^[a-z0-9]+(-[a-z0-9]+)*$`; **never four digits** (it would collide with the vehicle year segment); unique among siblings, and across the L1 sections at depth 1.

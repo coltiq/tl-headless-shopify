@@ -244,7 +244,7 @@ simply unread until then.
   fitment filter as the grid** — otherwise a landing page quietly becomes the
   one place that shows parts that don't fit.
 
-### 4.2 The four L1 sections are title-only stubs
+### 4.2 The L1 sections are title-only stubs
 
 `/parts`, `/custom-work`, `/lifestyle` render a heading and nothing else;
 `/community` and `/the-standard` are scaffolds. Real pages come after the
@@ -271,33 +271,41 @@ demotes the other two from visible cards to hover-to-reveal rows. Per-service an
 per-build **pages** stay available — URL depth costs nothing and needs no nav
 change. Reasoning and the `links-row` escape hatch are in the spec, §5.
 
-`/community` is the brand side, and it is a **container**: Blog, Customer
-Builds, and The Standard to start, with Events and Giveaways when they exist.
-It is **not** where support lives — see 4.7.
+`/community` and the blog were **re-cut on 2026-07-30 — see
+`docs/plans/community.md`.** Community held three things with three different
+authors (customer, company-teaching, company-declaring); only the first was
+community. The blog is promoted to a new L1, **The Manual**; The Standard loses
+its nav slot; Community keeps the people-side content.
 
-Named Community rather than About because it is the only section whose contents
-are expected to grow — About shrinks the moment events land, Journal narrows to
-articles, and a place name makes company philosophy read as furniture. It is
-also the only heading under which The Standard fits: "what we stand for" reads
-as the terms of belonging rather than corporate boilerplate.
+This supersedes the earlier reasoning that Community was "the only heading under
+which The Standard fits." A manifesto works better linked where the price
+objection happens — homepage, footer, product pages — than in a dropdown, which
+is the same call already made for Support (4.7).
 
-**Customer Builds is the child that has to ship.** With nothing but a blog
-behind it the section name over-promises, and customer trucks are free content,
-social proof to link from product pages, and model-specific search traffic.
-Distinct from Custom Work's Our Builds, which is the shop's own work.
+**Customer Builds is still the child that has to ship.** Without it the section
+name over-promises, and customer trucks are free content, social proof to link
+from product pages, and model-specific search traffic. Distinct from Custom
+Work's Our Builds, which is the shop's own work; both pages need a sentence
+pointing at the other.
 
-`/the-standard` is now an **L2 under Community**, not an L1 section. Its URL
-does not move: an L2 with an explicit `link` and no `slug` falls back to the
-link, so nav position and path are independent here.
+`/the-standard` keeps its URL and loses its `nav_item`. No code change —
+`the-standard` is already reserved and in the sitemap.
 
-**The blog needs a content-source decision before it gets a route.** Shopify
-articles are queryable on the Storefront API, which beats a deploy per post —
-settle that before scaffolding, and name the blog at the same time.
+**The Manual's content source still blocks its route**, and now blocks a nav
+entry too: an L1 pointing at nothing is worse than four L1s. Recommendation on
+the table is Shopify articles plus a `products` metafield on the article —
+different from Our Builds, which stays a metaobject. Decide both in one review.
 
-**The L1 set is four.** Custom Work · Parts · Lifestyle · Community. Support
-deliberately gets no bar slot (4.7), and the category rail inside the Parts
-panel is why the bar does not need category items on it — promoting categories
-to L1 would consume the rail's level and burn the L1 cap of 8.
+**The L1 set is five.** Custom Work · Parts · The Manual · Lifestyle ·
+Community. Support deliberately gets no bar slot (4.7), and the category rail
+inside the Parts panel is why the bar does not need category items on it —
+promoting categories to L1 would consume the rail's level and burn the L1 cap
+of 8. Five is the practical ceiling before the bar needs a different treatment.
+
+**There is no shop address or hours anywhere in the codebase** —
+`lib/constants.ts` exports only the phone, and `/contact` is a placeholder. For
+a shop whose differentiator is being a physical place, that is a hole; it is why
+Where to Find Us is proposed as Community's third child.
 
 ### 4.3 "Shop without truck" deletes the truck
 

@@ -468,21 +468,30 @@ Create one **root** entry with handle **`main-nav`** (label "Main nav", no
 link). The app looks this handle up — it must match exactly. The root's
 `children` are the L1 nav bar items.
 
-## 4.2 The four L1 sections
+## 4.2 The five L1 sections
 
 L1 items **group the menu and contribute nothing to any URL**. They are
 standalone destinations backed by custom code routes, which is why their links
 don't look like category paths:
 
-| Label       | `link`         | Route status                  |
-| ----------- | -------------- | ----------------------------- |
-| Custom Work | `/custom-work` | Title-only placeholder, built |
-| Parts       | `/parts`       | Title-only placeholder, built |
-| Lifestyle   | `/lifestyle`   | Title-only placeholder, built |
-| Community   | `/community`   | Scaffolded                    |
+| Label       | `link`         | Route status                          |
+| ----------- | -------------- | ------------------------------------- |
+| Custom Work | `/custom-work` | Title-only placeholder, built         |
+| Parts       | `/parts`       | Title-only placeholder, built         |
+| The Manual  | `/the-manual`  | **No route yet** — blocked, see below |
+| Lifestyle   | `/lifestyle`   | Title-only placeholder, built         |
+| Community   | `/community`   | Scaffolded                            |
 
-Because these are code routes, **a collection can never use those four
+Because these are code routes, **a collection can never use those five
 handles** — a static route always beats the category resolver.
+
+**Order in the bar is the root's `children` order**, nothing derives it. The
+Manual sits beside Parts deliberately: someone reading how to wire rock lights is
+one click from buying them.
+
+**Do not create The Manual's `nav_item` yet.** Its route does not exist, because
+its content source is still undecided (`docs/plans/community.md` §3). An L1
+pointing at a 404 is worse than four L1s.
 
 **Custom Work is deliberately plain-language, not a sub-brand.** Truck Lab is
 one brand with two faces — retail and shop — and neither is subordinate, so the
@@ -502,24 +511,29 @@ children are custom pages, and those are authored the opposite way to Part 4.3:
 produces no category node and no URL of its own, so the menu falls back to
 `link` — which is what keeps nav position and path independent here.
 
-| Parent      | Label           | `link`                         | Route status                                  |
-| ----------- | --------------- | ------------------------------ | --------------------------------------------- |
-| Community   | Blog            | —                              | No route yet; needs a content source decision |
-| Community   | Customer Builds | —                              | No route yet                                  |
-| Community   | The Standard    | `/the-standard`                | Title-only placeholder, built                 |
-| Custom Work | Our Services    | `/custom-work/services`        | Spec'd, not built                             |
-| Custom Work | Our Builds      | `/custom-work/builds`          | Spec'd, not built                             |
-| Custom Work | Inside the Shop | `/custom-work/inside-the-shop` | Spec'd, not built                             |
+| Parent      | Label            | `link`                         | Route status                |
+| ----------- | ---------------- | ------------------------------ | --------------------------- |
+| Community   | Customer Builds  | `/community/builds`            | Spec'd, not built           |
+| Community   | Socials          | `/community/socials`           | Spec'd, not built           |
+| Community   | Where to Find Us | `/community/visit`             | **Proposed, not confirmed** |
+| Custom Work | Our Services     | `/custom-work/services`        | Spec'd, not built           |
+| Custom Work | Our Builds       | `/custom-work/builds`          | Spec'd, not built           |
+| Custom Work | Inside the Shop  | `/custom-work/inside-the-shop` | Spec'd, not built           |
+
+**Two entries were removed from Community** (`docs/plans/community.md`): Blog
+became the L1 **The Manual**, and **The Standard lost its nav slot** while
+keeping `/the-standard`. Do not re-add either as a Community child.
 
 **Write a `description` on every one of these.** Both sections are shallow — no
 L2 has children — so the mega panel renders flat, and the description is the
 only copy in the panel. Blank means a bare title. See "How a section's depth
 changes its panel" in Part 1.1.
 
-**Custom Work's children nest under the section** (`/custom-work/services`, not
-`/our-services`). That is not a contradiction of "L1 contributes no segment":
-that rule governs **derived** category paths, and these are hand-typed `link`
-values on code routes. Full spec in `docs/plans/custom-work.md`.
+**Both sections' children nest under the section path** (`/custom-work/services`,
+`/community/builds` — not `/our-services`, not `/customer-builds`). That is not a
+contradiction of "L1 contributes no segment": that rule governs **derived**
+category paths, and these are hand-typed `link` values on code routes. Full specs
+in `docs/plans/custom-work.md` and `docs/plans/community.md`.
 
 **Adding children to any of these L2s changes the panel for all of them** — the
 layout flips from flat to the rail, and the siblings' descriptions stop showing
@@ -568,7 +582,7 @@ Three rules the walk enforces, worth knowing before authoring:
 - **A slug may never be four digits.** `/lighting/2021` would collide with the
   vehicle year segment. Four-digit slugs are dropped with a console error.
 - Slugs must be unique among siblings — and, because L1 contributes no segment,
-  also across the four L1 sections at the first level. Two sections both
+  also across the five L1 sections at the first level. Two sections both
   holding a `lighting` child produce one `/lighting`; the second is dropped
   with an error.
 - **`/contact`, `/app`, `/support`, `/quote`, `/the-standard`, `/search`, and
@@ -576,7 +590,8 @@ Three rules the walk enforces, worth knowing before authoring:
   same reason — they are static code routes, so no slug or collection handle
   may use them either. The full list is
   `PROXY_RESERVED_SEGMENTS` in `lib/constants.ts`.
-- **The four L1 handles are reserved forever.** `/parts`, `/custom-work`,
+- **The five L1 handles are reserved forever.** `/parts`, `/custom-work`,
+  `/the-manual`,
   `/lifestyle`, and `/community` are static code routes and always beat
   the category resolver, so no slug (and no collection handle) can ever use
   them.
