@@ -172,7 +172,15 @@ function MegaPanel({
         <div className="mx-auto max-w-(--container-page) px-(--spacing-gutter) pb-[34px] pt-[30px]">
           {feature ? (
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-              <div className="grid content-start gap-3">
+              {/* Two-up past three cards. Stacked in one column they run about
+                  110px each, so a fourth turns a 320px panel into a 440px one
+                  — taller than the feature card it is meant to sit beside. */}
+              <div
+                className={clsx(
+                  "grid content-start gap-3",
+                  cards.length > 3 && "sm:grid-cols-2",
+                )}
+              >
                 {cards.map((child) => (
                   <FlatCard key={child.title} item={child} compact />
                 ))}
