@@ -50,6 +50,12 @@ export function DesktopNav({
   const lastPointerWasTouch = useRef(false);
 
   const close = () => setOpen(null);
+
+  // Dismissal is on click rather than on a pathname effect. usePathname() here
+  // makes this route bail out of caching — the component sits outside any
+  // Suspense boundary — and the click handlers fire immediately anyway, where
+  // an effect would leave the panel up until the route committed.
+
   // First rail item preselected so the panel is never half-empty.
   const openPanel = (index: number) => {
     setOpen(index);
@@ -91,7 +97,12 @@ export function DesktopNav({
                   ) {
                     e.preventDefault();
                     openPanel(index);
+                    return;
                   }
+                  // Navigating, so the panel goes with it. Without this it
+                  // stays up over the new page until the cursor happens to
+                  // leave it, since onMouseLeave is the only other dismissal.
+                  close();
                 }}
                 className={clsx(
                   // Pure white for every item, panel or not. The dimmed state
@@ -118,7 +129,12 @@ export function DesktopNav({
       </div>
 
       {openItem && openItem.items.length > 0 ? (
-        <MegaPanel item={openItem} rail={rail} onRailChange={setRail} />
+        <MegaPanel
+          item={openItem}
+          rail={rail}
+          onRailChange={setRail}
+          onNavigate={close}
+        />
       ) : null}
     </div>
   );
@@ -128,10 +144,12 @@ function MegaPanel({
   item,
   rail,
   onRailChange,
+  onNavigate,
 }: {
   item: MenuItem;
   rail: number;
   onRailChange: (index: number) => void;
+  onNavigate: () => void;
 }) {
   // Level-2 items styled "links-row" are pulled out of the rail: their
   // children render as the links row beneath the rule.
@@ -168,7 +186,7 @@ function MegaPanel({
       ? railItems.filter((child) => child !== feature)
       : railItems;
     return (
-      <PanelShell>
+      <PanelShell onNavigate={onNavigate}>
         <div className="mx-auto max-w-(--container-page) px-(--spacing-gutter) pb-[34px] pt-[30px]">
           {feature ? (
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
@@ -198,7 +216,7 @@ function MegaPanel({
   }
 
   return (
-    <PanelShell>
+    <PanelShell onNavigate={onNavigate}>
       {/* No gutter padding here: the fog rail runs to the page-width boundary
           while its items carry the gutter, keeping text aligned with the nav. */}
       <div className="mx-auto grid max-w-(--container-page) grid-cols-[262px_1fr]">
@@ -341,9 +359,21 @@ function MegaPanel({
 //
 // Hovers are white overlays rather than new tokens, so they compose on
 // whichever dark ground they land on.
-function PanelShell({ children }: { children: ReactNode }) {
+function PanelShell({
+  children,
+  onNavigate,
+}: {
+  children: ReactNode;
+  onNavigate: () => void;
+}) {
   return (
-    <div className="absolute inset-x-0 top-full z-50 border-b-[2.5px] border-tl-indigo bg-tl-shell shadow-[0_26px_60px_-20px_rgba(0,0,0,0.55)]">
+    // Any click in here dismisses the panel. Catching it on the container
+    // rather than on each link covers the cards, the rail, the feature and the
+    // links row at once — and keeps working for whatever gets added next.
+    <div
+      onClick={onNavigate}
+      className="absolute inset-x-0 top-full z-50 border-b-[2.5px] border-tl-indigo bg-tl-shell shadow-[0_26px_60px_-20px_rgba(0,0,0,0.55)]"
+    >
       {children}
     </div>
   );
