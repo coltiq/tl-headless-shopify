@@ -92,10 +92,11 @@ export const PROXY_RESERVED_SEGMENTS = new Set([
 export const SHOP_PHONE_DISPLAY = "(205) 539-9794";
 export const SHOP_PHONE_HREF = "tel:+12055399794";
 
-// Direct lines for the two halves of the shop, rendered by
-// /custom-work/services. Each falls back to SHOP_PHONE_* while empty, so the
-// page ships today on the main number and swaps to direct lines by editing two
-// constants — no markup change, and no dead tel: link in the meantime.
+// Direct lines by service area, rendered at the bottom of
+// /custom-work/services for people who already know what they need. Each falls
+// back to SHOP_PHONE_* while empty, so the page ships today on the main number
+// and splits by editing four constants — no markup change, and no dead tel:
+// link in the meantime. Not personal numbers.
 export const LIGHTING_PHONE_DISPLAY = "";
 export const LIGHTING_PHONE_HREF = "";
 export const BUILD_PHONE_DISPLAY = "";
