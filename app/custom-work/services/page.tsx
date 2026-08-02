@@ -344,7 +344,7 @@ function Also() {
       <SectionHeading
         eyebrow="Also in the shop"
         title="And the rest of it"
-        lead="If it bolts to a truck, ask. We turn down work we'd do badly, and we'll say so on the first call."
+        lead="If it bolts or wires to a truck, ask. We turn down work we'd do badly, and we'll say so up front."
       />
       <ul className="mt-9 grid list-none gap-x-10 gap-y-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
         {ALSO.map((item) => (
