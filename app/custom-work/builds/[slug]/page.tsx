@@ -22,9 +22,12 @@ export async function generateMetadata(props: {
 
   if (!build) return notFound();
 
-  const title = build.vehicle
-    ? `${build.title} — ${vehicleLabel(build.vehicle)}`
-    : build.title;
+  // The truck belongs in the title tag even when the heading is already the
+  // truck — search results have no eyebrow to carry it.
+  const title =
+    build.title && build.vehicle
+      ? `${build.title} — ${vehicleLabel(build.vehicle)}`
+      : build.heading;
 
   return {
     title,
@@ -58,7 +61,11 @@ export default async function BuildPage(props: {
 
   if (!build) return notFound();
 
-  const vehicle = build.vehicle ? vehicleLabel(build.vehicle) : null;
+  // Only when the heading is a nickname — otherwise the heading is the truck
+  // and the line above it would repeat itself.
+  const vehicle =
+    build.title && build.vehicle ? vehicleLabel(build.vehicle) : null;
+  const scope = build.scope ? scopeLabel(build.scope) : null;
 
   return (
     <>
@@ -83,14 +90,13 @@ export default async function BuildPage(props: {
           ← All builds
         </Link>
 
-        {vehicle ? (
+        {vehicle || scope ? (
           <p className="mt-8 font-tl-mono text-[10px] uppercase tracking-[0.16em] text-tl-mute-white">
-            {vehicle}
-            {build.scope ? ` · ${scopeLabel(build.scope)}` : ""}
+            {[vehicle, scope].filter(Boolean).join(" · ")}
           </p>
         ) : null}
         <h1 className="mt-4 max-w-[18ch] font-tl-sans text-4xl font-bold uppercase leading-[1.02] tracking-[0.01em] text-tl-ink md:text-6xl">
-          {build.title}
+          {build.heading}
         </h1>
         {build.summary ? (
           <p className="mt-5 max-w-[52ch] font-tl-text text-lg leading-relaxed text-tl-steel">

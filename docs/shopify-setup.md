@@ -240,23 +240,39 @@ and nothing 500s — `getTruckBuilds()` returns `[]` on any failure and logs. Th
 means a missing definition, a missing scope, and an empty definition all look
 identical on the page. **Check the logs, not the page.**
 
-| Field key    | Type                             | Required | Notes                                                                                                               |
-| ------------ | -------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `title`      | Single line text                 | Yes      | The build's name. Set as the display name field                                                                     |
-| `slug`       | Single line text                 | Yes      | **URL segment.** Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Must be unique — duplicates are dropped with an error |
-| `summary`    | Single line text                 | No       | The card line under the title, and the meta description. Keep it to one short sentence                              |
-| `scope`      | Single line text                 | No       | Preset `full-build` or `install`. An unrecognised value renders as itself rather than vanishing                     |
-| `body`       | Multi-line text                  | No       | The build's story. **Blank lines separate paragraphs**; rendered as text, never as HTML                             |
-| `hero`       | File                             | No       | The card photo and the page's banner. Accepts images only                                                           |
-| `gallery`    | File, list                       | No       | Up to 20 read. Renders as a two-column grid under "The build"                                                       |
-| `products`   | Product reference, list          | No       | Up to 24 read. **This is the retail cross-link** — every part on the truck becomes a link to buy it                 |
-| `vehicle`    | Metaobject reference → `vehicle` | No       | The generation. Needs `year` set too, or nothing renders                                                            |
-| `year`       | Integer                          | No       | The truck's actual year. Must fall inside the referenced generation's range                                         |
-| `sort_order` | Integer                          | No       | Ascending. Decides grid order; entries without it fall to the back, newest-edited first                             |
+| Field key    | Type                             | Required  | Notes                                                                                                               |
+| ------------ | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| `title`      | Single line text                 | See below | The truck's **nickname**. Set as the display name field. Optional when `vehicle` + `year` are set — see below       |
+| `slug`       | Single line text                 | Yes       | **URL segment.** Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Must be unique — duplicates are dropped with an error |
+| `summary`    | Single line text                 | No        | The card line under the title, and the meta description. Keep it to one short sentence                              |
+| `scope`      | Single line text                 | No        | Preset `full-build` or `install`. An unrecognised value renders as itself rather than vanishing                     |
+| `body`       | Multi-line text                  | No        | The build's story. **Blank lines separate paragraphs**; rendered as text, never as HTML                             |
+| `hero`       | File                             | No        | The card photo and the page's banner. Accepts images only                                                           |
+| `gallery`    | File, list                       | No        | Up to 20 read. Renders as a two-column grid under "The build"                                                       |
+| `products`   | Product reference, list          | No        | Up to 24 read. **This is the retail cross-link** — every part on the truck becomes a link to buy it                 |
+| `vehicle`    | Metaobject reference → `vehicle` | No        | The generation. Needs `year` set too, or nothing renders                                                            |
+| `year`       | Integer                          | No        | The truck's actual year. Must fall inside the referenced generation's range                                         |
+| `sort_order` | Integer                          | No        | Ascending. Decides grid order; entries without it fall to the back, newest-edited first                             |
 
 Enable **Storefront API access**, and add a `metaobjects/*` webhook subscription
 if one doesn't already exist (Part 2 — the same three subscriptions cover every
 metaobject type).
+
+### Nicknames are optional
+
+Show trucks tend to have a name; a customer's daily driver usually doesn't. So
+`title` is the **nickname**, and a build only needs one of two things to be
+publishable: a `title`, or a `vehicle` + `year`.
+
+- **With a nickname:** the card reads `2022 Ford F-150` in small type above
+  **Midnight Runner**.
+- **Without one:** the truck becomes the heading — **2022 Ford F-150** — and the
+  small line above it disappears rather than saying the same words twice.
+
+An entry with neither is dropped with an error, because there would be nothing
+to call it. Shopify still wants a display name for its own admin list, so a
+blank `title` shows the entry as untitled there — set it if that bothers you,
+and the storefront will simply use it as the heading.
 
 ### `vehicle` and `year` are a pair
 

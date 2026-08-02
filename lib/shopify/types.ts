@@ -471,11 +471,17 @@ export type ShopifyTruckBuildsOperation = {
   };
 };
 
-// App-facing build record. `slug` and `title` are the only guaranteed fields —
-// everything else is optional in admin and the pages degrade around it.
+// App-facing build record. `slug` and `heading` are the only guaranteed
+// fields — everything else is optional in admin and the pages degrade around
+// it.
 export type TruckBuild = {
   slug: string;
-  title: string;
+  // The truck's nickname, when it has one. Plenty of builds never get one, so
+  // this is null as often as not — read `heading` to render.
+  title: string | null;
+  // What to actually print: the nickname, or the truck itself when there is no
+  // nickname. Computed once in reshapeTruckBuilds so no caller has to decide.
+  heading: string;
   // Free-form in admin; the page maps known values to display text and falls
   // back to hiding the badge, so a new preset value can never render raw.
   scope: string | null;

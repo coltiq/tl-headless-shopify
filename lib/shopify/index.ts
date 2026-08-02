@@ -8,6 +8,7 @@ import {
 import {
   FALLBACK_VEHICLE_GENERATIONS,
   vehicleHandle,
+  vehicleLabel,
   type VehicleGeneration,
 } from "lib/fitment";
 import { isShopifyError } from "lib/type-guards";
@@ -738,11 +739,18 @@ const reshapeTruckBuilds = (nodes: ShopifyTruckBuildNode[]): TruckBuild[] => {
   // Per-entry validation — one bad admin entry must not blank the grid.
   for (const node of nodes) {
     const slug = node.slug?.value?.trim();
-    const title = node.title?.value?.trim();
+    const title = node.title?.value?.trim() || null;
+    const vehicle = reshapeBuildVehicle(node);
 
-    if (!slug || !slugPattern.test(slug) || !title) {
+    // **A nickname is optional.** Show trucks often have one and daily drivers
+    // don't, so the heading falls back to the truck itself — "2023 Ford F-250"
+    // — and the card drops its vehicle eyebrow rather than printing the same
+    // words twice. An entry needs a name from one source or the other.
+    const heading = title ?? (vehicle ? vehicleLabel(vehicle) : null);
+
+    if (!slug || !slugPattern.test(slug) || !heading) {
       console.error(
-        `Dropping invalid truck_build entry: needs a title and a lowercase-hyphenated slug${keyMismatchHint(node)}`,
+        `Dropping invalid truck_build entry: needs a lowercase-hyphenated slug, plus either a title or a vehicle with a year${keyMismatchHint(node)}`,
         node,
       );
       continue;
@@ -771,19 +779,20 @@ const reshapeTruckBuilds = (nodes: ShopifyTruckBuildNode[]): TruckBuild[] => {
 
     const gallery: Image[] = [];
     for (const item of node.gallery?.references?.nodes ?? []) {
-      const image = reshapeImage(item?.image ?? null, title);
+      const image = reshapeImage(item?.image ?? null, heading);
       if (image) gallery.push(image);
     }
 
     builds.push({
       slug,
       title,
+      heading,
       scope: node.scope?.value?.trim() || null,
       summary: node.summary?.value?.trim() || null,
       body: node.body?.value?.trim() || null,
-      hero: reshapeImage(node.hero?.reference?.image ?? null, title),
+      hero: reshapeImage(node.hero?.reference?.image ?? null, heading),
       gallery,
-      vehicle: reshapeBuildVehicle(node),
+      vehicle,
       products,
       sortOrder: parseSortOrder(node.sortOrder?.value),
     });

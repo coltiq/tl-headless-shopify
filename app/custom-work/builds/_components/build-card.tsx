@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -11,17 +12,19 @@ import type { Image as ShopifyImage } from "lib/shopify/types";
 // paragraph is noise, but two short facts still read.
 export function BuildCard({
   slug,
-  title,
+  heading,
   summary,
   hero,
   vehicle,
   partCount,
 }: {
   slug: string;
-  title: string;
+  /** The nickname, or the truck itself when the build hasn't got one. */
+  heading: string;
   summary: string | null;
   hero: ShopifyImage | null;
-  /** Composed "2022 Ford F-150" — never a bare generation. */
+  /** Composed "2022 Ford F-150" — never a bare generation, and null whenever
+   *  the heading is already the truck, so the card never says it twice. */
   vehicle: string | null;
   partCount: number;
 }) {
@@ -55,8 +58,15 @@ export function BuildCard({
           {vehicle}
         </p>
       ) : null}
-      <h2 className="mt-2 font-tl-sans text-xl font-bold uppercase leading-tight tracking-[0.01em] text-tl-ink underline decoration-transparent underline-offset-[6px] transition-colors group-hover:decoration-tl-indigo">
-        {title}
+      {/* Takes the eyebrow's top margin when there is no eyebrow, so a
+          nickname-less card doesn't crowd its photograph. */}
+      <h2
+        className={clsx(
+          "font-tl-sans text-xl font-bold uppercase leading-tight tracking-[0.01em] text-tl-ink underline decoration-transparent underline-offset-[6px] transition-colors group-hover:decoration-tl-indigo",
+          vehicle ? "mt-2" : "mt-4",
+        )}
+      >
+        {heading}
       </h2>
       {summary ? (
         <p className="mt-2 line-clamp-2 font-tl-text text-sm leading-snug text-tl-steel">

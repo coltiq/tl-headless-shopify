@@ -48,11 +48,17 @@ export default async function BuildsPage() {
               <BuildCard
                 key={build.slug}
                 slug={build.slug}
-                title={build.title}
+                heading={build.heading}
                 summary={build.summary}
                 hero={build.hero}
                 partCount={build.products.length}
-                vehicle={build.vehicle ? vehicleLabel(build.vehicle) : null}
+                // Only when the heading is a nickname. Without one the heading
+                // *is* the truck, and an eyebrow would repeat it.
+                vehicle={
+                  build.title && build.vehicle
+                    ? vehicleLabel(build.vehicle)
+                    : null
+                }
               />
             ))}
           </div>
