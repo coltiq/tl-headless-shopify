@@ -74,10 +74,10 @@ const FEATURED = [
     // the customer has probably already had, so naming the thing we don't do
     // beats any adjective about quality.
     lead: "Rings mounted on bolts and lock nuts — not the self-tappers most installs run, which work loose with vibration. Two rows for a clean glow, twenty for a show truck, all on the same app as the rock lights.",
-    // No repeating the app — the lead already has it. A spec item has to earn
-    // its place by adding a fact, and the switch option is one the lead
-    // doesn't mention.
-    spec: "2, 4, 5, 10 & 20-row rings · bolts and lock nuts · switch or app controlled",
+    // Not "switch or app" — the app is always there, and a switch panel is
+    // something you add to it. Framing them as alternatives got the product
+    // wrong. This also keeps the slot on a fact the lead doesn't already have.
+    spec: "2, 4, 5, 10 & 20-row rings · bolts and lock nuts · optional switch panel",
     price: "/custom-work/pricing#wheel-lights",
     imageBrief:
       "One wheel, tight and square on, ring lit, dark background — a product photograph more than a truck photograph. If you have a build shot of the mounts bolted up before the wheel went back on, use that instead: it proves the hardware claim this row is making.",
