@@ -111,19 +111,36 @@ const FEATURED = [
 ];
 
 // Everything the featured four don't cover. Flat and unglamorous on purpose:
-// its job is to answer "do you do X" for the person scanning for one word.
+// its job is to answer "do you do X" for the person scanning for one word, so
+// length is a feature here in a way it isn't anywhere else on the page.
+//
+// Ordered lighting → electrical → suspension & finish → bolt-ons, so a scanner
+// lands in the right neighbourhood rather than reading all of it.
+//
+// TODO(copy): cab and mirror lights are confirmed. The rest were extrapolated
+// from what a lighting-and-suspension shop usually takes on — delete anything
+// this shop doesn't actually do. A list that promises work you turn away costs
+// more than a short one.
 const ALSO = [
+  "Cab & mirror lights",
+  "Amber grille lights",
   "Light bars & pods",
   "Ditch & reverse lighting",
+  "Bed & under-glow lighting",
+  "Interior & footwell lighting",
+  "Headlight & taillight retrofits",
   "Wiring, harnesses & switch panels",
+  "Trailer wiring & brake controllers",
   "Audio & 12V power",
   "Powder coating",
   "Suspension & re-gearing",
   "Wheels & tires",
   "Bumpers, armor & steps",
+  "Grilles & fender flares",
+  "Chase racks & bed racks",
+  "Winches & recovery points",
   "Bed covers & tonneaus",
   "Exhaust work",
-  "Full builds, start to finish",
 ];
 
 // Two numbers for people who already know which side of the shop they need.
@@ -148,10 +165,13 @@ export default function ServicesPage() {
   return (
     <>
       <HeroBanner />
+      <div className="page-width pt-20 md:pt-28">
+        <Featured />
+      </div>
+      <FullBuilds />
       {/* pb-28 clears the mobile call bar, which would otherwise sit on top of
           the closing CTA — the one element it must never cover. */}
-      <div className="page-width pb-28 pt-20 md:pb-24 md:pt-28">
-        <Featured />
+      <div className="page-width pb-28 md:pb-24">
         <Also />
         <Costs />
         <DirectLines />
@@ -285,6 +305,54 @@ function Featured() {
             </div>
           </article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+// The only full-bleed band in the body, and the reason the page-width container
+// is split in two around it. Full builds are the largest thing the shop sells,
+// and the four featured rows all read as single jobs — this is where the page
+// says they combine. Breaking the container also gives the page a second
+// photographic moment and separates the four services from the long list.
+function FullBuilds() {
+  return (
+    <section className="mt-24 bg-tl-shell py-16 text-white md:py-24">
+      <div className="page-width grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <p className="font-tl-mono text-[10px] uppercase tracking-[0.16em] text-white/60">
+            Full builds
+          </p>
+          <h2 className="mt-4 max-w-[14ch] font-tl-sans text-4xl font-bold uppercase leading-[1.02] tracking-[0.01em] md:text-5xl">
+            One truck, all of it
+          </h2>
+          <div className="mt-6 grid max-w-[48ch] gap-4 font-tl-text text-lg leading-relaxed text-white/75">
+            <p>
+              Most trucks come in for one thing. Some come in stock and leave
+              finished — lift, wheels, lighting, trim and coating planned as one
+              truck instead of six jobs booked around each other.
+            </p>
+            {/* The real benefit, and the one worth stating plainly: at most
+                shops the customer ends up coordinating between vendors. */}
+            <p>
+              One of us runs the whole build, so you aren&apos;t the one chasing
+              it.
+            </p>
+          </div>
+          <Link
+            href="/custom-work/builds"
+            className="mt-8 inline-flex items-center gap-2 font-tl-sans text-sm font-bold uppercase tracking-[0.08em] text-white underline underline-offset-[6px]"
+          >
+            See what we&apos;ve built
+            <span aria-hidden>→</span>
+          </Link>
+        </div>
+
+        <ImageSlot
+          ratio="aspect-[4/3]"
+          tone="dark"
+          brief="A finished build, shot whole — the single truck that best shows everything on this page done at once. Use a different vehicle from the banner photo so the page isn't showing the same truck twice."
+        />
       </div>
     </section>
   );
