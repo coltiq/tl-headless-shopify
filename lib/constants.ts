@@ -92,6 +92,15 @@ export const PROXY_RESERVED_SEGMENTS = new Set([
 export const SHOP_PHONE_DISPLAY = "(205) 539-9794";
 export const SHOP_PHONE_HREF = "tel:+12055399794";
 
+// Direct lines for the two halves of the shop, rendered by
+// /custom-work/services. Each falls back to SHOP_PHONE_* while empty, so the
+// page ships today on the main number and swaps to direct lines by editing two
+// constants — no markup change, and no dead tel: link in the meantime.
+export const LIGHTING_PHONE_DISPLAY = "";
+export const LIGHTING_PHONE_HREF = "";
+export const BUILD_PHONE_DISPLAY = "";
+export const BUILD_PHONE_HREF = "";
+
 // Store links for the lighting control app, rendered by `/app`. Each button
 // collapses while its URL is empty, so a dead store link can never ship.
 export const APP_STORE_URL = "";
