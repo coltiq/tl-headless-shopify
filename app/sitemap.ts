@@ -1,4 +1,9 @@
-import { getCategoryTree, getCollections, getProducts } from "lib/shopify";
+import {
+  getCategoryTree,
+  getCollections,
+  getProducts,
+  getTruckBuilds,
+} from "lib/shopify";
 import { baseUrl, validateEnvironmentVariables } from "lib/utils";
 import { MetadataRoute } from "next";
 
@@ -95,11 +100,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
+  // Per-build pages. The metaobject carries no updated-at the Storefront API
+  // exposes, so these take `now` — acceptable for a set this small, and a
+  // wrong-but-recent date is better than omitting real indexable pages.
+  const buildsPromise = getTruckBuilds().then((builds) =>
+    builds.map((build) => ({
+      url: `${baseUrl}/custom-work/builds/${build.slug}`,
+      lastModified: now,
+    })),
+  );
+
   let fetchedRoutes: Route[] = [];
 
   try {
     fetchedRoutes = (
-      await Promise.all([categoryRoutes(), productsPromise])
+      await Promise.all([categoryRoutes(), productsPromise, buildsPromise])
     ).flat();
   } catch (error) {
     throw JSON.stringify(error, null, 2);

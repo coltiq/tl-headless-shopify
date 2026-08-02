@@ -1,3 +1,5 @@
+import type { VehicleSelection } from "lib/fitment";
+
 export type Maybe<T> = T | null;
 
 export type Connection<T> = {
@@ -415,6 +417,84 @@ export type ShopifyVehiclesOperation = {
       pageInfo: { hasNextPage: boolean };
     };
   };
+};
+
+// Raw shape of a `truck_build` metaobject entry — the shop's own builds. Every
+// field is Maybe: unset metaobject fields resolve to null, a reference pointing
+// at something that isn't the expected type deserializes as {}, and a mis-keyed
+// field is indistinguishable from an empty one. reshapeTruckBuilds validates
+// and drops bad entries so one broken record can't blank the grid.
+export type ShopifyTruckBuildNode = {
+  // Present so a key mismatch can name the keys that *do* exist.
+  type?: string;
+  fields?: { key: string }[];
+  title: Maybe<{ value: string }>;
+  slug: Maybe<{ value: string }>;
+  scope: Maybe<{ value: string }>;
+  summary: Maybe<{ value: string }>;
+  body: Maybe<{ value: string }>;
+  year: Maybe<{ value: string }>;
+  sortOrder: Maybe<{ value: string }>;
+  hero: Maybe<{
+    reference: Maybe<{ image: Maybe<ShopifyMediaImage> }>;
+  }>;
+  gallery: Maybe<{
+    references: Maybe<{ nodes: { image: Maybe<ShopifyMediaImage> }[] }>;
+  }>;
+  // Sub-selects the same keys as queries/vehicles.ts, so a VehicleGeneration
+  // can be rebuilt without a second fetch. The handle is derived, never read.
+  vehicle: Maybe<{ reference: Maybe<ShopifyVehicleNode> }>;
+  products: Maybe<{
+    references: Maybe<{ nodes: ShopifyTruckBuildProductNode[] }>;
+  }>;
+};
+
+type ShopifyMediaImage = {
+  url: string;
+  width: Maybe<number>;
+  height: Maybe<number>;
+  altText: Maybe<string>;
+};
+
+export type ShopifyTruckBuildProductNode = {
+  handle: Maybe<string>;
+  title: Maybe<string>;
+  featuredImage: Maybe<ShopifyMediaImage>;
+};
+
+export type ShopifyTruckBuildsOperation = {
+  data: {
+    metaobjects: {
+      nodes: ShopifyTruckBuildNode[];
+      pageInfo: { hasNextPage: boolean };
+    };
+  };
+};
+
+// App-facing build record. `slug` and `title` are the only guaranteed fields —
+// everything else is optional in admin and the pages degrade around it.
+export type TruckBuild = {
+  slug: string;
+  title: string;
+  // Free-form in admin; the page maps known values to display text and falls
+  // back to hiding the badge, so a new preset value can never render raw.
+  scope: string | null;
+  summary: string | null;
+  body: string | null;
+  hero: Image | null;
+  gallery: Image[];
+  // Composed from the vehicle reference plus the build's own `year`. Null when
+  // either is missing or the year falls outside the generation — the app never
+  // renders a year the truck doesn't come in.
+  vehicle: VehicleSelection | null;
+  products: TruckBuildProduct[];
+  sortOrder: number | null;
+};
+
+export type TruckBuildProduct = {
+  handle: string;
+  title: string;
+  image: Image | null;
 };
 
 // Raw metaobject shapes behind the announcement band. Fields are Maybe

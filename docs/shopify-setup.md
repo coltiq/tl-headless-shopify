@@ -229,6 +229,52 @@ generation's handle as `<make>-<model>-<year_start>-<year_end>`, keeping it
 deterministic and immune to handle typos or Shopify's auto-generation. Set the
 entry handle to the same string anyway, for sanity when browsing the admin.
 
+## 1.2b `truck_build` metaobject
+
+**Name:** Truck build, **Type:** `truck_build`. One entry per build the shop has
+done. Drives the grid at `/custom-work/builds` and a page per entry at
+`/custom-work/builds/<slug>`.
+
+Until this exists the grid renders "The first builds are going up here shortly"
+and nothing 500s — `getTruckBuilds()` returns `[]` on any failure and logs. That
+means a missing definition, a missing scope, and an empty definition all look
+identical on the page. **Check the logs, not the page.**
+
+| Field key    | Type                             | Required | Notes                                                                                                               |
+| ------------ | -------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `title`      | Single line text                 | Yes      | The build's name. Set as the display name field                                                                     |
+| `slug`       | Single line text                 | Yes      | **URL segment.** Validation regex `^[a-z0-9]+(-[a-z0-9]+)*$`. Must be unique — duplicates are dropped with an error |
+| `summary`    | Single line text                 | No       | The card line under the title, and the meta description. Keep it to one short sentence                              |
+| `scope`      | Single line text                 | No       | Preset `full-build` or `install`. An unrecognised value renders as itself rather than vanishing                     |
+| `body`       | Multi-line text                  | No       | The build's story. **Blank lines separate paragraphs**; rendered as text, never as HTML                             |
+| `hero`       | File                             | No       | The card photo and the page's banner. Accepts images only                                                           |
+| `gallery`    | File, list                       | No       | Up to 20 read. Renders as a two-column grid under "The build"                                                       |
+| `products`   | Product reference, list          | No       | Up to 24 read. **This is the retail cross-link** — every part on the truck becomes a link to buy it                 |
+| `vehicle`    | Metaobject reference → `vehicle` | No       | The generation. Needs `year` set too, or nothing renders                                                            |
+| `year`       | Integer                          | No       | The truck's actual year. Must fall inside the referenced generation's range                                         |
+| `sort_order` | Integer                          | No       | Ascending. Decides grid order; entries without it fall to the back, newest-edited first                             |
+
+Enable **Storefront API access**, and add a `metaobjects/*` webhook subscription
+if one doesn't already exist (Part 2 — the same three subscriptions cover every
+metaobject type).
+
+### `vehicle` and `year` are a pair
+
+Neither renders alone. The vehicle metaobject's `label` deliberately carries no
+years (1.2), so the truck name on a card is composed at render time from the
+generation's label plus this entry's `year` — "2022 Ford F-150".
+
+Set one without the other and the card simply shows no truck. Set a `year`
+outside the generation's range and the app drops the vehicle **and logs**,
+rather than printing a truck that doesn't exist.
+
+### Ordering
+
+`sort_order` is the only ordering control. Leave it off every entry and builds
+appear newest-edited first, which drifts every time someone fixes a typo. Set it
+on the handful you want to lead and leave the rest unset — they queue up behind
+in that default order.
+
 ## 1.3 Collection metafield — `custom.fitment_disabled`
 
 Settings → Custom data → Collections → Add definition. **Name** "Fitment
@@ -382,8 +428,8 @@ against the real page instead of guessed at.
 
 **Do this now, before creating any entries.** Six for products and
 collections, then **three per metaobject type you created** — `nav_item`,
-`vehicle`, and each announcement type from Part 1.4. Twelve with the two
-original types; eighteen if you add `announcement` and `announcement_bar_link`.
+`vehicle`, `truck_build`, and each announcement type from Part 1.4. Fifteen with
+those three; twenty-one if you add `announcement` and `announcement_bar_link`.
 
 The full mutations, the inventory table, and the known gaps are in **Part 9**
 at the bottom of this document. Create them, confirm every `userErrors` array
@@ -859,14 +905,15 @@ The handler (`revalidate()` in `lib/shopify/index.ts`) checks the secret, reads
 `x-shopify-topic`, and maps it to a cache tag. Any other topic is acknowledged
 and ignored.
 
-| Topic group | Topics                                                                                 | Tag revalidated                                      | Refreshes                                                                     |
-| ----------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Products    | `products/create`, `products/update`, `products/delete`                                | `TAGS.products`                                      | product pages, grids, search, predictive search                               |
-| Collections | `collections/create`, `collections/update`, `collections/delete`                       | `TAGS.collections`                                   | category pages, collection metadata, sidebar, sitemap, nav fallback           |
-| Metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (one filter per type) | `TAGS.menu` + `TAGS.vehicles` + `TAGS.announcements` | header nav, the vehicle list / garage picker, **and** both announcement bands |
+| Topic group | Topics                                                                                 | Tag revalidated                                                      | Refreshes                                                                                      |
+| ----------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Products    | `products/create`, `products/update`, `products/delete`                                | `TAGS.products`                                                      | product pages, grids, search, predictive search                                                |
+| Collections | `collections/create`, `collections/update`, `collections/delete`                       | `TAGS.collections`                                                   | category pages, collection metadata, sidebar, sitemap, nav fallback                            |
+| Metaobjects | `metaobjects/create`, `metaobjects/update`, `metaobjects/delete` (one filter per type) | `TAGS.menu` + `TAGS.vehicles` + `TAGS.announcements` + `TAGS.builds` | header nav, the vehicle list / garage picker, both announcement bands, **and** the builds grid |
 
-**Metaobject topics revalidate both tags.** The handler only reads
-`x-shopify-topic`, which is identical for `nav_item` and `vehicle`
+**Metaobject topics revalidate every metaobject tag.** The handler only reads
+`x-shopify-topic`, which is identical for `nav_item`, `vehicle`, `truck_build`
+and the announcement
 subscriptions — telling them apart would mean parsing the webhook body's `type`
 field. Both caches are tiny and metaobject edits are rare admin actions, so a
 nav edit also refreshes vehicles and vice versa. Body parsing is the escalation
