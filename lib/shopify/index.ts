@@ -8,6 +8,7 @@ import {
 import {
   FALLBACK_VEHICLE_GENERATIONS,
   vehicleHandle,
+  vehicleLabel,
   type VehicleGeneration,
 } from "lib/fitment";
 import { isShopifyError } from "lib/type-guards";
@@ -21,6 +22,7 @@ import {
   editCartItemsMutation,
   removeFromCartMutation,
 } from "./mutations/cart";
+import { getTruckBuildsQuery } from "./queries/builds";
 import { getCartQuery } from "./queries/cart";
 import {
   getCollectionProductsQuery,
@@ -45,6 +47,7 @@ import {
   Collection,
   Connection,
   Image,
+  Maybe,
   Menu,
   MenuItem,
   PredictiveSearchResult,
@@ -72,9 +75,13 @@ import {
   ShopifyRemoveFromCartOperation,
   ShopifyShopAnnouncementsOperation,
   ShopifyUpdateCartOperation,
+  ShopifyTruckBuildNode,
+  ShopifyTruckBuildsOperation,
   ShopifyVehicleNode,
   ShopifyVehiclesOperation,
   ShopAnnouncements,
+  TruckBuild,
+  TruckBuildProduct,
 } from "./types";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
@@ -702,6 +709,211 @@ export async function getVehicles(): Promise<VehicleGeneration[]> {
   return FALLBACK_VEHICLE_GENERATIONS;
 }
 
+const reshapeImage = (
+  raw: Maybe<{
+    url: string;
+    width: Maybe<number>;
+    height: Maybe<number>;
+    altText: Maybe<string>;
+  }>,
+  fallbackAlt: string,
+): Image | null => {
+  if (!raw?.url) return null;
+  return {
+    url: raw.url,
+    // Shopify returns null dimensions for a few legacy uploads. next/image
+    // needs numbers, and a wrong intrinsic size only costs layout precision
+    // inside an already fixed aspect ratio.
+    width: raw.width ?? 1600,
+    height: raw.height ?? 1200,
+    // An empty alt on a decorative build photo is correct; a filename is not.
+    altText: raw.altText || fallbackAlt,
+  };
+};
+
+const reshapeTruckBuilds = (nodes: ShopifyTruckBuildNode[]): TruckBuild[] => {
+  const slugPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+  const builds: TruckBuild[] = [];
+  const seen = new Set<string>();
+
+  // Per-entry validation — one bad admin entry must not blank the grid.
+  for (const node of nodes) {
+    const slug = node.slug?.value?.trim();
+    const title = node.title?.value?.trim() || null;
+    const vehicle = reshapeBuildVehicle(node);
+
+    // **A nickname is optional.** Show trucks often have one and daily drivers
+    // don't, so the heading falls back to the truck itself — "2023 Ford F-250"
+    // — and the card drops its vehicle eyebrow rather than printing the same
+    // words twice. An entry needs a name from one source or the other.
+    const heading = title ?? (vehicle ? vehicleLabel(vehicle) : null);
+
+    if (!slug || !slugPattern.test(slug) || !heading) {
+      console.error(
+        `Dropping invalid truck_build entry: needs a lowercase-hyphenated slug, plus either a title or a vehicle with a year${keyMismatchHint(node)}`,
+        node,
+      );
+      continue;
+    }
+
+    // Two builds on one slug would make /custom-work/builds/<slug> ambiguous.
+    // Keep the first, drop the rest — admin fixes the data, the app never
+    // guesses which one was meant.
+    if (seen.has(slug)) {
+      console.error(`Dropping truck_build entry with duplicate slug: ${slug}`);
+      continue;
+    }
+    seen.add(slug);
+
+    const products: TruckBuildProduct[] = [];
+    for (const product of node.products?.references?.nodes ?? []) {
+      // A deleted or unpublished product deserializes as {} under the
+      // `... on Product` fragment. Skip it rather than render a dead link.
+      if (!product?.handle || !product.title) continue;
+      products.push({
+        handle: product.handle,
+        title: product.title,
+        image: reshapeImage(product.featuredImage, product.title),
+      });
+    }
+
+    const gallery: Image[] = [];
+    for (const item of node.gallery?.references?.nodes ?? []) {
+      const image = reshapeImage(item?.image ?? null, heading);
+      if (image) gallery.push(image);
+    }
+
+    builds.push({
+      slug,
+      title,
+      heading,
+      scope: node.scope?.value?.trim() || null,
+      summary: node.summary?.value?.trim() || null,
+      body: node.body?.value?.trim() || null,
+      hero: reshapeImage(node.hero?.reference?.image ?? null, heading),
+      gallery,
+      vehicle,
+      products,
+      sortOrder: parseSortOrder(node.sortOrder?.value),
+    });
+  }
+
+  // `sort_order` ascending decides which build leads the grid. Unset entries
+  // fall to the back in the query's newest-first order rather than jumping to
+  // the front, so adding the field to one build doesn't reshuffle the rest.
+  builds.sort((a, b) => {
+    if (a.sortOrder === b.sortOrder) return 0;
+    if (a.sortOrder === null) return 1;
+    if (b.sortOrder === null) return -1;
+    return a.sortOrder - b.sortOrder;
+  });
+
+  return builds;
+};
+
+const parseSortOrder = (raw: string | undefined): number | null => {
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
+};
+
+// Composes the build's own `year` with the referenced generation. Returns null
+// rather than a bare generation: per the fitment contract a VehicleGeneration
+// must never reach a component that renders text, because the year is what the
+// visitor actually sees.
+const reshapeBuildVehicle = (
+  node: ShopifyTruckBuildNode,
+): TruckBuild["vehicle"] => {
+  const ref = node.vehicle?.reference;
+  const make = ref?.make?.value;
+  const model = ref?.model?.value;
+  const label = ref?.label?.value;
+  const yearStart = Number(ref?.yearStart?.value);
+  const yearEnd = Number(ref?.yearEnd?.value);
+  const year = Number(node.year?.value);
+
+  if (!make || !model || !label) return null;
+  if (!Number.isInteger(yearStart) || !Number.isInteger(yearEnd)) return null;
+
+  // A year the generation doesn't cover means the build or the reference is
+  // wrong. Drop the vehicle instead of printing a truck that doesn't exist.
+  if (!Number.isInteger(year) || year < yearStart || year > yearEnd) {
+    if (node.year?.value) {
+      console.error(
+        `truck_build "${node.slug?.value}": year ${node.year.value} is outside ${make} ${model} ${yearStart}-${yearEnd}`,
+      );
+    }
+    return null;
+  }
+
+  return {
+    gen: {
+      handle: vehicleHandle(make, model, yearStart, yearEnd),
+      label,
+      shortLabel: ref?.shortLabel?.value || label,
+      make,
+      model,
+      yearStart,
+      yearEnd,
+    },
+    year,
+  };
+};
+
+// Every build the shop has published, ordered for the grid. Returns [] rather
+// than throwing when the metaobject can't be read — a missing
+// unauthenticated_read_metaobjects scope, no `truck_build` definition, or
+// storefront access left off all throw. The grid goes empty and the page still
+// renders; check the logs.
+export async function getTruckBuilds(): Promise<TruckBuild[]> {
+  "use cache";
+  cacheTag(TAGS.builds);
+  cacheLife("days");
+
+  if (!endpoint) {
+    console.log("Skipping getTruckBuilds - Shopify not configured");
+    return [];
+  }
+
+  try {
+    const res = await shopifyFetch<ShopifyTruckBuildsOperation>({
+      query: getTruckBuildsQuery,
+    });
+    const metaobjects = res.body.data.metaobjects;
+
+    // Silent truncation would read as "build missing from the grid".
+    if (metaobjects.pageInfo.hasNextPage) {
+      console.error(
+        "getTruckBuilds: over 100 truck_build metaobjects — entries beyond the page cap are missing",
+      );
+    }
+
+    return reshapeTruckBuilds(metaobjects.nodes);
+  } catch (e) {
+    console.error("getTruckBuilds failed, rendering an empty grid", e);
+    return [];
+  }
+}
+
+// Resolves one build against the same cached list the grid uses, so a detail
+// page costs no extra Shopify traffic.
+//
+// **`"use cache"` here is load-bearing, not an optimisation.** The route has no
+// generateStaticParams, so under cacheComponents the slug is runtime data — and
+// runtime data touched outside a cache boundary fails the build with "Uncached
+// data was accessed outside of <Suspense>". Keying the lookup itself on the
+// slug puts that access inside the boundary, exactly as getProduct does.
+export async function getTruckBuild(
+  slug: string,
+): Promise<TruckBuild | undefined> {
+  "use cache";
+  cacheTag(TAGS.builds);
+  cacheLife("days");
+
+  const builds = await getTruckBuilds();
+  return builds.find((build) => build.slug === slug);
+}
+
 // A field key that doesn't exist resolves to null, exactly like a field left
 // blank — so "no label" is far more often a mis-keyed field than an empty one.
 // Naming the keys the entry actually has turns a puzzling null into the answer.
@@ -1011,13 +1223,14 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
 
   if (isMetaobjectUpdate) {
     // The x-shopify-topic header is identical for every metaobject
-    // subscription — nav_item, vehicle, announcement — so telling them apart
-    // would mean parsing the webhook body's `type` field. All three caches are
-    // tiny and metaobject edits are rare admin actions, so revalidate all
-    // three; parse the body if that trade ever changes.
+    // subscription — nav_item, vehicle, announcement, truck_build — so telling
+    // them apart would mean parsing the webhook body's `type` field. All these
+    // caches are tiny and metaobject edits are rare admin actions, so
+    // revalidate all of them; parse the body if that trade ever changes.
     revalidateTag(TAGS.menu, "seconds");
     revalidateTag(TAGS.vehicles, "seconds");
     revalidateTag(TAGS.announcements, "seconds");
+    revalidateTag(TAGS.builds, "seconds");
   }
 
   return NextResponse.json({ status: 200, revalidated: true, now: Date.now() });

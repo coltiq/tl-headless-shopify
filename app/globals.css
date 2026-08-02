@@ -46,6 +46,23 @@
   padding-inline: var(--spacing-gutter);
 }
 
+/* 50px is right at full width and absurd on a phone — a third of a 375px
+   screen spent on margin. Stepping the variable down rather than making each
+   caller responsive keeps it a single source of truth: `page-width` and the
+   header's mega panel both read it, and neither needs to know. Breakpoints
+   match Tailwind's `lg` and `sm` so this lines up with everything else. */
+@media (max-width: 1023px) {
+  :root {
+    --spacing-gutter: 32px;
+  }
+}
+
+@media (max-width: 639px) {
+  :root {
+    --spacing-gutter: 20px;
+  }
+}
+
 @layer base {
   *,
   ::after,

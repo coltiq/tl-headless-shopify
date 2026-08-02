@@ -47,6 +47,7 @@ export const TAGS = {
   menu: "menu",
   vehicles: "vehicles",
   announcements: "announcements",
+  builds: "builds",
 };
 
 // The nav_item metaobject entry the header tree — and therefore the whole
