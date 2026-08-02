@@ -43,21 +43,33 @@ export const metadata: Metadata = {
 // callback expectation set alongside the buttons, which that block has no room
 // for.
 
-// TODO(copy): the `spec` lines are the one place here with invented numbers.
-// They're the most persuasive thing on the page precisely because they're
-// concrete, so they have to be true — check every one before this goes live.
+// `price` deep-links the pricing page rather than the product catalogue. A link
+// to the rock light collection would trade an install lead for a kit sale and
+// drop the visitor out of the funnel — and this section's own argument is that
+// anyone can sell you the parts. Products get sold on the Parts side.
+//
+// TODO(pricing): these anchors don't exist yet — app/custom-work/pricing is
+// still a scaffold. They land at the top of the page until it has sections. Any
+// service the chart won't cover should lose its link rather than keep a dead
+// one.
+//
+// TODO(copy): `spec` is the most persuasive thing on the page precisely because
+// it's concrete, so every figure has to be true. Rock lights are confirmed;
+// check the other three.
 const FEATURED = [
   {
     title: "Rock lights",
     lead: "Pods under the truck, wiring you can't see, and no rattle six months later. The install is the product — anyone can sell you a kit.",
-    spec: "6–10 pods · hidden runs · app or switch panel",
+    spec: "8 pods minimum · up to 40 on a show build · custom or plug-and-play harness",
+    price: "/custom-work/pricing#rock-lights",
     imageBrief:
       "The truck at night, lit from underneath, parked somewhere dark. Shot low and from the front three-quarter so the glow spills across the ground. This is the money shot of the whole page.",
   },
   {
     title: "Wheel lights",
     lead: "Rings behind the wheel, mounted so they clear the caliper and survive a car wash. Same controller as the rock lights, so it's all one system.",
-    spec: "4 rings · behind the spokes · same app",
+    spec: "4 rings · behind the spokes · same controller",
+    price: "/custom-work/pricing#wheel-lights",
     imageBrief:
       "One wheel, tight and square on, ring lit. Dark background. Should read as a product photograph more than a truck photograph.",
   },
@@ -65,6 +77,7 @@ const FEATURED = [
     title: "Lifts & leveling",
     lead: "From a leveling kit on a Saturday to a full lift with the geometry sorted out. We'll tell you what the tire size you want actually requires.",
     spec: "2–8 in. · alignment after · re-gear when it needs it",
+    price: "/custom-work/pricing#lifts",
     imageBrief:
       "A truck on the lift with the suspension exposed, or a before/after of the same truck at ride height. Show the work, not just the stance.",
   },
@@ -72,6 +85,7 @@ const FEATURED = [
     title: "Paint matching",
     lead: "Bumpers, flares, hard parts and panels matched to your factory code and blended so the repair doesn't announce itself.",
     spec: "OEM code match · blended · panels & hard parts",
+    price: "/custom-work/pricing#paint-matching",
     imageBrief:
       "A freshly matched part next to the truck it's going on — close enough to see there's no seam in the colour. A bumper or a set of flares works well.",
   },
@@ -233,12 +247,22 @@ function Featured() {
               <p className="mt-5 max-w-[44ch] font-tl-text text-lg leading-relaxed text-tl-steel">
                 {service.lead}
               </p>
-              {/* The scope of the job in the fewest possible words. Mono and
-                  rule-topped so it reads as spec rather than more sentence —
-                  it's the concrete detail that makes the paragraph credible. */}
-              <p className="mt-6 border-t border-tl-hairline pt-4 font-tl-mono text-[11px] uppercase leading-relaxed tracking-[0.12em] text-tl-mute-white">
-                {service.spec}
-              </p>
+              {/* The scope of the job in the fewest possible words, with its
+                  price link riding the same rule. Mono and rule-topped so the
+                  row reads as a spec sheet rather than four more CTAs — it's
+                  the concrete detail that makes the paragraph credible, and
+                  "what does that cost" is the next question either way. */}
+              <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-tl-hairline pt-4 font-tl-mono text-[11px] uppercase tracking-[0.12em]">
+                <p className="max-w-[42ch] leading-relaxed text-tl-mute-white">
+                  {service.spec}
+                </p>
+                <Link
+                  href={service.price}
+                  className="shrink-0 text-tl-indigo underline underline-offset-4 transition-colors hover:text-tl-indigo-lift"
+                >
+                  Pricing
+                </Link>
+              </div>
             </div>
           </article>
         ))}

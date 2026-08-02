@@ -35,7 +35,12 @@ export default function PricingPage() {
         </p>
 
         {/* TODO: the chart — per service, a range, a typical figure, and one
-            line on what drives it. */}
+            line on what drives it.
+
+            /custom-work/services already deep-links four sections by id, so
+            these are a contract: #rock-lights, #wheel-lights, #lifts,
+            #paint-matching. Any one the chart won't cover should lose its link
+            there rather than keep a dead anchor here. */}
         {/* TODO: the shop labour rate. */}
         {/* TODO: one or two real builds with their actual totals. */}
 
