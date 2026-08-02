@@ -93,14 +93,31 @@ export const SHOP_PHONE_DISPLAY = "(205) 539-9794";
 export const SHOP_PHONE_HREF = "tel:+12055399794";
 
 // Direct lines by service area, rendered at the bottom of
-// /custom-work/services for people who already know what they need. Each falls
-// back to SHOP_PHONE_* while empty, so the page ships today on the main number
-// and splits by editing four constants — no markup change, and no dead tel:
-// link in the meantime. Not personal numbers.
-export const LIGHTING_PHONE_DISPLAY = "";
-export const LIGHTING_PHONE_HREF = "";
-export const BUILD_PHONE_DISPLAY = "";
-export const BUILD_PHONE_HREF = "";
+// /custom-work/services for people who already know what they need.
+//
+// **These are text lines, not call lines.** Someone on tools can answer a
+// message between jobs where a call goes to voicemail, so the page builds
+// `sms:` hrefs from `e164` and never links these as `tel:`. The main
+// SHOP_PHONE_* number stays the one to call.
+//
+// Name and number live together on purpose: splitting a person from their
+// number across two files is how one of them ends up stale.
+export const DIRECT_CONTACTS = [
+  {
+    name: "Colton",
+    area: "Lighting & electrical",
+    scope: "rock lights, wheel lights, wiring and audio",
+    display: "(205) 539-9929",
+    e164: "+12055399929",
+  },
+  {
+    name: "Carson",
+    area: "Suspension, paint & builds",
+    scope: "lifts, powder coating, paint matching and full builds",
+    display: "(205) 539-9755",
+    e164: "+12055399755",
+  },
+] as const;
 
 // Store links for the lighting control app, rendered by `/app`. Each button
 // collapses while its URL is empty, so a dead store link can never ship.

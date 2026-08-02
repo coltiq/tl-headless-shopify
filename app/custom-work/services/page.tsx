@@ -3,10 +3,7 @@ import Link from "next/link";
 
 import Footer from "components/layout/footer";
 import {
-  BUILD_PHONE_DISPLAY,
-  BUILD_PHONE_HREF,
-  LIGHTING_PHONE_DISPLAY,
-  LIGHTING_PHONE_HREF,
+  DIRECT_CONTACTS,
   SHOP_PHONE_DISPLAY,
   SHOP_PHONE_HREF,
 } from "lib/constants";
@@ -142,24 +139,6 @@ const ALSO = [
   "Winches & recovery points",
   "Bed covers & tonneaus",
   "Exhaust work",
-];
-
-// Two numbers for people who already know which side of the shop they need.
-// Both fall back to the main line while empty, so the page ships today and
-// splits by editing lib/constants.ts — no dead tel: link in the meantime.
-const DIRECT_LINES = [
-  {
-    label: "Lighting & electrical",
-    scope: "Rock lights, wheel lights, wiring, audio",
-    display: LIGHTING_PHONE_DISPLAY || SHOP_PHONE_DISPLAY,
-    href: LIGHTING_PHONE_HREF || SHOP_PHONE_HREF,
-  },
-  {
-    label: "Suspension, paint & builds",
-    scope: "Lifts, powder coating, paint matching, full builds",
-    display: BUILD_PHONE_DISPLAY || SHOP_PHONE_DISPLAY,
-    href: BUILD_PHONE_HREF || SHOP_PHONE_HREF,
-  },
 ];
 
 export default function ServicesPage() {
@@ -425,34 +404,37 @@ function Costs() {
   );
 }
 
+// Text, not call. Someone under a truck can answer a message between jobs; a
+// call goes to voicemail and then needs a second call back. So these are the
+// only numbers on the page that aren't tel: links, and the copy names the
+// action so a tap is never a surprise.
 function DirectLines() {
   return (
     <section className="mt-24 border-t border-tl-hairline pt-14">
       <SectionHeading
         eyebrow="Direct lines"
         title="Skip a step"
-        lead="If you already know what you need, these reach the person doing the work. We're on tools during the day, so whoever picks up will take your details and one of us calls you back that evening."
+        lead="Text the side of the shop your job belongs to and we'll get back to you within the day. These reach the person who'd be doing the work."
       />
       <div className="mt-9 grid gap-5 sm:grid-cols-2">
-        {DIRECT_LINES.map((line) =>
-          line.display ? (
-            <a
-              key={line.label}
-              href={line.href}
-              className="group rounded-[3px] border border-tl-hairline p-7 transition-colors hover:border-tl-ink"
-            >
-              <p className="font-tl-mono text-[10px] uppercase tracking-[0.16em] text-tl-mute-white">
-                {line.label}
-              </p>
-              <p className="mt-3 font-tl-sans text-2xl font-bold tracking-[-0.01em] text-tl-ink underline decoration-tl-hairline underline-offset-[6px] transition-colors group-hover:decoration-tl-indigo">
-                {line.display}
-              </p>
-              <p className="mt-2 font-tl-text text-sm text-tl-steel">
-                {line.scope}
-              </p>
-            </a>
-          ) : null,
-        )}
+        {DIRECT_CONTACTS.map((contact) => (
+          <a
+            key={contact.name}
+            href={`sms:${contact.e164}`}
+            aria-label={`Text ${contact.name} at ${contact.display}`}
+            className="group rounded-[3px] border border-tl-hairline p-7 transition-colors hover:border-tl-ink"
+          >
+            <p className="font-tl-mono text-[10px] uppercase tracking-[0.16em] text-tl-mute-white">
+              {contact.area}
+            </p>
+            <p className="mt-3 font-tl-sans text-2xl font-bold tracking-[-0.01em] text-tl-ink underline decoration-tl-hairline underline-offset-[6px] transition-colors group-hover:decoration-tl-indigo">
+              {contact.display}
+            </p>
+            <p className="mt-2 font-tl-text text-sm text-tl-steel">
+              Text {contact.name} about {contact.scope}.
+            </p>
+          </a>
+        ))}
       </div>
     </section>
   );
