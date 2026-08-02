@@ -53,9 +53,9 @@ export const metadata: Metadata = {
 // service the chart won't cover should lose its link rather than keep a dead
 // one.
 //
-// TODO(copy): `spec` is the most persuasive thing on the page precisely because
-// it's concrete, so every figure has to be true. Rock lights, wheel lights and
-// lifts are confirmed; paint matching is still unchecked.
+// `spec` is the most persuasive thing on the page precisely because it's
+// concrete, so every figure has to be true. All four rows are confirmed with
+// the shop — keep it that way.
 const FEATURED = [
   {
     title: "Rock lights",
@@ -98,11 +98,15 @@ const FEATURED = [
   },
   {
     title: "Paint matching",
-    lead: "Bumpers, flares, hard parts and panels matched to your factory code and blended so the repair doesn't announce itself.",
-    spec: "OEM code match · blended · panels & hard parts",
+    // The scene's meaning of the term: accessory and trim pieces sprayed to the
+    // body colour. Not collision work — an earlier draft described panel
+    // refinishing and blending, which is a different business and would have
+    // brought in the wrong calls.
+    lead: "Mirror caps, door handles, grille, bumpers, emblems — the black plastic sprayed to your factory code so the truck reads as one color. It's the smallest change on this page and usually the one people notice first.",
+    spec: "Mirrors, handles, grille, bumpers, emblems · matched to your factory code",
     price: "/custom-work/pricing#paint-matching",
     imageBrief:
-      "A freshly matched part next to the truck it's going on — close enough to see there's no seam in the colour. A bumper or a set of flares works well.",
+      "A before and after of the same truck — black plastic on one, matched on the other. The mirrors, grille and handles are where the change reads hardest. If you only have the finished truck, shoot it three-quarter front so the grille and a mirror are both in frame.",
   },
 ];
 
