@@ -102,8 +102,8 @@ const FEATURED = [
     // body colour. Not collision work — an earlier draft described panel
     // refinishing and blending, which is a different business and would have
     // brought in the wrong calls.
-    lead: "Mirror caps, door handles, grille, bumpers, emblems — the black plastic sprayed to your factory code so the truck reads as one color. It's the smallest change on this page and usually the one people notice first.",
-    spec: "Mirrors, handles, grille, bumpers, emblems · matched to your factory code",
+    lead: "Mirror caps, door handles, grille, bumpers, emblems — the black plastic sprayed to your factory code so the truck reads as one color, or to an accent color if you'd rather it didn't. It's the smallest change on this page and usually the one people notice first.",
+    spec: "Mirrors, handles, grille, bumpers, emblems · your factory code or any accent color",
     price: "/custom-work/pricing#paint-matching",
     imageBrief:
       "A before and after of the same truck — black plastic on one, matched on the other. The mirrors, grille and handles are where the change reads hardest. If you only have the finished truck, shoot it three-quarter front so the grille and a mirror are both in frame.",
