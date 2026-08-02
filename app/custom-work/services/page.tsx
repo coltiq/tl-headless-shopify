@@ -54,8 +54,8 @@ export const metadata: Metadata = {
 // one.
 //
 // TODO(copy): `spec` is the most persuasive thing on the page precisely because
-// it's concrete, so every figure has to be true. Rock lights are confirmed;
-// check the other three.
+// it's concrete, so every figure has to be true. Rock lights, wheel lights and
+// lifts are confirmed; paint matching is still unchecked.
 const FEATURED = [
   {
     title: "Rock lights",
@@ -84,8 +84,11 @@ const FEATURED = [
   },
   {
     title: "Lifts & leveling",
-    lead: "From a leveling kit on a Saturday to a full lift with the geometry sorted out. We'll tell you what the tire size you want actually requires.",
-    spec: "2–8 in. · alignment after · re-gear when it needs it",
+    // Alignment and re-gearing are off this row on purpose. Both can be
+    // arranged, neither is the offer, and highlighting a service the shop
+    // doesn't lead with sets up the wrong conversation.
+    lead: "From a leveling kit on a Saturday to a full cradle. Tell us the stance and the tire size you're after and we'll tell you what actually gets you there.",
+    spec: "Leveling kits to full cradles · wheels and tires to match",
     price: "/custom-work/pricing#lifts",
     imageBrief:
       "A truck on the lift with the suspension exposed, or a before/after of the same truck at ride height. Show the work, not just the stance.",
