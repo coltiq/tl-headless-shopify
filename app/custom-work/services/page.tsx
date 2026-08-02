@@ -87,11 +87,11 @@ const FEATURED = [
     // Alignment and re-gearing are off this row on purpose. Both can be
     // arranged, neither is the offer, and highlighting a service the shop
     // doesn't lead with sets up the wrong conversation.
-    lead: "From a leveling kit on a Saturday to a full cradle. Tell us the stance and the tire size you're after and we'll tell you what actually gets you there.",
+    lead: "From a leveling kit on a Saturday to a full cradle. Either end of that, you get the stance you pictured and a truck that still drives like one.",
     // Powder coating sits here rather than only in the Also list because it's
     // the upsell that belongs to this row — most shops bolt on whatever came in
-    // the box, and "in-house" is what makes it credible.
-    spec: "Leveling kits to full cradles · components powder coated in-house",
+    // the box. Not "in-house" until it actually is.
+    spec: "Leveling kits to full cradles · all components can be powder coated to match your vision",
     price: "/custom-work/pricing#lifts",
     imageBrief:
       "A truck on the lift with the suspension exposed, or a before/after of the same truck at ride height. Show the work, not just the stance.",
