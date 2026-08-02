@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 const FEATURED = [
   {
     title: "Rock lights",
-    lead: "Pods under the truck, wiring you can't see, and no rattle six months later. The install is the product — anyone can sell you a kit.",
+    lead: "Pods under the truck, wiring you can't see, and no rattle six months later. The install is the product — anyone can sell you a kit. Run the controller and the whole thing lives on our own app.",
     // Not "8–40". A range reads as a menu with a ceiling; the floor and the
     // absence of one are two different facts, and the second is the claim
     // worth making.
@@ -70,11 +70,14 @@ const FEATURED = [
   },
   {
     title: "Wheel lights",
-    lead: "Rings behind the wheel, mounted so they clear the caliper and survive a car wash. Same controller as the rock lights, so it's all one system.",
-    spec: "4 rings · behind the spokes · same controller",
+    // The hardware is the whole pitch. A self-tapper backing out is a failure
+    // the customer has probably already had, so naming the thing we don't do
+    // beats any adjective about quality.
+    lead: "Rings mounted on bolts and lock nuts — not the self-tappers most installs run, which work loose with vibration. Two rows for a clean glow, twenty for a show truck, all on the same app as the rock lights.",
+    spec: "2, 4, 5, 10 & 20-row rings · bolts and lock nuts · Truck Lab app",
     price: "/custom-work/pricing#wheel-lights",
     imageBrief:
-      "One wheel, tight and square on, ring lit. Dark background. Should read as a product photograph more than a truck photograph.",
+      "One wheel, tight and square on, ring lit, dark background — a product photograph more than a truck photograph. If you have a build shot of the mounts bolted up before the wheel went back on, use that instead: it proves the hardware claim this row is making.",
   },
   {
     title: "Lifts & leveling",
