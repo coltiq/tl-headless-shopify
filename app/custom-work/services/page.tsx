@@ -60,7 +60,10 @@ const FEATURED = [
   {
     title: "Rock lights",
     lead: "Pods under the truck, wiring you can't see, and no rattle six months later. The install is the product — anyone can sell you a kit.",
-    spec: "8 pods minimum · up to 40 on a show build · custom or plug-and-play harness",
+    // Not "8–40". A range reads as a menu with a ceiling; the floor and the
+    // absence of one are two different facts, and the second is the claim
+    // worth making.
+    spec: "8 pods minimum · no maximum · custom or plug-and-play harness",
     price: "/custom-work/pricing#rock-lights",
     imageBrief:
       "The truck at night, lit from underneath, parked somewhere dark. Shot low and from the front three-quarter so the glow spills across the ground. This is the money shot of the whole page.",
