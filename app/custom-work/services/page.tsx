@@ -192,14 +192,12 @@ function HeroBanner() {
             </a>
           ) : null}
         </div>
-        {/* Says what actually happens after either action. Setting the callback
-            expectation here is the whole reason the phone isn't the primary
-            button — a caller who expects a price and gets a message-taker
-            leaves worse than one who was told. */}
-        <p className="mt-4 max-w-[48ch] font-tl-text text-sm leading-relaxed text-white/60">
-          Either way it reaches the same two people, and one of us gets back to
-          you that evening. The form is faster, and it doesn&apos;t care what
-          time it is.
+        {/* A promise, not a caveat. The hero is the wrong place to explain that
+            the phone takes messages — that belongs where someone is choosing
+            how to reach us, in DirectLines. Here it only has to say the wait is
+            hours, not days. */}
+        <p className="mt-5 font-tl-mono text-[11px] uppercase tracking-[0.12em] text-white/55">
+          Quotes come back the same evening
         </p>
       </div>
     </section>
@@ -320,7 +318,7 @@ function DirectLines() {
       <SectionHeading
         eyebrow="Direct lines"
         title="Skip a step"
-        lead="If you already know what you need, these go straight to the person doing it. Still evenings — we're both on tools during the day."
+        lead="If you already know what you need, these reach the person doing the work. Either way you're leaving details rather than getting a price on the spot — we're on tools during the day, and the quote follows that evening."
       />
       <div className="mt-9 grid gap-5 sm:grid-cols-2">
         {DIRECT_LINES.map((line) =>
