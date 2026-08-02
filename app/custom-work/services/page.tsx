@@ -114,10 +114,10 @@ const DIRECT_LINES = [
 export default function ServicesPage() {
   return (
     <>
+      <HeroBanner />
       {/* pb-28 clears the mobile call bar, which would otherwise sit on top of
           the closing CTA — the one element it must never cover. */}
-      <div className="page-width pb-28 pt-16 md:pb-24">
-        <Hero />
+      <div className="page-width pb-28 pt-20 md:pb-24 md:pt-28">
         <Featured />
         <Also />
         <Costs />
@@ -130,58 +130,85 @@ export default function ServicesPage() {
   );
 }
 
-function Hero() {
+// The whole niche is sold on photographs, so the page opens with one at full
+// bleed rather than arguing in text above a picture. Everything below it is
+// constrained to page-width; this is the only element that breaks out.
+//
+// The layout is final while the photograph is missing — the dark plate below is
+// exactly the surface the image will sit on, and the scrim is already in place,
+// so dropping the file in moves nothing. To fill it, add above the scrim:
+//
+//   <Image src={hero} alt="" fill priority className="object-cover" />
+//
+// and delete the brief note.
+function HeroBanner() {
   return (
-    <section>
-      <p className="font-tl-mono text-[10px] uppercase tracking-[0.16em] text-tl-mute-white">
-        Tuscaloosa, Alabama · By appointment
-      </p>
-      <h1 className="mt-5 max-w-[16ch] font-tl-sans text-5xl font-bold uppercase leading-[0.95] tracking-[-0.01em] text-tl-ink md:text-7xl">
-        What we do to trucks
-      </h1>
-      <p className="mt-6 max-w-[52ch] font-tl-text text-lg leading-relaxed text-tl-steel">
-        Rock lights, wheel lights, lifts, paint matching, powder coating — from
-        one install to a truck built from the frame up.
-      </p>
-
-      <div className="mt-9 flex flex-wrap items-center gap-x-4 gap-y-3">
-        <Link
-          href="/quote"
-          className="inline-flex h-14 items-center rounded-[3px] bg-tl-indigo px-8 font-tl-sans text-sm font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-tl-indigo-lift"
-        >
-          Start a quote
-        </Link>
-        {SHOP_PHONE_DISPLAY ? (
-          <a
-            href={SHOP_PHONE_HREF}
-            className="inline-flex h-14 items-center rounded-[3px] border border-tl-ink px-8 font-tl-sans text-sm font-bold uppercase tracking-[0.08em] text-tl-ink transition-colors hover:bg-tl-fog"
-          >
-            Or call {SHOP_PHONE_DISPLAY}
-          </a>
-        ) : null}
-      </div>
-      {/* Says what actually happens after either action. Setting the callback
-          expectation here is the whole reason the phone isn't the primary
-          button — a caller who expects a price and gets a message-taker leaves
-          worse than one who was told. */}
-      <p className="mt-4 max-w-[54ch] font-tl-text text-sm leading-relaxed text-tl-mute-white">
-        Either way it reaches the same two people. Tell us the truck and what
-        you&apos;re after and one of us gets back to you that evening — the form
-        is faster, and it doesn&apos;t care what time it is.
-      </p>
-
-      <ImageSlot
-        ratio="aspect-[21/9]"
-        className="mt-14"
-        brief="The best truck you have ever finished, shot wide outside the shop — ideally at dusk with the rock lights on. This is the first thing anyone sees, so it should be the single most impressive photograph you own."
+    <section className="relative isolate flex min-h-[560px] flex-col justify-end overflow-hidden bg-tl-shell-deep md:min-h-[78svh] md:max-h-[840px]">
+      {/* Scrim. Sized so the type stays legible over a bright dusk shot without
+          flattening the photograph into a grey rectangle. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/45 to-black/20"
       />
+
+      {/* Photo brief — delete this block with the image. */}
+      <div className="page-width pointer-events-none absolute inset-x-0 top-0 pt-8">
+        <p className="ml-auto max-w-[34ch] border border-dashed border-white/25 bg-white/[0.04] p-4 font-tl-text text-sm leading-snug text-white/70">
+          <span className="mb-1.5 block font-tl-mono text-[10px] uppercase tracking-[0.14em] text-white/50">
+            Banner photo
+          </span>
+          The best truck you have ever finished, shot wide outside the shop at
+          dusk with the rock lights on. Leave room low and left for the
+          headline, and keep the sky out of the bottom third so the text stays
+          readable.
+        </p>
+      </div>
+
+      <div className="page-width relative w-full pb-14 pt-40 md:pb-20">
+        <p className="font-tl-mono text-[10px] uppercase tracking-[0.16em] text-white/60">
+          Tuscaloosa, Alabama · By appointment
+        </p>
+        <h1 className="mt-5 max-w-[16ch] font-tl-sans text-5xl font-bold uppercase leading-[0.95] tracking-[-0.01em] text-white md:text-7xl lg:text-8xl">
+          What we do to trucks
+        </h1>
+        <p className="mt-6 max-w-[46ch] font-tl-text text-lg leading-relaxed text-white/75">
+          Rock lights, wheel lights, lifts, paint matching, powder coating —
+          from one install to a truck built from the frame up.
+        </p>
+
+        <div className="mt-9 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <Link
+            href="/quote"
+            className="inline-flex h-14 items-center rounded-[3px] bg-white px-8 font-tl-sans text-sm font-bold uppercase tracking-[0.08em] text-tl-ink transition-colors hover:bg-white/85"
+          >
+            Start a quote
+          </Link>
+          {SHOP_PHONE_DISPLAY ? (
+            <a
+              href={SHOP_PHONE_HREF}
+              className="inline-flex h-14 items-center rounded-[3px] border border-white/40 px-8 font-tl-sans text-sm font-bold uppercase tracking-[0.08em] text-white transition-colors hover:border-white hover:bg-white/[0.08]"
+            >
+              Or call {SHOP_PHONE_DISPLAY}
+            </a>
+          ) : null}
+        </div>
+        {/* Says what actually happens after either action. Setting the callback
+            expectation here is the whole reason the phone isn't the primary
+            button — a caller who expects a price and gets a message-taker
+            leaves worse than one who was told. */}
+        <p className="mt-4 max-w-[48ch] font-tl-text text-sm leading-relaxed text-white/60">
+          Either way it reaches the same two people, and one of us gets back to
+          you that evening. The form is faster, and it doesn&apos;t care what
+          time it is.
+        </p>
+      </div>
     </section>
   );
 }
 
 function Featured() {
   return (
-    <section className="mt-24">
+    <section>
       <SectionHeading
         eyebrow="What we're known for"
         title="Four things we do more than anything else"
