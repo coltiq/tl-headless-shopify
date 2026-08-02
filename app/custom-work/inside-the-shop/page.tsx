@@ -8,7 +8,7 @@ import { QuoteCta } from "../_components/quote-cta";
 export const metadata: Metadata = {
   title: "Inside the Shop",
   description:
-    "One bay in Tuscaloosa, and how a truck moves through it — design, order, install, delivery.",
+    "The shop in Tuscaloosa, and how a truck moves through it — design, order, install, delivery.",
 };
 
 // Spec: docs/plans/custom-work.md §3, and its §8 risk. **The process lives
@@ -19,11 +19,13 @@ export const metadata: Metadata = {
 //
 // No team section — the people belong to the brand story, not the shop tour.
 //
-// **The thesis: one bay means the room becomes each stage in turn.** At a
-// bigger shop a truck moves between bays and the process is a floor plan. Here
-// it's a calendar, and the same space is the design table, the staging area and
-// the install bay in sequence. That's the honest version and it's also the
-// better story, so the page is built on it.
+// **The thesis is the process, not the premises.** An earlier pass built the
+// whole page on "one bay" and made scale the argument, which is a case the shop
+// shouldn't have to plead. What's actually worth claiming doesn't depend on
+// square footage: the same two people carry a truck from the first conversation
+// to the hand-over, and you always know which stage yours is in. The shop's size
+// is still stated plainly where it's relevant — once, as a fact — and never
+// defended.
 //
 // **Numbering is used here and almost nowhere else on the site**, because this
 // is one of the few places the content genuinely is an ordered sequence — the
@@ -54,7 +56,7 @@ const STAGES = [
   {
     n: "03",
     title: "Install",
-    lead: "One bay, one truck at a time. Harnesses get loomed and hidden, hardware gets torqued, coated parts come back and go on. Nothing gets rushed to make room for the next job, because there is no next job until yours leaves.",
+    lead: "Your truck has the shop while it's here. Harnesses get loomed and hidden, hardware gets torqued, coated parts come back and go on. Nothing gets rushed to make room for the next job, because the next job does not start until yours leaves.",
     // TODO(copy): confirm the photo updates line before this ships — it's the
     // most quotable promise on the page and the easiest to be held to.
     you: "Nothing. We send photos as it goes.",
@@ -127,8 +129,8 @@ function HeroBanner() {
           Inside the shop
         </h1>
         <p className="mt-5 max-w-[48ch] font-tl-text text-lg leading-relaxed text-white/75">
-          One bay, one truck at a time, and everything that happens between
-          dropping it off and driving it home.
+          Where the work happens, and everything that goes on between dropping
+          your truck off and driving it home.
         </p>
 
         {/* The page's spine, previewed. Same numerals and same order as the
@@ -149,9 +151,10 @@ function HeroBanner() {
   );
 }
 
-// Small is the fact, so the page leads with it and treats it as the reason to
-// choose the shop rather than something to work around. Pretending to be bigger
-// is the one thing that would make a one-bay shop look worse than it is.
+// What the shop is, not how big it is. The claim worth making here is that the
+// work doesn't get handed around — the same two people carry it end to end —
+// and coating is named as the one exception, because a promise with an
+// unstated hole in it is worse than no promise.
 function ThePlace() {
   return (
     <section className="page-width py-20 md:py-28">
@@ -161,40 +164,24 @@ function ThePlace() {
             The place
           </p>
           <h2 className="mt-4 max-w-[16ch] font-tl-sans text-4xl font-bold uppercase leading-[1.02] tracking-[0.01em] text-tl-ink md:text-5xl">
-            One bay, and that&apos;s on purpose
+            A working shop, not a showroom
           </h2>
           <div className="mt-6 grid max-w-[52ch] gap-4 font-tl-text text-lg leading-relaxed text-tl-steel">
             <p>
-              Everything happens in one bay in Tuscaloosa. One truck is in it at
-              a time, booked by appointment, so nothing sits half-finished while
-              a walk-in jumps the line.
+              Design, staging, install and the hand-over all happen here in
+              Tuscaloosa. Coating goes out and comes back; everything else stays
+              in the building, with the same two people on it from the first
+              conversation to the last.
             </p>
             <p>
-              It also means we turn work away when the calendar is full rather
-              than take it and stack it. If we give you a date, the bay is
-              yours.
+              We book by appointment so your truck has the shop while it&apos;s
+              here, and we turn work away when the calendar is full rather than
+              take it and stack it. If we give you a date, it&apos;s a real one.
             </p>
             <p className="text-tl-mute-white">
               A retail space is coming. Right now the shop is a shop.
             </p>
           </div>
-
-          <dl className="mt-9 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-tl-hairline pt-6 sm:grid-cols-3">
-            {[
-              ["Bays", "One"],
-              ["Trucks at a time", "One"],
-              ["Walk-ins", "By appointment"],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <dt className="font-tl-mono text-[10px] uppercase tracking-[0.14em] text-tl-mute-white">
-                  {label}
-                </dt>
-                <dd className="mt-1.5 font-tl-sans text-lg font-bold uppercase tracking-[0.01em] text-tl-ink">
-                  {value}
-                </dd>
-              </div>
-            ))}
-          </dl>
         </div>
 
         <div className="grid gap-5">
@@ -234,9 +221,9 @@ function TheProcess() {
           Design, order, install, delivery
         </h2>
         <p className="mt-5 max-w-[54ch] font-tl-text text-lg leading-relaxed text-tl-steel">
-          With one bay there is nowhere for a truck to move to, so the room
-          changes instead — design table, staging area, install bay, in that
-          order.
+          Four stages, always in this order. You&apos;ll know which one your
+          truck is in the whole way through, which is the part most shops leave
+          you guessing at.
         </p>
 
         <ol className="mt-14 list-none p-0">
