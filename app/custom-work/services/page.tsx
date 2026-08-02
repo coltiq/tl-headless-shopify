@@ -166,7 +166,7 @@ function HeroBanner() {
 
       <div className="page-width relative w-full pb-14 pt-40 md:pb-20">
         <p className="font-tl-mono text-[10px] uppercase tracking-[0.16em] text-white/60">
-          Tuscaloosa, Alabama · By appointment
+          Tuscaloosa, Alabama · By appointment only
         </p>
         <h1 className="mt-5 max-w-[16ch] font-tl-sans text-5xl font-bold uppercase leading-[0.95] tracking-[-0.01em] text-white md:text-7xl lg:text-8xl">
           What we do to trucks
@@ -192,12 +192,12 @@ function HeroBanner() {
             </a>
           ) : null}
         </div>
-        {/* A promise, not a caveat. The hero is the wrong place to explain that
-            the phone takes messages — that belongs where someone is choosing
-            how to reach us, in DirectLines. Here it only has to say the wait is
-            hours, not days. */}
+        {/* Promises a reply, not a price. Most jobs can't be quoted off a form
+            — people arrive with an idea rather than a spec, and working out
+            what they actually want is the job. So the only same-evening
+            commitment is that someone answers. */}
         <p className="mt-5 font-tl-mono text-[11px] uppercase tracking-[0.12em] text-white/55">
-          Quotes come back the same evening
+          We get back to you the same evening
         </p>
       </div>
     </section>
@@ -279,19 +279,20 @@ function Costs() {
         <div>
           <SectionHeading
             eyebrow="What it costs"
-            title="You get a range before you commit"
+            title="Most of it gets figured out together"
           />
           <div className="mt-6 grid max-w-[54ch] gap-4 font-tl-text leading-relaxed text-tl-steel">
             <p>
               Almost nothing here has one price. A lift depends on the height,
               whether you&apos;re re-gearing, and what you&apos;re running for
-              wheels and tires — a number without those answers would be a
-              guess.
+              wheels and tires — a number before those answers would be a guess.
             </p>
             <p>
-              So tell us the truck and the job, and you get the range, what
-              moves it, and where yours is likely to land. Nothing starts until
-              you&apos;ve seen that.
+              Most people come to us with an idea rather than a parts list, so
+              the first conversation is usually about working out what you
+              actually want. Simple jobs we can price on the spot. Bigger ones
+              take a call or two, and you&apos;ll see a written number before
+              anything starts.
             </p>
           </div>
           <Link
@@ -318,7 +319,7 @@ function DirectLines() {
       <SectionHeading
         eyebrow="Direct lines"
         title="Skip a step"
-        lead="If you already know what you need, these reach the person doing the work. Either way you're leaving details rather than getting a price on the spot — we're on tools during the day, and the quote follows that evening."
+        lead="If you already know what you need, these reach the person doing the work. We're on tools during the day, so whoever picks up will take your details and one of us calls you back that evening."
       />
       <div className="mt-9 grid gap-5 sm:grid-cols-2">
         {DIRECT_LINES.map((line) =>
@@ -348,12 +349,16 @@ function DirectLines() {
 function Closing() {
   return (
     <section className="mt-24 rounded-[3px] bg-tl-shell px-8 py-14 text-center text-white md:px-10 md:py-20">
+      {/* "What you want done" assumed a spec the visitor usually doesn't have,
+          which is the main thing stopping people starting a form at all.
+          Naming that as normal is the cheapest conversion win on the page. */}
       <h2 className="mx-auto max-w-[18ch] font-tl-sans text-4xl font-bold uppercase leading-[1.02] tracking-[0.01em] md:text-5xl">
-        Tell us what you want done
+        Tell us what you&apos;re thinking
       </h2>
       <p className="mx-auto mt-5 max-w-[48ch] font-tl-text text-lg text-white/70">
-        Year, make, model, and what you&apos;re after. That&apos;s enough to
-        come back to you with a real number.
+        Not sure exactly what you want yet? That&apos;s most people. Give us the
+        year, make and model and roughly what you&apos;re after, and we&apos;ll
+        work the rest out with you.
       </p>
 
       <div className="mt-9 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
