@@ -117,25 +117,26 @@ const FEATURED = [
 // Ordered lighting → electrical → suspension & finish → bolt-ons, so a scanner
 // lands in the right neighbourhood rather than reading all of it.
 //
-// TODO(copy): cab and mirror lights are confirmed. The rest were extrapolated
-// from what a lighting-and-suspension shop usually takes on — delete anything
-// this shop doesn't actually do. A list that promises work you turn away costs
-// more than a short one.
+// No under-glow: that's rock lights, which already have a featured row, and
+// listing it twice under two names makes the list look padded.
+//
+// TODO(copy): confirmed — cab & mirror lights, custom headlights & taillights,
+// powered steps. Still extrapolated and safe to cut: bed lighting, interior &
+// footwell, grilles & fender flares, chase racks, winches. A list that promises
+// work you turn away costs more than a short one.
 const ALSO = [
   "Cab & mirror lights",
-  "Amber grille lights",
   "Light bars & pods",
-  "Ditch & reverse lighting",
-  "Bed & under-glow lighting",
+  "Custom headlights & taillights",
+  "Bed lighting",
   "Interior & footwell lighting",
-  "Headlight & taillight retrofits",
   "Wiring, harnesses & switch panels",
-  "Trailer wiring & brake controllers",
   "Audio & 12V power",
   "Powder coating",
   "Suspension & re-gearing",
   "Wheels & tires",
-  "Bumpers, armor & steps",
+  "Bumpers & armor",
+  "Powered steps & step bars",
   "Grilles & fender flares",
   "Chase racks & bed racks",
   "Winches & recovery points",
