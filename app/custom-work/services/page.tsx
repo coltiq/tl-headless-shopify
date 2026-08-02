@@ -77,7 +77,7 @@ const FEATURED = [
     // Not "switch or app" — the app is always there, and a switch panel is
     // something you add to it. Framing them as alternatives got the product
     // wrong. This also keeps the slot on a fact the lead doesn't already have.
-    spec: "2, 4, 5, 10 & 20-row rings · bolts and lock nuts · optional switch panel",
+    spec: "2, 4, 5, 10 & 20-row rings · bolts and lock nuts · optional switch",
     price: "/custom-work/pricing#wheel-lights",
     imageBrief:
       "One wheel, tight and square on, ring lit, dark background — a product photograph more than a truck photograph. If you have a build shot of the mounts bolted up before the wheel went back on, use that instead: it proves the hardware claim this row is making.",
